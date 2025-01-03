@@ -5,9 +5,11 @@ import 'package:application_amonak/data/data_controller.dart';
 import 'package:application_amonak/interface/explorer/details_user.dart';
 import 'package:application_amonak/models/ccommentaire.dart';
 import 'package:application_amonak/models/like.dart';
+import 'package:application_amonak/models/notifications.dart';
 import 'package:application_amonak/models/publication.dart';
 import 'package:application_amonak/services/commentaire.dart';
 import 'package:application_amonak/services/like.dart';
+import 'package:application_amonak/services/notification.dart';
 import 'package:application_amonak/settings/weights.dart';
 import 'package:application_amonak/widgets/bottom_sheet_header.dart';
 import 'package:flutter/cupertino.dart';
@@ -18,8 +20,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
 class CommentaireWidget extends StatefulWidget {
-  final Publication? publication;
-  const CommentaireWidget({super.key,this.publication});
+  final String? pubId;
+  const CommentaireWidget({super.key,this.pubId});
 
   @override
   State<CommentaireWidget> createState() => _CommentaireWidgetState();
@@ -27,15 +29,16 @@ class CommentaireWidget extends StatefulWidget {
 
 class _CommentaireWidgetState extends State<CommentaireWidget> {
 
-  Publication pub=Publication();
+  // Publication pub=Publication();
+  String pubId="";
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    pub=super.widget.publication!;
+    pubId=super.widget.pubId!;
     
-    print("PUBLICATION ${pub.id}");
+    // print("PUBLICATION ${pub.id}");
   }
 
   TextEditingController content=TextEditingController();
@@ -46,9 +49,9 @@ class _CommentaireWidgetState extends State<CommentaireWidget> {
 
   @override
   Widget build(BuildContext context) {
-    if(pub.id!=null){
+    if(pubId.isNotEmpty){
     return FutureBuilder(
-      future: CommentaireService.getCommentByPublication(pub.id!).then((value){
+      future: CommentaireService.getCommentByPublication(pubId).then((value){
         print("Status code ${value.statusCode}");
         if(value.statusCode.toString()=='200'){
           commentaires=[];
@@ -62,7 +65,7 @@ class _CommentaireWidgetState extends State<CommentaireWidget> {
       }),
       builder: (context,snapshot){
         if(snapshot.connectionState==ConnectionState.waiting){
-          return zoneCommentaire(pub);
+          return zoneCommentaire(pubId);
         }
         if(snapshot.hasError){
           return  Container(
@@ -77,39 +80,41 @@ class _CommentaireWidgetState extends State<CommentaireWidget> {
             ),
           );
         }
-        return zoneCommentaire(pub);
+        return zoneCommentaire(pubId);
       }
     );}
     else{
-      return Center();
+      return const Center();
     }
   }
 
   
 
 
-  zoneCommentaire(Publication pub,) {
+  zoneCommentaire(String id,) {
     
     return  Container(
-                    width: ScreenSize.height*0.88,
+                    // width: ScreenSize.height*0.88,
                     child: Column(
                       children: [
                         headerBottomSheet(context, "Commentaires"),
                          Expanded(
-                          child:commentaires.isNotEmpty? SingleChildScrollView(
-                            child: Column(
-                              children: [
-                                for(Commentaire com in commentaires) 
-                                ItemCommentaire(com: com,)
-                                
-                              ],
-                            ),
+                          child:commentaires.isNotEmpty? ListView.builder(
+                            itemCount: commentaires.length, 
+                            itemBuilder: (context, index) {
+                              // commentaires[index].
+                              return ItemCommentaire(com: commentaires[index]);
+                            },
                           ):Center(
                             child: Text("Aucun commentaire Trouvé."),
                           )
                         ), 
                         Container(
                           margin:const EdgeInsets.symmetric(horizontal: 16,vertical: 22),
+                          decoration: BoxDecoration(
+                            color: Colors.black12, 
+                            borderRadius: BorderRadius.circular(36)
+                          ),
                           child: Form(
                             key: keyForm,
                             child: Row(
@@ -126,14 +131,21 @@ class _CommentaireWidgetState extends State<CommentaireWidget> {
                                       },
                                       keyboardType: TextInputType.multiline, 
                                       style: GoogleFonts.roboto(fontSize:13),
+                                      autofocus: true,
+                                      
                                       decoration: InputDecoration(
                                         contentPadding:const EdgeInsets.symmetric(vertical: 12,horizontal: 16),
                                         hintText: 'Votre commentaire',
                                         
                                         hintStyle: GoogleFonts.roboto(fontSize:12),
                                         isCollapsed: true,
-                                        border: OutlineInputBorder(
-                                          borderRadius: BorderRadius.circular(26),
+                                        border:const UnderlineInputBorder(
+                                          // borderRadius: BorderRadius.circular(26),
+                                          borderSide: BorderSide(color: Colors.transparent,width: 2)
+                                        ),
+                                        focusedBorder:const UnderlineInputBorder(
+                                          // borderRadius: BorderRadius.circular(26),
+                                          borderSide: BorderSide(color: Colors.transparent,width: 2)
                                         ),
                                       ),
                                     ),
@@ -145,7 +157,7 @@ class _CommentaireWidgetState extends State<CommentaireWidget> {
                                     
                                     onPressed: ()async{
                                       if(keyForm.currentState!.validate()){
-                                        ajouterCommentaire(pub);
+                                        ajouterCommentaire(pubId);
                                       }
                                     }, child:waitComment==false? Column(
                                     children: [
@@ -178,21 +190,32 @@ class _CommentaireWidgetState extends State<CommentaireWidget> {
                                                             )));
   }
 
-  ajouterCommentaire(Publication pub)async{
+  ajouterCommentaire(String  pubId)async{
     Commentaire com=Commentaire();
     com.content=content.text;
     com.userId=DataController.user!.id;
-    com.publicationId=pub.id;
+    com.publicationId=pubId;
+
+    Map<String,dynamic> notificationData={
+      'publication':pubId, 
+      'from':DataController.user!.id,
+      'to':pubId,
+      'type':'commentaire'
+    };
+    
     setState(() {
       waitComment=true;
     });
     CommentaireService.saveComent(com).then((value) {
+      if(value.statusCode==200){
+        notificationData['commentaire']=jsonDecode(value.body)['_id'];
+        NotificationService.addNotification(notificationData);
+      }
       setState(() {
-        pub.commentaires.add(
-          com
-        );
+        
         waitComment=false;
       });
+
     });
     
   }
@@ -229,6 +252,7 @@ class _ItemCommentaireState extends State<ItemCommentaire> {
     super.initState();
     print("user id ${DataController.user!.id}\n\n\n");
     commentaire=widget.com;
+    
     LikeService.getNombreLike(commentaire.id!).then((value){
       if(value.statusCode==200){
         setState(() {
@@ -244,6 +268,7 @@ class _ItemCommentaireState extends State<ItemCommentaire> {
           if(item['user']==DataController.user!.id){
             setState(() {
               isLiked=true;
+              commentaire.isLike=true;
               likeId=item['_id'];
               return;
             });
@@ -253,7 +278,9 @@ class _ItemCommentaireState extends State<ItemCommentaire> {
     }).catchError((e){
       return e;
     });
-    
+    setState(() {
+      isLiked=commentaire.isLike;
+    });
     print("Publication Id: ${commentaire.id}");
     print(" nombre like ${commentaire.nbLikes}");
   }
@@ -263,6 +290,13 @@ class _ItemCommentaireState extends State<ItemCommentaire> {
   // }
 
   likeCommentaire(Commentaire commentaire)async{
+
+    Map<String,dynamic> notification={
+      'from':commentaire.user!.id, 
+      // 'to':commentaire.user!.id,
+      'comment':commentaire.id,
+      'type':'like'
+    };
     setState(() {
       isLiked=true;
     });
@@ -284,6 +318,7 @@ class _ItemCommentaireState extends State<ItemCommentaire> {
         setState(() {
           likeId=jsonDecode(value.body)['_id'];
         });
+        NotificationService.addNotification(notification);
       }
     }).catchError((e){
        setState(() {
@@ -322,7 +357,7 @@ class _ItemCommentaireState extends State<ItemCommentaire> {
                                           width: 46, 
                                           height:46, 
                                           margin:const EdgeInsets.only(right: 12),
-                                          child: ClipOval(child:widget.com.avatar!=null? Image.network(widget.com.user!.avatar![0].url!,fit: BoxFit.cover,):Image.asset("assets/medias/user.jpg",fit:BoxFit.cover )),
+                                          child: ClipOval(child:widget.com.user!.avatar!.isNotEmpty? Image.network(widget.com.user!.avatar!.first.url!,fit: BoxFit.contain,):Image.asset("assets/medias/user.jpg",fit:BoxFit.cover )),
                                         ),
                                       ),
                                       Column(
@@ -370,7 +405,7 @@ class _ItemCommentaireState extends State<ItemCommentaire> {
                                                               onTap:(){
                                                                 // likeCommentaire(com);
                                                               },
-                                                              child: Row(
+                                                              child:const Row(
                                                               children: [
                                                                 // Text("J'aime",style: GoogleFonts.roboto(fontSize: 9,fontWeight:FontWeight.w500,color: isLiked(com, DataController.user!.id!)?Colors.blue:Colors.black)),
                                                               ],

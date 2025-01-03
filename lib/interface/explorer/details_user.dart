@@ -47,44 +47,49 @@ class _DetailsUserState extends State<DetailsUser> {
             return [
               SliverAppBar(
                 automaticallyImplyLeading: false,
-                expandedHeight: 225,
+                expandedHeight: 250,
                 elevation: 0,
                 scrolledUnderElevation: 0,
+                pinned: false,
                 flexibleSpace: FlexibleSpaceBar(
                   background: headerProfile(),
                 )
               )
             ];
           },
+          
           body: userPageContainer(),
         ),
       ),
     );
   }
 
-  DefaultTabController userPageContainer() {
-    return DefaultTabController(
-          length: 4, child: Scaffold(
-            appBar: AppBar(
-              automaticallyImplyLeading: false, 
-              toolbarHeight: 0,
-              bottom: TabBar(tabs: [
-                itemTab('articles',2000),
-                itemTab('publications',2000), 
-                itemTab('alertes',572454), 
-                itemTab('abonné',2000)
+  Widget userPageContainer() {
+    return Container(
+      margin:const  EdgeInsets.symmetric(vertical: 12),
+      child: DefaultTabController(
+            length: 4, child: Scaffold(
+              appBar: AppBar(
+                automaticallyImplyLeading: false, 
+                toolbarHeight: 0,
+                bottom: TabBar(tabs: [
+                  itemTab('articles',2000),
+                  itemTab('publications',2000), 
+                  itemTab('alertes',572454), 
+                  itemTab('abonné',2000)
+                ]),
+                
+              ),
+              body: TabBarView(children: [
+                FutureListArticle(userId: widget.user.id!),
+                PublicationPage(type: 'default',userId: widget.user.id),
+                PublicationPage(type: 'alerte',userId: widget.user.id),
+                const ListAbonnee()
               ]),
-              
-            ),
-            body: TabBarView(children: [
-              FutureListArticle(userId: widget.user.id!),
-              PublicationPage(type: 'default',userId: widget.user.id),
-              PublicationPage(type: 'alerte',userId: widget.user.id),
-              const ListAbonnee()
-            ]),
-          ), 
-          
-        );
+            ), 
+            
+          ),
+    );
   }
 
   Tab itemTab(String label,int value) {
@@ -112,7 +117,7 @@ class _DetailsUserState extends State<DetailsUser> {
                     margin:const EdgeInsets.symmetric(vertical: 2),
                     child: ClipOval(
                   
-                      child: Image.asset("assets/medias/user.jpg",fit: BoxFit.cover,),
+                      child: Image.asset("assets/medias/profile.jpg",fit: BoxFit.cover,),
                     ),
                   ),
                 ],

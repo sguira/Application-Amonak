@@ -12,6 +12,7 @@ import 'package:application_amonak/widgets/bottom_sheet_header.dart';
 import 'package:application_amonak/widgets/commentaire.dart';
 import 'package:application_amonak/widgets/publication_card.dart';
 import 'package:application_amonak/widgets/zone_commentaire.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
@@ -22,7 +23,8 @@ import 'package:video_player/video_player.dart';
 class PublicationPage extends StatefulWidget {
   final String type;
   final String? userId;
-  const PublicationPage({super.key,required this.type,this.userId});
+  final bool? hideLabel;
+  const PublicationPage({super.key,required this.type,this.userId,this.hideLabel});
 
   
 
@@ -36,6 +38,7 @@ class _PublicationPageState extends State<PublicationPage> {
   late VideoPlayerController videoController;
   late int nbLike=0;
   late bool isLiked=false;
+  TextEditingController search=TextEditingController();
   String type=''; 
   @override
   void initState() {
@@ -90,17 +93,28 @@ class _PublicationPageState extends State<PublicationPage> {
           );
         }
         return publication.isNotEmpty?
-          Container(
-          child: ListView.builder(
-            // alignment: WrapAlignment.center,
-            itemCount: publication.length,
-            itemBuilder: (context, index) {
-              return ItemPublication(pub: publication[index]);
-            },
-            addAutomaticKeepAlives: false,
-            
-          ),
-        ):const Center(child: Text("Aucun element trouvé"),);
+          StatefulBuilder(
+            builder: (context,setState_) {
+              return Column(
+                children: [
+                  header(setState_),
+                  Expanded(
+                    child: Container(
+                    child: ListView.builder(
+                      // alignment: WrapAlignment.center,
+                      itemCount: publication.length,
+                      itemBuilder: (context, index) {
+                        return ItemPublication(pub: publication[index]);
+                      },
+                      addAutomaticKeepAlives: false,
+                      
+                    ),
+                            ),
+                  ),
+                ],
+              );
+            }
+          ):const Center(child: Text("Aucun element trouvé"),);
       }
     );
   }
@@ -156,7 +170,7 @@ class _PublicationPageState extends State<PublicationPage> {
               itemDescription("100", "Likes"), 
               GestureDetector(
                 onTap: (){
-                  showBottomSheet(context: context, builder: (context)=>CommentaireWidget(publication: publication));
+                  showBottomSheet(context: context, builder: (context)=>CommentaireWidget(pubId: publication.id));
                 },
                 child: itemDescription("5000", "Commentaires"),
               ),
@@ -175,7 +189,101 @@ class _PublicationPageState extends State<PublicationPage> {
     );
   }
 
-  
+  header(dynamic setState_) {
+    return Container(
+      // decoration: BoxDecoration(
+      //   color: Colors.red
+      // ),
+      // height: 8,
+      // margin: EdgeInsets.only(top: 22),
+      margin:const EdgeInsets.only(bottom: 16),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,  
+        children: [
+          if(widget.hideLabel!=true)
+          Container(
+            margin:const EdgeInsets.symmetric(vertical: 18),
+            child: Text("\" NOUS DEVENONS CE QUE NOUS PENSONS \"",style: GoogleFonts.roboto(fontSize: 12,fontWeight: FontWeight.w700),),
+          ), 
+          Container(
+            width: 280,
+            height: 42,
+            margin:const EdgeInsets.symmetric(vertical: 12),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(22)
+            ),
+            child: TextFormField(
+              controller: search,
+              decoration: InputDecoration(
+                filled: true,
+                fillColor: Colors.black12,
+                hintText: 'Chercher..',
+                hintStyle: GoogleFonts.roboto(fontSize: 12),
+                contentPadding:const EdgeInsets.symmetric(vertical: 4,horizontal: 18),
+                border:const OutlineInputBorder(
+                  borderSide: BorderSide(
+                    width: 0, color: Colors.transparent, 
+                  )
+                ), 
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(36),
+                  borderSide:const BorderSide(
+                    width: 0, color: Colors.transparent, 
+                  )
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(36),
+                  borderSide:const BorderSide(
+                    width: 0, color: Colors.transparent, 
+                  )
+                )
+              ),
+              onChanged: (value){
+                if(value.length>=3){
+                  PublicationService.getPublications(search: search.text).then((value){
+                    print("values status code search:${value.statusCode}");
+                    if(value.statusCode==200){
+                      setState_(() {
+                          publication=[];
+                          for(var item in jsonDecode(value.body) as List){
+                            publication.add(Publication.fromJson(item));
+                          }
+                        });
+                    }
+                  }).catchError((e){
+                    print("Error $e");
+                    PublicationService.getPublications().then((value){
+                      if(value.statusCode==200){
+                        setState_(() {
+                          publication=[];
+                          for(var item in jsonDecode(value.body) as List){
+                            publication.add(Publication.fromJson(item));
+                          }
+                        });
+                      }
+                    });
+                  });
+                }
+                else{
+                  PublicationService.getPublications().then((value){
+                      if(value.statusCode==200){
+                        setState_(() {
+                          publication=[];
+                          for(var item in jsonDecode(value.body) as List){
+                            publication.add(Publication.fromJson(item));
+                          }
+                        });
+                      }
+                    });
+                }
+              },
+            ),
+          )
+        ],
+      ),
+    );
+  }
 
   Container buttonIcon(IconData icon) => Container(
     margin:const EdgeInsets.symmetric(horizontal: 3),

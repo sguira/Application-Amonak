@@ -4,6 +4,7 @@ import 'package:application_amonak/data/data_controller.dart';
 import 'package:application_amonak/interface/explorer/videoPlayerWidget.dart';
 import 'package:application_amonak/models/publication.dart';
 import 'package:application_amonak/services/commentaire.dart';
+import 'package:application_amonak/services/notification.dart';
 import 'package:application_amonak/services/publication.dart';
 import 'package:application_amonak/settings/weights.dart';
 import 'package:application_amonak/widgets/commentaire.dart';
@@ -153,7 +154,7 @@ class _ImageSectionState extends State<ItemPublication> {
               itemDescription("$nbLike", "Likes"), 
               GestureDetector(
                 onTap: (){
-                  showBottomSheet(context: context, builder: (context)=>CommentaireWidget(publication: publication));
+                  showBottomSheet(context: context, builder: (context)=>CommentaireWidget(pubId: publication.id));
                 },
                 child: itemDescription(nbLike.toString(), "Commentaires"),
               ),
@@ -190,7 +191,7 @@ class _ImageSectionState extends State<ItemPublication> {
 
 onComment(){
     print("Commentaire \n\n");
-    return showBottomSheet(context: context, builder: (context)=>CommentaireWidget(publication: widget.pub));
+    return showBottomSheet(context: context, builder: (context)=>CommentaireWidget(pubId: widget.pub.id));
 }
   
 
@@ -243,6 +244,12 @@ onComment(){
       "user":DataController.user!.id,
       "type":'like'
     };
+    Map notification ={
+      'from':DataController.user!.id, 
+      'to':widget.pub.user!.id, 
+      'type':'like',
+      // 'content':'publication.LikeYourPublication'
+    };
     if(isLike==false){
       setState(() {
         isLike=true;
@@ -250,12 +257,15 @@ onComment(){
       });
       PublicationService.addLike(data).then((value) {
         print("Status like ${value.statusCode}\n\n");
-        if(value.statusCode.toString()!='200'){
+        if(value.statusCode!=200){
 
           setState(() {
             isLike=false;
             nbLike-=1;
           });
+        }
+        else{
+          NotificationService.addNotification(notification);
         }
       }).catchError((e){
         setState(() {

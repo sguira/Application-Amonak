@@ -1,28 +1,34 @@
-import 'package:application_amonak/interface/accueils/connection/change_password.dart';
+import 'package:application_amonak/interface/connection/change_password.dart';
+import 'package:application_amonak/interface/connection/confirm_change.dart';
+import 'package:application_amonak/services/auths.dart';
 import 'package:application_amonak/settings/weights.dart';
 import 'package:application_amonak/widgets/gradient_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:email_validator/email_validator.dart';
-class ConfirmChange extends StatefulWidget {
-  
-  const ConfirmChange({super.key});
+class ResetPassword extends StatefulWidget {
+ 
+  const ResetPassword({super.key});
 
   @override
-  State<ConfirmChange> createState() => _ResetPasswordState();
+  State<ResetPassword> createState() => _ResetPasswordState();
 }
 
-class _ResetPasswordState extends State<ConfirmChange> {
+class _ResetPasswordState extends State<ResetPassword> {
 
   final formKey=GlobalKey<FormState>();
   bool waitRequest=false;
-  TextEditingController confirmCode=TextEditingController();
-  String label="Code reçu par mail.";
-  String description="Veuillez entrer le code à quatre (04) chiffres envoyé par mail.";
-  String hint="Code..";
+
+  // final formKey=GlobalKey<FormState>();
+  // bool waitRequest=false;
+  TextEditingController email=TextEditingController();
+  String label="Votre adresse mail";
+  String description="Veuillez entrer votre adresse email et un code vous sera envoyer pour changer votre mot de passe et accéder à votre compte Amonak.";
+  String hint="Email..";
   String titre="Réinitialiser votre mot de passe";
   bool waitRequestReset=false;
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -41,7 +47,7 @@ class _ResetPasswordState extends State<ConfirmChange> {
                   children: [
                     Container(
                       margin:const EdgeInsets.symmetric(vertical: 12),
-                      child: Text(titre,style: GoogleFonts.roboto(fontWeight: FontWeight.bold,letterSpacing: 1),),
+                      child: Text(titre,style: GoogleFonts.roboto(fontWeight: FontWeight.bold,letterSpacing: 1,fontSize:15),),
                     ),
                     Container(
                       width: ScreenSize.width*0.75,
@@ -62,7 +68,7 @@ class _ResetPasswordState extends State<ConfirmChange> {
           Container(
             margin:const EdgeInsets.only(top: 6),
             child: Form( 
-              // key: widget.formKey,
+              key: formKey,
               child: Column(
                 children: [
                    Container(
@@ -73,15 +79,16 @@ class _ResetPasswordState extends State<ConfirmChange> {
                           Text(label,style: GoogleFonts.roboto(fontSize: 12,letterSpacing: 0.8,color: Colors.black.withAlpha(150)),),
                           const SizedBox(height: 6,),
                           TextFormField(
-                            controller: confirmCode,
+                            controller: email,
                             validator: (value){
                               
-                               
+                                if(!EmailValidator.validate(value!)){
+                                  return 'email invalide';
+                                }
                               
-                              if(value!.isEmpty){
+                              if(value.isEmpty){
                                 return 'Champ obligatoire';
                               }
-                              return null;
                             },
                             decoration: InputDecoration(
                               // label: Text()
@@ -122,16 +129,33 @@ class _ResetPasswordState extends State<ConfirmChange> {
   TextButton buttonAction( Function onPressed, String btnTexte) {
     return TextButton(onPressed: (){
       if(formKey.currentState!.validate()){
-        setState(() {
-          waitRequestReset=true;
-        });
-        onPressed();
-        setState(() {
-          waitRequestReset=false;
-        });
+        gotoConfirmCode();
       }
     }, child:waitRequestReset==false? Text(btnTexte.toUpperCase(),style: GoogleFonts.roboto(color: Colors.white),):SizedBox(width: 18,height: 18,child: CircularProgressIndicator(strokeWidth: 2,color: Colors.white,),));
   }
 
+
+  gotoConfirmCode()async{
+    setState(() {
+      waitRequest=true;
+    });
+    Login.requestResetPassword(email.text).then((value) {
+      print("Reset status code: ${value.statusCode}");
+      setState(() {
+        waitRequest=false;
+      });
+      if(value.statusCode==200){
+        Navigator.pop(context);
+        showModalBottomSheet(context: context, builder: (conext)=> ConfirmChange());
+      }
+    }).catchError((e){
+      setState(() {
+        waitRequest=true;
+      });
+    });
+    
+    // await Future.delayed(Duration(seconds: 5));
+    
+  }
   
 }

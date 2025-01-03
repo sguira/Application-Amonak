@@ -1,7 +1,9 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:application_amonak/models/user.dart';
 import 'package:application_amonak/prod.dart';
+import 'package:application_amonak/services/upLoadFile.dart';
 import 'package:http/http.dart'as http; 
 
 class Register{
@@ -9,8 +11,22 @@ class Register{
   static String server=apiLink+'/auths/register'; 
 
 
-  static Future createUser(User user)async{
+  static Future createUser({
+    required User user, 
+    File? picture
+  })async{
     String result='';
+
+    Map userData=user.toJson2();
+
+    if(picture!=null){
+      dynamic value=await UploadFile.saveFile(picture!);
+
+      if(UploadFile.obtainTrushUrl(value)){
+        userData['files']=UploadFile.getTrushPath(value);
+      }
+    }
+
     
     await http.post(Uri.parse(server),
     body: jsonEncode(user.toJson2()),

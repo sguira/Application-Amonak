@@ -1,6 +1,8 @@
 import 'dart:io';
 
 import 'package:application_amonak/interface/accueils/home.dart';
+import 'package:application_amonak/interface/accueils/home_tab_menu.dart';
+import 'package:application_amonak/interface/contact/message.dart';
 import 'package:application_amonak/services/publication.dart';
 import 'package:application_amonak/widgets/bottom_sheet_header.dart';
 import 'package:application_amonak/widgets/button_importer_fichier.dart';
@@ -54,19 +56,20 @@ class _CreateAlertePageState extends State<CreateAlertePage> {
                   child: Form( 
                     key: keyForm,
                     child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         multilineTexteForm(controller: description, hint: "De quoi parle t'on Aujourd'hui"), 
                         itemForm(hint: 'Ex. Chaussure Givenchy paris', label: "Nom de l’article",controller: articleName,requiet: true), 
                         buttonImportFile(label: 'Importer une photo / vidéo de l’article',function: loadFile),
                         if(selectedFile!=null)
-                        DescriptionFileLoad(),
+                        FileSelectedViewer(file: selectedFile!, onClose: onClose),
                         if(alerte)
                         Container(
                           margin:const EdgeInsets.symmetric(vertical: 12),
                           decoration: BoxDecoration(
                             color:const Color.fromARGB(255, 14, 111, 172), 
                             borderRadius: BorderRadius.circular(28)
-                          ),
+                          ),  
                           padding:const EdgeInsets.symmetric(vertical: 8,horizontal: 22),
                           child: Center(
                             child: Row(
@@ -113,6 +116,12 @@ class _CreateAlertePageState extends State<CreateAlertePage> {
         ],
       ),
     );
+  }
+
+  onClose(){
+    setState(() {
+      selectedFile=null;
+    });
   }
 
   Container DescriptionFileLoad() {
@@ -175,7 +184,7 @@ class _CreateAlertePageState extends State<CreateAlertePage> {
             alerteCode=1;
          });
          Future.delayed(const Duration(milliseconds: 800),(){
-                          Navigator.push(context, MaterialPageRoute(builder: (context)=>const HomePage() ));
+                          Navigator.push(context, MaterialPageRoute(builder: (context)=>const HomePageTab() ));
                         });
         }
         else{

@@ -9,32 +9,7 @@ import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
 class PublicationService{
 
-  static Future  uloadFile(File file)async{
-    // String fileName=file.
-    final url= Uri.parse("$apiLink/uploads");
-    print('avant catch');
-    try{
-      final mimeType=lookupMimeType(file.path)??'application/octet-stream';
-      final mimeTypeData=mimeType.split('/');
-
-      var request=http.MultipartRequest('POST', url);
-      request.files.add(
-        http.MultipartFile.fromBytes('files', await file.readAsBytes() )
-      );
-
-      var response=await request.send();
-      print("status code ${response.statusCode}");
-      
-      var responseData= await http.Response.fromStream(response);
-      var responseBody=json.decode(responseData.body);
-      print(" body: $responseBody");
-        
-    }
-    catch(e){ 
-      print(" test: $e ");
-    }
-    //  print('Apres catch');
-  }
+  
 
 
   static obtainUrl(dynamic data){
@@ -174,15 +149,7 @@ class PublicationService{
         if(value.statusCode.toString()=='200'){
           for(var item in value.data as List){
             print("type de la publication ${item['type']}\n\n ");
-            result.add({
-              'url':item['url'], 
-              'type':item['type'], 
-              'extension':item['extension'], 
-              'originalname':item['originalname'], 
-              'filename':item['filename'],
-              'size':item['size'], 
-
-            });
+            result.add(item);
           }
         }
         else{
@@ -209,7 +176,8 @@ class PublicationService{
 
   static Future<http.Response> getPublications({
     String? type, 
-    String? userId 
+    String? userId, 
+    String? search 
   })async{
     // String url="$apiLink/publications";
     final Uri url=Uri.parse("$apiLink/publications").replace(queryParameters: {
@@ -217,6 +185,8 @@ class PublicationService{
       'type':type, 
       if(userId!=null)
       'user':userId,
+      if(search!=null)
+      'search':search
     });
     return await http.get(url).then((value){
       return value;

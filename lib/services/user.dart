@@ -16,14 +16,32 @@ class UserService{
   
 
 
-  static Future getAllUser()async{
-    List<User> users=[];
+  static Future<http.Response> getAllUser()async{
+    // List<User> users=[];
     print("token value $tokenValue");
     return await http.get(Uri.parse(server),headers: authHeader ).then((value){
       return value;
     });
 
     
+  }
+
+  static Future<http.Response> getUser({
+    required String userId
+  })async{
+    return await http.get(Uri.parse("$apiLink/users/$userId"),headers: authHeader).then((value) {
+      return value;
+    }).catchError((e){
+      return e;
+    });
+  }
+
+  static Future<http.Response> searchUser(String query)async{
+    return await http.get(Uri.parse(server).replace(queryParameters: {'search':query}),headers: authHeader).then((value){
+      return value;
+    }).catchError((e){
+      return e;
+    });
   }
 
   static Future sendFriend(String id)async{
@@ -47,9 +65,13 @@ class UserService{
     return resutl;
   }
 
-  static Future<http.Response> getBoutique()async{
+  static Future<http.Response> getBoutique({
+    String? search
+  })async{
     Uri uri=Uri.parse("$apiLink/users").replace(queryParameters: {
-      'accountType':'seller'
+      'accountType':'seller', 
+      if(search!=null)
+      'search':search
     });
     return await http.get(uri,headers:authHeader).then((value) {
       return value;

@@ -28,7 +28,7 @@ Container itemPublication(User item,int style) {
                     color: Colors.blue, 
                     borderRadius: BorderRadius.circular(18)
                   ),
-                  child: Image.asset('assets/medias/user.jpg',fit: BoxFit.cover,),
+                  child: Image.asset('assets/medias/profile.jpg',fit: BoxFit.cover,),
                 ), 
                 Container(
                   margin:const EdgeInsets.symmetric(horizontal: 12,vertical: 8),
@@ -90,7 +90,7 @@ footerPublication(dynamic item){
               borderRadius: BorderRadius.circular(86), 
               // color: Colors.black12
             ),
-            child: ClipOval(child: Image.asset('assets/medias/user.jpg',fit: BoxFit.cover,))), 
+            child: ClipOval(child: Image.asset('assets/medias/profile.jpg',fit: BoxFit.cover,))), 
             Column(
               children: [
                 Text(pub.user!.userName!,style: GoogleFonts.roboto(fontSize: 14,fontWeight: FontWeight.w500),),
@@ -119,7 +119,7 @@ footerPublication(dynamic item){
               borderRadius: BorderRadius.circular(86), 
               // color: Colors.black12
             ),
-            child: ClipOval(child:DataController.user!.avatar!.isEmpty? Image.asset('assets/medias/user.jpg',fit: BoxFit.cover,):Image.network(DataController.user!.avatar!.first.url!,fit: BoxFit.contain,))), 
+            child: ClipOval(child:pub.avatar!.isEmpty ? Image.asset('assets/medias/profile.jpg',fit: BoxFit.cover,):Image.network(pub.avatar!.first.url!,fit: BoxFit.contain,))), 
             Column(
               children: [
                 Text(pub.userName!,style: GoogleFonts.roboto(fontSize: 14,fontWeight: FontWeight.w500),),

@@ -1,14 +1,20 @@
 import 'dart:convert';
+
 import 'dart:ui';
 
 import 'package:application_amonak/colors/colors.dart';
 import 'package:application_amonak/data/data_controller.dart';
+import 'package:application_amonak/interface/accueils/notifications.dart';
 import 'package:application_amonak/interface/explorer/details_user.dart';
 import 'package:application_amonak/interface/vendre/vendre.dart';
+import 'package:application_amonak/models/article.dart';
 import 'package:application_amonak/models/publication.dart';
 import 'package:application_amonak/services/commentaire.dart';
+import 'package:application_amonak/services/product.dart';
 import 'package:application_amonak/services/publication.dart';
 import 'package:application_amonak/settings/weights.dart';
+import 'package:application_amonak/widgets/btnLike.dart';
+import 'package:application_amonak/widgets/buttonComment.dart';
 import 'package:application_amonak/widgets/commentaire.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
@@ -50,6 +56,20 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
     });
   }
 
+  Future getArticle()async{
+    if(widget.videoItem.typePub=='sale'){
+      await ProductService.getSingleArticle(id: widget.videoItem.productId).then((value) {
+        if(value.statusCode==200){
+          article=ArticleModel.fromJson(jsonDecode(value.body));
+        }
+      }).catchError((e){
+        print(e);
+      });
+    }
+  }
+
+  ArticleModel? article;
+
   int nbComment=0;
 
 
@@ -59,7 +79,9 @@ List likes=[];
   void initState() {
     // TODO: implement initState
     super.initState();
+    getArticle();
     setState(() {
+      
       getNombreLike();
       nombreComment();
     });
@@ -87,28 +109,14 @@ List likes=[];
     
   }
 
-  showHeart(){
-    final heart=  Positioned(
-      // left: tapPosition.dx, 
-      // top: tapPosition.dy,
-      child: Center(child: HeartAnimation())
-    );
-
-    setState(() {
-      hearts.add(heart);
-    });
-
-    Future.delayed(const Duration(milliseconds: 1500),(){
-      setState(() {
-        hearts.remove(heart);
-      });
-    });
-  }
+ 
+    
 
   
 
   getNombreLike()async{
     await PublicationService.getNumberLike(widget.videoItem.id!, 'like').then((value){
+      print("nombre like");
       if(value!.statusCode.toString()=='200'){
         setState(() {
           nbLike=(jsonDecode(value.body)as List).length;
@@ -282,39 +290,80 @@ List likes=[];
       bottom: 20, 
       left: 10,
       child: Container(
-        padding:const EdgeInsets.symmetric(horizontal: 12,vertical: 8),
-        
         decoration: BoxDecoration(
-          color: Colors.black.withAlpha(80), 
+          color: Colors.black.withAlpha(60),
           borderRadius: BorderRadius.circular(4)
         ),
-        width: ScreenSize.width*0.75,
-        constraints:BoxConstraints(maxHeight:isExpanded==false? 130:ScreenSize.height*0.6),
-        child: SingleChildScrollView(
-          child: Text.rich(
-            TextSpan(
-              children: [
-                TextSpan(
-                  text: "${isExpanded==false? super.widget.videoItem.content!.substring(0,100):widget.videoItem.content!}", 
-                  style: GoogleFonts.roboto(color:Colors.white)
-                ), 
-                TextSpan(
-                  text:isExpanded==false? " voir plus...":"voir moins",
-                  style: GoogleFonts.roboto(color:Colors.white,fontWeight:FontWeight.bold ),
-                  recognizer: TapGestureRecognizer(
-                    
-                  )..onTap=(){
-                    setState(() {
-                      isExpanded=!isExpanded;
-                    });
-                  }
-                )
-              ]
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if(article!=null)
+            Container(
+              margin:const EdgeInsets.only(right: 12,left: 12,top: 12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  
+                  Text(NumberFormat.currency(locale: 'fr',decimalDigits: 0,symbol: article!.currency!).format(article!.price),style: GoogleFonts.roboto(fontSize:18,fontWeight:FontWeight.w800,color:Colors.white),), 
+                  Text(article!.name!,style: GoogleFonts.roboto(color:Colors.white),), 
+                  Text("Stock: ${article!.qte}",style: GoogleFonts.roboto(color:Colors.white),)
+                ],
+              ),
+            ),
+            TextExpanded(),
+            Container(
+              margin:const EdgeInsets.symmetric(horizontal: 12,vertical: 4),
+              // child: Text(calculateTimeDifferenceBetween(startDate: widget.videoItem.dateCreation!, endDate: DateTime.now()),style: GoogleFonts.roboto(color:Colors.white,fontSize:10),),
             )
-          ),
-        )
+          ],
+        ),
       )
     ):Center();
+  }
+
+  calculateDiffenceDate({
+    required DateTime from, 
+    required DateTime to
+  }){
+    // int seconde=to.difference(other)
+  }
+  
+
+  Container TextExpanded() {
+    return Container(
+      padding:const EdgeInsets.symmetric(horizontal: 12,vertical: 8),
+      
+      decoration: BoxDecoration(
+        // color: Colors.black.withAlpha(80), 
+        borderRadius: BorderRadius.circular(4)
+      ),
+      width: ScreenSize.width*0.75,
+      constraints:BoxConstraints(maxHeight:isExpanded==false? 130:ScreenSize.height*0.6),
+      child: SingleChildScrollView(
+        child:widget.videoItem.content!.length>100? Text.rich(
+          TextSpan(
+            
+            children: [
+              TextSpan(
+                text: "${isExpanded==false? super.widget.videoItem.content!.substring(0,100):widget.videoItem.content!}", 
+                style: GoogleFonts.roboto(color:Colors.white)
+              ), 
+              TextSpan(
+                text:isExpanded==false? " voir plus...":"voir moins",
+                style: GoogleFonts.roboto(color:Colors.white,fontWeight:FontWeight.bold ),
+                recognizer: TapGestureRecognizer(
+                  
+                )..onTap=(){
+                  setState(() {
+                    isExpanded=!isExpanded;
+                  });
+                }
+              )
+            ]
+          )
+        ):Text(widget.videoItem.content!),
+      )
+    );
   }
 
   Positioned containerButton() {
@@ -335,30 +384,10 @@ List likes=[];
                   ),
                   child: Column(
                     children: [
-                      Container(
-                        margin:const EdgeInsets.symmetric(vertical: 1),
-                        child: Column(
-                          children: [
-                            IconButton(onPressed: (){
-                              onLiker();
-                            }, icon: Icon(Icons.favorite,color:isLike==false? Colors.white:Colors.red)),
-                            Text(NumberFormat.compact(locale: 'fr').format(nbLike),style: GoogleFonts.roboto(fontSize:sizeLike ,color: Colors.white),)
-                          ],
-                        ),
-                      ),
+                      ButtonLike(pub: widget.videoItem,color: Colors.white,),
                       
                       // itemButton(double.parse("80000"),Icons.repeat,false,onComment),
-                      Container(
-                        margin: EdgeInsets.symmetric(vertical: 16),
-                        child: Column(
-                          children: [
-                            IconButton(onPressed: (){
-                              onComment();
-                            }, icon:const Icon(Icons.comment,color: Colors.white)),
-                            Text(NumberFormat.compact(locale: 'fr').format(nbComment),style: GoogleFonts.roboto(fontSize: sizeLike,color: Colors.white),)
-                          ],
-                        ),
-                      ),
+                      CommentaireButton(pubId: widget.videoItem.id!,color: Colors.white,),
                       Container(
                         child: Column(
                           children: [
@@ -410,14 +439,16 @@ List likes=[];
             ),
             child: ClipOval(
               
-              child: DataController.user!.avatar!.isEmpty? Image.asset('assets/medias/user.jpg',fit: BoxFit.cover,):Image.network(DataController.user!.avatar!.first.url!,fit: BoxFit.cover,)),
+              child: DataController.user!.avatar!.isEmpty? Image.asset('assets/medias/profile.jpg',fit: BoxFit.cover,):Image.network(DataController.user!.avatar!.first.url!,fit: BoxFit.cover,)),
           ),
         ), 
         Container(
-          child: Text(widget.videoItem.userName!.toUpperCase(),style: GoogleFonts.roboto(fontWeight: FontWeight.w600, fontSize:14,color: Colors.black),),
+          child: Text(widget.videoItem.userName!.toUpperCase(),style: GoogleFonts.roboto(fontWeight: FontWeight.w600, fontSize:14,color: Colors.white),),
         ), 
         Container(
-          child: IconButton(onPressed: (){}, icon:const Icon(FontAwesomeIcons.bell,color: Colors.black,)),
+          child: IconButton(onPressed: (){
+            Navigator.push(context, MaterialPageRoute(builder: (context)=>Notifications()));
+          }, icon:const Icon(FontAwesomeIcons.bell,color: Colors.white,)),
         )
       ],),
     ));
@@ -474,7 +505,13 @@ List likes=[];
 
   onComment(){
     print("Commentaire \n\n");
-    return showBottomSheet(context: context, builder: (context)=>CommentaireWidget(publication: widget.videoItem));
+    return showModalBottomSheet(
+      context: context,
+      enableDrag: true, 
+      isScrollControlled: true,
+      builder: (context)=>Container(
+      width: ScreenSize.height*0.6,
+      child: CommentaireWidget(pubId: widget.videoItem.id)));
   }
 
   likePublication()async{

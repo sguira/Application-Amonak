@@ -9,7 +9,8 @@ class Commentaire{
   String? userId;
   String? publicationId;
   User? user; 
-  String? avatar;
+  String? avatar; 
+  bool isLike=false;
   int? nbLikes=0;
   List<Like>? likes=[];
   // String? createdAt; 

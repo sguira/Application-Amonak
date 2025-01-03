@@ -1,4 +1,5 @@
 import 'package:application_amonak/colors/colors.dart';
+import 'package:application_amonak/data/data_controller.dart';
 import 'package:application_amonak/interface/accueils/home.dart';
 import 'package:application_amonak/interface/contact/contact.dart';
 import 'package:application_amonak/interface/explorer/explorer.dart';
@@ -88,7 +89,7 @@ class _HomeState extends State<HomePageTab> {
                           borderRadius: BorderRadius.circular(86),
                           // border: Border.all(width: 4)
                       ),
-                      child: Image.asset("assets/medias/user.jpg",fit:BoxFit.cover)),
+                      child:DataController.user!.avatar!.isEmpty? Image.asset("assets/medias/user.jpg",fit:BoxFit.cover):Image.network(DataController.user!.avatar!.first.url!,fit:BoxFit.fitHeight)),
                   ),
                 ),
     );

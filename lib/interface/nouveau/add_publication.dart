@@ -1,6 +1,9 @@
 import 'dart:io';
 
 import 'package:application_amonak/colors/colors.dart';
+import 'package:application_amonak/interface/accueils/home.dart';
+import 'package:application_amonak/interface/accueils/home_tab_menu.dart';
+import 'package:application_amonak/interface/contact/message.dart';
 import 'package:application_amonak/services/publication.dart';
 import 'package:application_amonak/widgets/bottom_sheet_header.dart';
 import 'package:application_amonak/widgets/button_importer_fichier.dart';
@@ -27,6 +30,7 @@ class _CreatePublicationState extends State<CreatePublication> {
   String messageAlerte="";
   bool waitPublication=false;
   String? code;
+  String type='';
   final formKey=GlobalKey<FormState>();
 
   @override
@@ -49,6 +53,7 @@ class _CreatePublicationState extends State<CreatePublication> {
                     child: Form(
                       key: formKey,
                       child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           multilineTexteForm(controller: texte, hint: 'Dis le...'), 
                           buttonImportFile(label: 'Importer une photo / vidéo',function: choiceTypeFile), 
@@ -63,7 +68,7 @@ class _CreatePublicationState extends State<CreatePublication> {
                             
                           // ),
                           if(selectedFile!=null)
-                          DescriptionFileLoad(),
+                          FileSelectedViewer(file: selectedFile!, onClose: onClose,type: type,),
                           Container(
                             margin:const EdgeInsets.symmetric(vertical: 12),
                             decoration: BoxDecoration(
@@ -101,6 +106,12 @@ class _CreatePublicationState extends State<CreatePublication> {
         ],
       ),
     );
+  }
+
+  onClose(){
+    setState(() {
+      selectedFile=null;
+    });
   }
 
   choiceTypeFile(){
@@ -196,6 +207,9 @@ class _CreatePublicationState extends State<CreatePublication> {
           setState(() {
             messageAlerte='Publication réussie';
           });
+          Future.delayed(const Duration(milliseconds: 800),(){
+            Navigator.push(context, MaterialPageRoute(builder: (context)=>const HomePageTab() ));
+          });
         }
         else{
           setState(() {
@@ -208,9 +222,9 @@ class _CreatePublicationState extends State<CreatePublication> {
     }
   }
 
-  choiceFile(String type)async{
+  choiceFile(String type_)async{
     final XFile? file;
-
+    type=type_;
     if(type=='image'){
       file=await _picker.pickImage(source: ImageSource.gallery);
       print("nom de fichier ${file!.path}");

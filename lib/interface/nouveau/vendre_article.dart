@@ -2,6 +2,8 @@ import 'dart:io';
 
 import 'package:application_amonak/data/data_controller.dart';
 import 'package:application_amonak/interface/accueils/home.dart';
+import 'package:application_amonak/interface/accueils/home_tab_menu.dart';
+import 'package:application_amonak/interface/contact/message.dart';
 import 'package:application_amonak/services/publication.dart';
 import 'package:application_amonak/settings/weights.dart';
 import 'package:application_amonak/widgets/bottom_sheet_header.dart';
@@ -120,12 +122,12 @@ class _VendreArticleState extends State<VendreArticle> {
                   margin:const EdgeInsets.symmetric(horizontal: 12),
                   child: Text('Veuillez chargée une vidéo de l\'article',style: GoogleFonts.roboto(fontSize:11,color: Colors.red),)),
                 if(selectedFile!=null)
-                DescriptionFileLoad()
+                FileSelectedViewer(file: selectedFile!, onClose: onClose,type: 'video',)
               ],
             ),
             if(responseShow)
             Container(
-              margin: EdgeInsets.only(top: 16),
+              margin:const EdgeInsets.only(top: 16),
               padding: EdgeInsets.symmetric(vertical: 6,horizontal: 12),
               decoration: BoxDecoration(
                 color: Colors.blueAccent.withOpacity(0.2),
@@ -171,6 +173,12 @@ class _VendreArticleState extends State<VendreArticle> {
         ),
       )
     );
+  }
+
+  onClose(){
+    setState(() {
+      selectedFile=null;
+    });
   }
 
   Container DescriptionFileLoad() {
@@ -303,7 +311,7 @@ class _VendreArticleState extends State<VendreArticle> {
           devise.text='';
         });
         Future.delayed(const Duration(milliseconds: 800),(){
-                          Navigator.push(context, MaterialPageRoute(builder: (context)=>const HomePage() ));
+                          Navigator.push(context, MaterialPageRoute(builder: (context)=>const HomePageTab() ));
                         });
         Future.delayed(Duration(seconds: 2),(){
           setState(() {

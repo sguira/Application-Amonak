@@ -1,9 +1,15 @@
+import 'package:application_amonak/data/data_controller.dart';
+import 'package:application_amonak/interface/articles/video_background.dart';
 import 'package:application_amonak/interface/vendre/WidgetVenteContainer.dart';
 import 'package:application_amonak/interface/vendre/vendre.dart';
 import 'package:application_amonak/models/article.dart';
 import 'package:application_amonak/models/publication.dart';
+import 'package:application_amonak/services/publication.dart';
 import 'package:application_amonak/settings/weights.dart';
 import 'package:application_amonak/widgets/bottom_sheet_header.dart';
+import 'package:application_amonak/widgets/btnLike.dart';
+import 'package:application_amonak/widgets/buttonComment.dart';
+import 'package:application_amonak/widgets/commentaire.dart';
 import 'package:application_amonak/widgets/gradient_button.dart';
 import 'package:application_amonak/widgets/text_expanded.dart';
 import 'package:flutter/material.dart';
@@ -28,46 +34,58 @@ class _DetailArticleState extends State<DetailArticle> {
   double fraisLivraison=14000;
   double livraisonMontant=1000;
   bool viewBottom=true;
+  int nbLike=0;
+  bool isLiked=false;
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      
-      bottomSheet:viewBottom?  bottomContainer(context):null,
-      resizeToAvoidBottomInset: true,
-      
-      body: Stack(
-        fit: StackFit.expand,
-        children: [
-          
-          Positioned.fill(
-            // top: 20,
-            child: Container(
-              // height: ScreenSize.height*0.98,
-              // width: ,
-              child: Image.asset("assets/medias/articles/article2.jpg",fit: BoxFit.cover,))),
-          Positioned(
-            bottom: 10,
-            left: ScreenSize.width*0.45,
-            child: Container(
-              alignment: Alignment.center,
-              child: IconButton(onPressed: (){
-                setState(() {
-                  viewBottom=true;
-                });
-              }, icon:const Icon(Icons.keyboard_double_arrow_up_sharp)),
-            ),
-          ), 
-          Positioned(
-            top: 8,
-            child: Container(
-              child: IconButton(onPressed: (){
-                Navigator.pop(context);
-              }, icon:const Icon(Icons.arrow_back)),
+    return SafeArea(
+      child: Scaffold(
+        
+        bottomSheet:viewBottom?  bottomContainer(context):null,
+        resizeToAvoidBottomInset: true,
+        
+        body: Stack(
+          fit: StackFit.expand,
+          children: [
+            
+            Positioned.fill(
+              // top: 20,
+              child: Container(
+                // height: ScreenSize.height*0.98,
+                // width: ,
+                child:widget.article.files.isEmpty||widget.article.files.first.type!='video'?Image.asset("assets/medias/articles/article2.jpg",fit: BoxFit.cover,):VideoBacground(url: widget.article.files.first.url!))),
+            Positioned(
+              bottom: 10,
+              left: ScreenSize.width*0.45,
+              child: Container(
+                decoration: BoxDecoration(
+                  color:Colors.black.withAlpha(120), 
+                  borderRadius: BorderRadius.circular(36)
+                ),
+                alignment: Alignment.center,
+                child: IconButton(onPressed: (){
+                  setState(() {
+                    viewBottom=true;
+                  });
+                }, icon:const Icon(Icons.keyboard_double_arrow_up_sharp,color: Colors.white,)),
+              ),
+            ), 
+            Positioned(
+              top: 8,
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.black.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(36)
+                ),
+                child: IconButton(onPressed: (){
+                  Navigator.pop(context);
+                }, icon:const Icon(Icons.arrow_back,color: Colors.white,)),
+              )
             )
-          )
-           
-          
-        ],
+             
+            
+          ],
+        ),
       ),
     );
   }
@@ -86,7 +104,7 @@ class _DetailArticleState extends State<DetailArticle> {
                 
                 
                 Container(
-                  width: ScreenSize.width*0.8,
+                  width: ScreenSize.width*0.75,
                   child: Column(
                     children: [
                       articleContent(),
@@ -153,18 +171,10 @@ class _DetailArticleState extends State<DetailArticle> {
                   margin:const EdgeInsets.only(top: 26),
                   child: Column(
                     children: [
-                      IconButton(onPressed: (){}, icon:const Icon(Icons.favorite)),
-                      Text(NumberFormat.currency(locale: 'fr',symbol: '',decimalDigits: 0).format(100),style: GoogleFonts.roboto(fontSize:9),)
+                      ButtonLike(pub: widget.article)
                     ],
                   )),
-                Container(
-                  margin:const EdgeInsets.symmetric(vertical: 4),
-                  child: Column(
-                    children: [
-                      IconButton(onPressed: (){}, icon: Icon(Icons.comment)),
-                      Text(NumberFormat.currency(locale: 'fr',decimalDigits: 0,symbol: '').format(200),style: GoogleFonts.roboto(fontSize: 9),)
-                    ],
-                  )),
+                CommentaireButton(pubId: widget.article.id!)
               ],
                               );
   }
@@ -205,7 +215,7 @@ class _DetailArticleState extends State<DetailArticle> {
                         label: Text(label,style: GoogleFonts.roboto(),),
                         hintText: NumberFormat.currency(locale: 'fr',decimalDigits: 0,symbol: 'CFA').format(double.parse(hint)),
                         hintStyle: GoogleFonts.roboto(color: Colors.black),
-                        border: UnderlineInputBorder(
+                        border:const UnderlineInputBorder(
                           borderSide: BorderSide(color: Colors.grey,width: 3),
                         ), 
                         enabledBorder: UnderlineInputBorder(
@@ -214,6 +224,37 @@ class _DetailArticleState extends State<DetailArticle> {
                       ),
                     ),
                   );
+  }
+
+  likePublication()async{
+    Map data={
+      "publication":widget.article.id, 
+      "user":DataController.user!.id,
+      "type":'like'
+    };
+    if(isLiked==false){
+      setState(() {
+        isLiked=true;
+        nbLike+=1;
+      });
+      PublicationService.addLike(data).then((value) {
+        print("Status like ${value.statusCode}\n\n");
+        if(value.statusCode.toString()!='200'){
+
+          setState(() {
+            isLiked=false;
+            nbLike-=1;
+          });
+        }
+      }).catchError((e){
+        setState(() {
+          isLiked=false;
+          nbLike-=1;
+        });
+      });
+    }
+
+
   }
 
   viewModal(){

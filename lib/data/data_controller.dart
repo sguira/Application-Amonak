@@ -148,6 +148,7 @@ class DataController{
   static User? user;
 
   static List videoControllerHistory=[];
+  static String searchQuery="";
 
   
 

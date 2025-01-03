@@ -19,6 +19,7 @@ class _ExplorerPageState extends State<ExplorerPage> {
 
   
 
+  
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -29,13 +30,13 @@ class _ExplorerPageState extends State<ExplorerPage> {
     //   // leadingWidth: 300,
       
     //  ),
-    appBar: AppBar(
-      toolbarHeight: 100,
-      automaticallyImplyLeading: false,
-      centerTitle: true,
-      title: header(),
-      elevation: 0,
-    ),
+    // appBar: AppBar(
+    //   // toolbarHeight: 100,
+    //   automaticallyImplyLeading: false,
+    //   centerTitle: true,
+    //   // title: header(),
+    //   elevation: 0,
+    // ),
      body: DefaultTabController(
       length: 5, 
       child: Column(

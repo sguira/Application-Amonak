@@ -3,7 +3,7 @@ import 'dart:io';
 
 import 'package:application_amonak/colors/colors.dart';
 import 'package:application_amonak/data/data_controller.dart';
-import 'package:application_amonak/interface/accueils/connection/activation.dart';
+import 'package:application_amonak/interface/connection/activation.dart';
 import 'package:application_amonak/interface/boutique/details_boutique..dart';
 import 'package:application_amonak/interface/explorer/publication.dart';
 import 'package:application_amonak/interface/profile/edit_profile.dart';
@@ -60,7 +60,7 @@ class _ProfilePageState extends State<ProfilePage> {
           return [
             SliverAppBar(
               automaticallyImplyLeading: false,
-              expandedHeight: 200,
+              expandedHeight: 250,
               // pinned: true,
               floating: true, 
               // pinned: true, 
@@ -95,8 +95,8 @@ class _ProfilePageState extends State<ProfilePage> {
                 ),
                 body: TabBarView(children: [
                   FutureListArticle(userId: DataController.user!.id!),
-                  PublicationPage(type: 'default',userId: DataController.user!.id),
-                  PublicationPage(type: 'alerte',userId: DataController.user!.id),
+                  PublicationPage(type: 'default',userId: DataController.user!.id,hideLabel: true, ),
+                  PublicationPage(type: 'alerte',userId: DataController.user!.id,hideLabel: true,),
                   const ListAbonnee()
                 ]),
               ), 
@@ -144,7 +144,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       margin:const EdgeInsets.symmetric(vertical: 22),
                       child: ClipOval(
                     
-                        child: Image.network(DataController.user!.avatar![0].url!,fit: BoxFit.contain,),
+                        child:DataController.user!.avatar!.isNotEmpty? Image.network(DataController.user!.avatar![0].url!,fit: BoxFit.contain,):Image.asset("assets/medias/user.jpg",fit:BoxFit.cover),
                       ),
                     ),
                   ),
@@ -333,29 +333,32 @@ class FutureListArticle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: FutureBuilder(
-        future:ProductService.getSingleArticle(userId: userId).then((value) {
-          if(value.statusCode.toString()=='200'){
-            articles=[];
-            for(var item in jsonDecode(value.body) as List){
-              try{
-                articles.add(ArticleModel.fromJson(item)!);
-              }
-              catch(e){
-                print(e);
+      body: Container(
+        margin: EdgeInsets.symmetric(vertical: 36),
+        child: FutureBuilder(
+          future:ProductService.getSingleArticle(userId: userId).then((value) {
+            if(value.statusCode.toString()=='200'){
+              articles=[];
+              for(var item in jsonDecode(value.body) as List){
+                try{
+                  articles.add(ArticleModel.fromJson(item)!);
+                }
+                catch(e){
+                  print(e);
+                }
               }
             }
-          }
-        }) ,
-        builder: (context,snapshot){
-          if(snapshot.connectionState==ConnectionState.waiting){
-            return WaitWidget();
-          }
-          if(snapshot.hasError){
-            return Text("Une erreur est survenue");
-          }
-          return ListArticle(articleModel: articles);
-        }),
+          }) ,
+          builder: (context,snapshot){
+            if(snapshot.connectionState==ConnectionState.waiting){
+              return WaitWidget();
+            }
+            if(snapshot.hasError){
+              return Text("Une erreur est survenue");
+            }
+            return ListArticle(articleModel: articles);
+          }),
+      ),
     );
   }
 

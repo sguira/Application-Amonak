@@ -91,9 +91,10 @@ class ListArticle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
+      margin: EdgeInsets.symmetric(vertical: 18),
       width: double.maxFinite,
       child: SingleChildScrollView(
-        child: Wrap(
+        child:articleModel.isNotEmpty? Wrap(
           alignment: WrapAlignment.spaceBetween,
           children: [
             for(var item in articleModel)
@@ -151,8 +152,10 @@ class ListArticle extends StatelessWidget {
               ),
             )
           ],
-        ),
+        ):Text("Aucun element"),
       )
     );
   }
+
+  
 }
