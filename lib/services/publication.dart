@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:application_amonak/data/data_controller.dart';
 import 'package:application_amonak/prod.dart';
+import 'package:application_amonak/services/socket/publication.dart';
 import 'package:mime/mime.dart';
 import 'package:dio/dio.dart';
 import 'package:path/path.dart';
@@ -10,7 +11,7 @@ import 'package:http_parser/http_parser.dart';
 class PublicationService{
 
   
-
+  static PublicationSocket socket=PublicationSocket();
 
   static obtainUrl(dynamic data){
     return data[0]['url'];
@@ -19,7 +20,7 @@ class PublicationService{
 
 
   // faire une publication
-  static Future<String> uploadFileOnserver({
+  static Future<Map<String,dynamic>> uploadFileOnserver({
     required File file,
     required String description,
     String? type, 
@@ -29,7 +30,9 @@ class PublicationService{
     // String result='';
     // Dio dio=Dio();
     String url="$apiLink/publications";
-    String result='';
+    Map<String,dynamic> result={
+      "code":"ERROR"
+    };
     await saveFile(file).then((value)async{
 
       
@@ -62,18 +65,19 @@ class PublicationService{
         await http.post(Uri.parse(url),body: jsonEncode(data),headers:{'Content-Type':'application/json'}).then((value){
           print("status code publication: ${value.statusCode}");
           if(value.statusCode.toString()=='200'){
-            result='OK';
+            result["code"]="OK";
+            result["data"]=jsonDecode(value.body);
           }
           else{
-            result='ERROR';
+            result["code"]="ERROR";
           }
         }).catchError((e){
-          result='ERROR';
+          result["code"]="ERROR";
         });
 
       }
       else{
-        result="ERROR";
+        result["code"]="ERROR";
         return null;
       }
       
@@ -91,6 +95,9 @@ class PublicationService{
         print(data);
         await http.post(Uri.parse('$apiLink/publications'),headers:{'Content-type':'application/json'},body: jsonEncode(data)).then((value){
           print("Publication article status ${value.statusCode}");
+          // if(value.statusCode==200){
+          //   socket.emitCreation(event: 'newPublicationListener', data: jsonDecode(value.body));
+          // }
           // return value;
           response=value;
         }).catchError((e){

@@ -5,6 +5,7 @@ import 'package:application_amonak/data/data_controller.dart';
 import 'package:application_amonak/interface/accueils/video_player_widget.dart';
 import 'package:application_amonak/models/publication.dart';
 import 'package:application_amonak/services/publication.dart';
+import 'package:application_amonak/services/socket/notificationSocket.dart';
 import 'package:flutter/material.dart';
 // import 'package:tiktoklikescroller/tiktoklikescroller.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -40,7 +41,7 @@ class _HomePageState extends State<HomePage> {
 
   int currentPage=0;
   List<Publication> publication=[];
-
+  Notificationsocket? notificationsocket;
   final PageController pageController=PageController(
     // viewportFraction: 0.1, 
 
@@ -50,6 +51,7 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     // TODO: implement initState
     super.initState();
+    notificationsocket=Notificationsocket();
   }
 
   @override

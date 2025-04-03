@@ -4,10 +4,11 @@ import 'package:application_amonak/interface/explorer/personne.dart';
 import 'package:application_amonak/interface/explorer/publication.dart';
 import 'package:application_amonak/interface/profile/publication_widget.dart';
 import 'package:application_amonak/settings/weights.dart';
+import 'package:application_amonak/widgets/notification_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:google_fonts/google_fonts.dart';
-
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 class ExplorerPage extends StatefulWidget {
   const ExplorerPage({super.key});
 
@@ -43,37 +44,55 @@ class _ExplorerPageState extends State<ExplorerPage> {
         children: [
           // header(),
           Expanded(
-            child: Scaffold(
-              appBar: AppBar(
-              // leading: Container(
-              //   child:const Column(
-              //     children: [
-              //       Text("Nous dévenons ce que nous pensons")
-              //     ],
-              //   ),
-              // ),
-              toolbarHeight: 0,
-              automaticallyImplyLeading: false,
-              // excludeHeaderSemantics: true,
-              // leading: header(),
-              // flexibleSpace: header(),
-              bottom: TabBar(tabs: [
-                itemTabBar("Personne"), 
-                itemTabBar("Article"),
-                itemTabBar("Boutique"), 
-                itemTabBar("Publication"),
-                itemTabBar("Alerte"),
-              ]),
-            ),
-              body:const TabBarView(
-                children: [
-                  ListePersonnePage(), 
-                  Article(),
-                  BoutiquePage(), 
-                  PublicationPage(type: 'default',), 
-                  PublicationPage(type: 'alerte')
-                ]
-              ),
+            child: Column(
+              children: [
+                Container(
+                  
+                  margin:const EdgeInsets.only(left: 12,right: 12,top: 6),
+                  padding:const EdgeInsets.all(0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                    Image.asset("assets/icons/amonak.png",width: 100,), 
+                    ButtonNotificationWidget()
+                  ],),
+                ),
+                Expanded(
+                  child: Scaffold(
+                    appBar: AppBar(
+                    // leading: Container(
+                    //   child:const Column(
+                    //     children: [
+                    //       Text("Nous dévenons ce que nous pensons")
+                    //     ],
+                    //   ),
+                    // ),
+                    toolbarHeight: 0,
+                    automaticallyImplyLeading: false,
+                    // excludeHeaderSemantics: true,
+                    // leading: header(),
+                    // flexibleSpace: header(),
+                    bottom: TabBar(tabs: [
+                      itemTabBar("Personne"), 
+                      itemTabBar("Article"),
+                      itemTabBar("Boutique"), 
+                      itemTabBar("Publication"),
+                      itemTabBar("Alerte"),
+                    ]),
+                  ),
+                    body:const TabBarView(
+                      children: [
+                        ListePersonnePage(), 
+                        Article(),
+                        BoutiquePage(), 
+                        PublicationPage(type: 'default',), 
+                        PublicationPage(type: 'alerte')
+                      ]
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
         ],
@@ -153,3 +172,4 @@ class _ExplorerPageState extends State<ExplorerPage> {
     );
   }
 }
+

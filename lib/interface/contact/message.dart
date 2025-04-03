@@ -6,7 +6,9 @@ import 'package:application_amonak/colors/colors.dart';
 import 'package:application_amonak/data/data_controller.dart';
 import 'package:application_amonak/models/message.dart';
 import 'package:application_amonak/models/user.dart';
+import 'package:application_amonak/prod.dart';
 import 'package:application_amonak/services/message.dart';
+import 'package:application_amonak/services/socket/chatProvider.dart';
 import 'package:application_amonak/services/user.dart';
 import 'package:application_amonak/settings/weights.dart';
 import 'package:application_amonak/widgets/wait_widget.dart';
@@ -19,6 +21,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:video_player/video_player.dart';
+import 'package:socket_io_client/socket_io_client.dart' as IO;
 class MessagePage extends StatefulWidget {
   final User user;
   const MessagePage({super.key,required this.user});
@@ -44,6 +47,12 @@ class _MessagePageState extends State<MessagePage> {
   final  imagePicker=ImagePicker();
   XFile? file;
   File? fileSelected;
+  final scrollController=ScrollController();
+  late MessageSocket messageSocket;
+
+  String room="";
+
+  
 
 
   @override
@@ -51,8 +60,45 @@ class _MessagePageState extends State<MessagePage> {
     // TODO: implement initState
     super.initState();
     // loadUser();
-    loadMessage();
+    messageSocket=MessageSocket();
+
     
+    
+    //join chat room
+    messageSocket.socket!.emit("joinChatRoom",{"from":DataController.user!.id,"to":widget.user.id});
+    messageSocket.socket!.on("joinedChatRoom",(handler){
+      print("joined chat $handler");
+      room=handler;  
+    });
+
+    /*
+      Apporter une correction au server faire en sorte que le socket renvoie également le message
+      au lieux d'envoyé juste le from
+    */
+    messageSocket.socket!.on("refreshMessageBoxHandler",(handler){
+      print("message recu $handler ");
+      if(handler['to']==DataController.user!.id){
+        setState(() {
+        loadMessage();
+      });
+      }
+    });
+    loadMessage();
+    // scrollController.jumpTo(scrollController.position.maxScrollExtent);
+    // WidgetsBinding.instance.addPostFrameCallback((_)=>scrollJump());
+    // scrollController.jumpTo(double.maxFinite);
+  }
+
+  scrollJump(){
+    WidgetsBinding.instance.addPostFrameCallback((_){
+      scrollController.jumpTo(scrollController.position.maxScrollExtent);
+    });
+  }
+
+  @override
+  void dispose() {
+    messageSocket.socket!.close();
+    super.dispose();
   }
 
   loadUser()async{
@@ -73,7 +119,7 @@ class _MessagePageState extends State<MessagePage> {
                         listMessage=[];
                         for(var item in jsonDecode(value.body) as List){
                           if(item['to']!=null&&item['from']!=null){
-                            print(item);
+                            // print(item);
                             try{
                               setState(() {
                                 listMessage.add(MessageModel.fromJson(item));
@@ -117,6 +163,7 @@ class _MessagePageState extends State<MessagePage> {
                 child: showListen==false?
                     
                      ListView.builder(
+                      controller:scrollController ,
                       itemCount: listMessage.length,
                       itemBuilder: (contxt,index){
                         
@@ -459,6 +506,9 @@ class _MessagePageState extends State<MessagePage> {
           waitingSend=false;
         });
         if(value.statusCode==200){
+          // socket!.emit("sendMessage",)
+          messageSocket.socket!.emit("sendMessage",{"room":room,"message":jsonDecode(value.body) });
+          messageSocket.socket!.emit("refreshMessageBox",{"to":widget.user.id,"from":DataController.user!.id});
           setState(() {
             fileSelected=null;
           });
@@ -513,6 +563,7 @@ class _MessagePageState extends State<MessagePage> {
               const Spacer(), 
               Container(
                 child: IconButton(onPressed: (){
+                  messageSocket.socket!.emit("leaveChatRoom",{});
                   Navigator.pop(context);
                 }, icon:const  Icon(Icons.close)),
               )

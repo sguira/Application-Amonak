@@ -7,9 +7,12 @@ import 'package:application_amonak/models/ccommentaire.dart';
 import 'package:application_amonak/models/like.dart';
 import 'package:application_amonak/models/notifications.dart';
 import 'package:application_amonak/models/publication.dart';
+import 'package:application_amonak/prod.dart';
 import 'package:application_amonak/services/commentaire.dart';
 import 'package:application_amonak/services/like.dart';
 import 'package:application_amonak/services/notification.dart';
+import 'package:application_amonak/services/socket/commentSocket.dart';
+import 'package:application_amonak/services/socket/notificationSocket.dart';
 import 'package:application_amonak/settings/weights.dart';
 import 'package:application_amonak/widgets/bottom_sheet_header.dart';
 import 'package:flutter/cupertino.dart';
@@ -19,6 +22,7 @@ import 'package:flutter/widgets.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
+import 'package:socket_io_client/socket_io_client.dart' as IO;
 class CommentaireWidget extends StatefulWidget {
   final String? pubId;
   const CommentaireWidget({super.key,this.pubId});
@@ -31,14 +35,74 @@ class _CommentaireWidgetState extends State<CommentaireWidget> {
 
   // Publication pub=Publication();
   String pubId="";
+  // Commentsocket? commentsocket;
+
+  IO.Socket? socket;
+
+  late Notificationsocket notificationsocket;
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
     pubId=super.widget.pubId!;
-    
+    // commentsocket=Commentsocket();
     // print("PUBLICATION ${pub.id}");
+
+    //socket
+    socket=IO.io(
+      apiLink+"/comment",
+      IO.OptionBuilder()
+      .setPath("/amonak-api")
+      .setTransports(["websocket"])
+      // .disableAutoConnect()
+      // 
+      .build()
+    );
+
+    socket!.onConnect((handler){
+      print("Connected to comment socket");
+    });
+
+
+    socket!.onDisconnect((handler){
+      print("Disconnected from comment socket");
+    });
+
+    socket!.on("newCommentEventListener", (data)=>{
+      print(data),
+      if(data['publication']==widget.pubId){
+        setState((){
+          if(commentaires.isNotEmpty){
+            commentaires.insert(1, Commentaire.fromJson(data));
+          }
+          else{
+            commentaires.add(Commentaire.fromJson(data));
+          }
+        }),
+      },
+      print("newCommentEventListener")
+    });
+
+    socket!.on("likeCommentListener",(data)=>{
+      print(data),
+      for(int index=0;index<commentaires.length;index++){
+        if(commentaires[index].id==data["comment"]){
+          setState(() {
+            commentaires[index].nbLikes=commentaires[index].nbLikes!+ 1;
+          })
+        }
+      }
+    });
+    notificationsocket=Notificationsocket();
+
+  }
+
+  @override
+  void dispose() {
+    // commentsocket!.dispose();
+    socket!.close();
+    super.dispose();
   }
 
   TextEditingController content=TextEditingController();
@@ -56,9 +120,11 @@ class _CommentaireWidgetState extends State<CommentaireWidget> {
         if(value.statusCode.toString()=='200'){
           commentaires=[];
           for(var map in jsonDecode(value.body) as List){
+            print(map);
+            print("\n\n\n");
             commentaires.add(Commentaire.fromJson(map));
           }
-          print("Status code ${value.statusCode}");
+          // print("Status code ${value.statusCode}");
         }
         }).catchError((e){
           print("Une erreur est survenu $e");
@@ -103,9 +169,13 @@ class _CommentaireWidgetState extends State<CommentaireWidget> {
                             itemCount: commentaires.length, 
                             itemBuilder: (context, index) {
                               // commentaires[index].
-                              return ItemCommentaire(com: commentaires[index]);
+                              return Column(
+                                children: [
+                                  ItemCommentaire(com: commentaires[index],setState_:setState,pubId: widget.pubId!, ),
+                                ],
+                              );
                             },
-                          ):Center(
+                          ):const Center(
                             child: Text("Aucun commentaire Trouvé."),
                           )
                         ), 
@@ -144,6 +214,10 @@ class _CommentaireWidgetState extends State<CommentaireWidget> {
                                           borderSide: BorderSide(color: Colors.transparent,width: 2)
                                         ),
                                         focusedBorder:const UnderlineInputBorder(
+                                          // borderRadius: BorderRadius.circular(26),
+                                          borderSide: BorderSide(color: Colors.transparent,width: 2)
+                                        ),
+                                        enabledBorder:const UnderlineInputBorder(
                                           // borderRadius: BorderRadius.circular(26),
                                           borderSide: BorderSide(color: Colors.transparent,width: 2)
                                         ),
@@ -207,15 +281,23 @@ class _CommentaireWidgetState extends State<CommentaireWidget> {
       waitComment=true;
     });
     CommentaireService.saveComent(com).then((value) {
+      
       if(value.statusCode==200){
+        // print("donnée ${jsonDecode(value.body)}");
+        print("Commentaire...");
+        socket!.emit("newCommentEvent",{"comment":jsonDecode(value.body)});
         notificationData['commentaire']=jsonDecode(value.body)['_id'];
         NotificationService.addNotification(notificationData);
+        notificationsocket.emitNotificationEvent(event:"refreshNotificationBox" , data: {"from":DataController.user!.id,"to":jsonDecode(value.body)['user']['_id']});
+
       }
       setState(() {
         
         waitComment=false;
       });
 
+    }).catchError((e){
+      print("Error");
     });
     
   }
@@ -233,7 +315,10 @@ class _CommentaireWidgetState extends State<CommentaireWidget> {
 
 class ItemCommentaire extends StatefulWidget {
   final Commentaire com;
-  const ItemCommentaire({super.key,required this.com});
+  final dynamic setState_;
+  final String pubId;
+  // final IO.Socket? socket;
+  const ItemCommentaire({super.key,required this.com,required this.setState_,required this.pubId});
 
   @override
   State<ItemCommentaire> createState() => _ItemCommentaireState();
@@ -244,13 +329,23 @@ class _ItemCommentaireState extends State<ItemCommentaire> {
   late bool isLiked=false;
 
   late Commentaire commentaire;
+  
 
   String likeId="";
+
+  bool showActions=false;
+
+  Commentsocket? commentsocket;
 
   @override
   void initState() {
     super.initState();
-    print("user id ${DataController.user!.id}\n\n\n");
+    // print("user id ${DataController.user!.id}\n\n\n");
+    
+    commentsocket=Commentsocket();  
+    commentsocket!.socket!.onConnect((e){
+      print("Item connected");
+    });
     commentaire=widget.com;
     
     LikeService.getNombreLike(commentaire.id!).then((value){
@@ -281,20 +376,27 @@ class _ItemCommentaireState extends State<ItemCommentaire> {
     setState(() {
       isLiked=commentaire.isLike;
     });
-    print("Publication Id: ${commentaire.id}");
-    print(" nombre like ${commentaire.nbLikes}");
+    // print("Publication Id: ${commentaire.id}");
+    // print(" nombre like ${commentaire.nbLikes}");
   }
 
   // getNombreLike(String id)async{
 
   // }
 
+  @override
+  void dispose() {
+    commentsocket!.dispose();
+    super.dispose();
+  }
+
   likeCommentaire(Commentaire commentaire)async{
 
     Map<String,dynamic> notification={
       'from':commentaire.user!.id, 
-      // 'to':commentaire.user!.id,
+      'to':commentaire.user!.id,
       'comment':commentaire.id,
+      
       'type':'like'
     };
     setState(() {
@@ -307,18 +409,32 @@ class _ItemCommentaireState extends State<ItemCommentaire> {
         
       });
       if(value.statusCode!=200){
+        
+        
         setState(() {
           commentaire.nbLikes=commentaire.nbLikes!-1;
           isLiked=false;
         //  isLiked(commentaire, DataController.user!.id!);
         });
+        
       }
       if(value.statusCode==200){
-        print("body ${value.body}");
+
+        Map<String,dynamic> data={
+          "comment":commentaire.id!, 
+          "publication":widget.pubId,
+          "inscremente":0
+        };
+        print(data);
+        // commentsocket!.socket!.emit("likeCommentEvent",{"comment":commentaire.id!,"publication":widget.pubId,"inscremente":0});
+
+        commentsocket!.socket!.emit("likeCommentEvent",data);
+        
         setState(() {
           likeId=jsonDecode(value.body)['_id'];
         });
         NotificationService.addNotification(notification);
+        // notificationsocket!.
       }
     }).catchError((e){
        setState(() {
@@ -335,152 +451,281 @@ class _ItemCommentaireState extends State<ItemCommentaire> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-                                  width: ScreenSize.width*1,
-                                  padding:const EdgeInsets.all(4), 
-                                  margin:const EdgeInsets.symmetric(vertical: 6,horizontal: 2),
-                                  decoration: BoxDecoration(
-                                    // border:Border.all(width: 1,color: Colors.black12), 
-                                    borderRadius: BorderRadius.circular(10),
-                                    // color: Colors.black12
-                                  ),
-                                  child: Row(
-                                    crossAxisAlignment: 
-                                    CrossAxisAlignment.start,
-                                    children: [
-                                     
-                                      GestureDetector(
-                                        onTap: (){
-                                          Navigator.push(context, MaterialPageRoute(builder: (context)=>DetailsUser(user: commentaire.user!) ));
-                                        },
-                                        child: Container(
-                                          width: 46, 
-                                          height:46, 
-                                          margin:const EdgeInsets.only(right: 12),
-                                          child: ClipOval(child:widget.com.user!.avatar!.isNotEmpty? Image.network(widget.com.user!.avatar!.first.url!,fit: BoxFit.contain,):Image.asset("assets/medias/user.jpg",fit:BoxFit.cover )),
+    return GestureDetector(
+      onLongPress: (){
+        setState(() {
+          showActions=true;
+        });
+      },
+      onTap: (){
+        if(showActions==true){
+          setState(() {
+            showActions=false;
+          });
+        }
+      },
+      child: Column(
+        children: [
+          Container(
+                                        width: ScreenSize.width*1,
+                                        padding:const EdgeInsets.all(4), 
+                                        margin:const EdgeInsets.symmetric(vertical: 2,horizontal: 2),
+                                        decoration: BoxDecoration(
+                                          // border:Border.all(width: 1,color: Colors.black12), 
+                                          borderRadius: BorderRadius.circular(10),
+                                          // color: Colors.black12
                                         ),
-                                      ),
-                                      Column(
-                                        crossAxisAlignment: CrossAxisAlignment.center,
-                                        mainAxisAlignment: MainAxisAlignment.center,
-                                        children: [
-                                          Container(
-                                            width: ScreenSize.width*0.65,
-                                            // padding: EdgeInsets.all(8),
-                                            
-                                            child: Column(
-                                              mainAxisAlignment: MainAxisAlignment.start,
-                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                        child: Row(
+                                          crossAxisAlignment: 
+                                          CrossAxisAlignment.start,
+                                          children: [
+                                           
+                                            GestureDetector(
+                                              onTap: (){
+                                                Navigator.push(context, MaterialPageRoute(builder: (context)=>DetailsUser(user: commentaire.user!) ));
+                                              },
+                                              child: Container(
+                                                width: 46, 
+                                                height:46, 
+                                                margin:const EdgeInsets.only(right: 12),
+                                                child: ClipOval(child:widget.com.user!.avatar!.isNotEmpty? Image.network(widget.com.user!.avatar!.first.url!,fit: BoxFit.contain,):Image.asset("assets/medias/user.jpg",fit:BoxFit.cover )),
+                                              ),
+                                            ),
+                                            Column(
+                                              crossAxisAlignment: CrossAxisAlignment.center,
+                                              mainAxisAlignment: MainAxisAlignment.center,
                                               children: [
                                                 Container(
                                                   width: ScreenSize.width*0.65,
-                                                  constraints: BoxConstraints(
-                                                    // maxHeight: 90
-                                                  ),
-                                                  padding:const EdgeInsets.all(8),
-                                                  decoration: BoxDecoration(
-                                                    color:Colors.black.withAlpha(20),
-                                                    borderRadius: BorderRadius.circular(4)
-                                                  ),
+                                                  // padding: EdgeInsets.all(8),
+                                                  
                                                   child: Column(
+                                                    mainAxisAlignment: MainAxisAlignment.start,
                                                     crossAxisAlignment: CrossAxisAlignment.start,
                                                     children: [
-                                                      Text(widget.com.user!.userName!,style: GoogleFonts.roboto(fontWeight:FontWeight.w600,fontSize:12),),
-                                                      Text(widget.com.content!,style: GoogleFonts.roboto(fontSize:14),),
-                                                    ],
-                                                  ),
-                                                ),
-                                                Container(
-                                                  child: Row(
-                                                    mainAxisAlignment: MainAxisAlignment.end,
-                                                    children: [
-                                                      Text("Il y'a 7min",style: GoogleFonts.roboto(fontSize:9),),
-                                                      Spacer(),
                                                       Container(
-                                                        child: Row(
+                                                        width: ScreenSize.width*0.65,
+                                                        constraints: BoxConstraints(
+                                                          // maxHeight: 90
+                                                        ),
+                                                        padding:const EdgeInsets.all(8),
+                                                        decoration: BoxDecoration(
+                                                          color:Colors.black.withAlpha(20),
+                                                          borderRadius: BorderRadius.circular(4)
+                                                        ),
+                                                        child: Column(
+                                                          crossAxisAlignment: CrossAxisAlignment.start,
                                                           children: [
-                                                            Container(
-                                                            margin:const EdgeInsets.all(6),
-                                                            child: GestureDetector(
-                                                              onTap:(){
-                                                                // likeCommentaire(com);
-                                                              },
-                                                              child:const Row(
-                                                              children: [
-                                                                // Text("J'aime",style: GoogleFonts.roboto(fontSize: 9,fontWeight:FontWeight.w500,color: isLiked(com, DataController.user!.id!)?Colors.blue:Colors.black)),
-                                                              ],
-                                                            ))),
-                                                            // buttonReatComment('Repondre',(){}),
+                                                            Text(widget.com.user!.userName!,style: GoogleFonts.roboto(fontWeight:FontWeight.w600,fontSize:12),),
+                                                            Text(widget.com.content!,style: GoogleFonts.roboto(fontSize:14),),
                                                           ],
-                                                        )
+                                                        ),
                                                       ),
-                                                      Spacer(),
+                                                      if(showActions==false)
                                                       Container(
                                                         child: Row(
+                                                          mainAxisAlignment: MainAxisAlignment.end,
                                                           children: [
+                                                            Text(DataController.FormatDate(date: widget.com.date!),style: GoogleFonts.roboto(fontSize:9),),
+                                                            Spacer(),
                                                             Container(
                                                               child: Row(
                                                                 children: [
-                                                                  Text(NumberFormat.compact().format(widget.com.nbLikes),style: GoogleFonts.roboto(fontSize:10,fontWeight: FontWeight.w600),), 
-                                                                  const SizedBox(width: 2,),
-                                                                  Text('Likes',style: GoogleFonts.roboto(fontSize: 9),), 
-                                                                  
+                                                                  Container(
+                                                                  margin:const EdgeInsets.all(6),
+                                                                  child: GestureDetector(
+                                                                    onTap:(){
+                                                                      // likeCommentaire(com);
+                                                                    },
+                                                                    child:const Row(
+                                                                    children: [
+                                                                      // Text("J'aime",style: GoogleFonts.roboto(fontSize: 9,fontWeight:FontWeight.w500,color: isLiked(com, DataController.user!.id!)?Colors.blue:Colors.black)),
+                                                                    ],
+                                                                  ))),
+                                                                  // buttonReatComment('Repondre',(){}),
+                                                                ],
+                                                              )
+                                                            ),
+                                                            Spacer(),
+                                                            Container(
+                                                              child: Row(
+                                                                children: [
+                                                                  Container(
+                                                                    child: Row(
+                                                                      children: [
+                                                                        Text(NumberFormat.compact().format(widget.com.nbLikes),style: GoogleFonts.roboto(fontSize:10,fontWeight: FontWeight.w600),), 
+                                                                        const SizedBox(width: 2,),
+                                                                        Text('Likes',style: GoogleFonts.roboto(fontSize: 9),), 
+                                                                        
+                                                                      ],
+                                                                    ),
+                                                                  )
                                                                 ],
                                                               ),
-                                                            )
+                                                            ) 
                                                           ],
                                                         ),
-                                                      ) 
+                                                      )
                                                     ],
-                                                  ),
-                                                )
-                                              ],
-                                            )),
-                                          
-                                        ],
-                                      ),
-                                    
-                                      Column(
-                                        mainAxisAlignment: MainAxisAlignment.end,
-                                        children: [
-                                          IconButton(onPressed: (){
-                                            if(likeId.isNotEmpty){
-                                               setState(() {
-                                                  isLiked = false;
-                                                  commentaire.nbLikes=commentaire.nbLikes!-1;
-                                                });
-                                              LikeService.removeLike(likeId).then((value) {
+                                                  )),
                                                 
-                                                if(value.statusCode!=200){
-                                                  // commentaire.nbLikes=commentaire.nbLikes!-1;
-                                                  setState(() {
-                                                    isLiked=false;
-                                                  });
-                                                }
-                                                if(value.statusCode==200){
-                                                  setState(() {
-                                                    likeId='';
-                                                  });
-                                                }
-                                              }).catchError((e){
-                                                print("ERROR $e");
-                                                setState(() {
-                                                  commentaire.nbLikes=commentaire.nbLikes!+1;
-                                                  isLiked=true;
-                                                });
-                                                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Verifier votre connexion')));
-                                              });
-                                            }
-                                            else{
-                                              setState(() {
-                                                likeCommentaire(commentaire);
-                                              });
-                                            }
-                                          }, icon: Icon(isLiked==false? Icons.favorite_border: Icons.favorite_outlined,size: 22,color: isLiked?Colors.red:null,)),
-                                        ],
-                                      )
-                                    ],
-                                  )
-                                );
+                                              ],
+                                            ),
+                                          
+                                            Column(
+                                              mainAxisAlignment: MainAxisAlignment.end,
+                                              children: [
+                                                IconButton(onPressed: (){
+                                                  if(likeId.isNotEmpty){
+                                                     setState(() {
+                                                        isLiked = false;
+                                                        commentaire.nbLikes=commentaire.nbLikes!-1;
+                                                      });
+                                                    LikeService.removeLike(likeId).then((value) {
+                                                      
+                                                      if(value.statusCode!=200){
+                                                        // commentaire.nbLikes=commentaire.nbLikes!-1;
+                                                        setState(() {
+                                                          isLiked=false;
+                                                        });
+                                                      }
+                                                      if(value.statusCode==200){
+                                                        setState(() {
+                                                          likeId='';
+                                                        });
+                                                      }
+                                                    }).catchError((e){
+                                                      print("ERROR $e");
+                                                      setState(() {
+                                                        commentaire.nbLikes=commentaire.nbLikes!+1;
+                                                        isLiked=true;
+                                                      });
+                                                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Verifier votre connexion')));
+                                                    });
+                                                  }
+                                                  else{
+                                                    setState(() {
+                                                      likeCommentaire(commentaire);
+                                                    });
+                                                  }
+                                                }, icon: Icon(isLiked==false? Icons.favorite_border: Icons.favorite_outlined,size: 22,color: isLiked?Colors.red:null,)),
+                                              ],
+                                            )
+                                          ],
+                                        )
+                                      ),
+          if(showActions==false)
+          SizedBox(height: 12,),
+          if(showActions && commentaire.user!.id==DataController.user!.id!)
+          WidgetActionCommentaire()
+        ],
+      ),
+    );
+  }
+
+  Container WidgetActionCommentaire() {
+    return Container(
+          alignment: Alignment.center,
+          margin:const EdgeInsets.only(
+            right: 68, bottom: 18
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              IconButton(onPressed: (){
+                dialogUpdate(commentaire);
+              }, icon:const Icon(Icons.edit,size: 18,)), 
+              IconButton(onPressed: (){
+                dialogSuppression(commentaire);
+              }, icon:const Icon(Icons.delete,size: 18,))
+            ],
+          ),
+        );
+  }
+
+  dialogSuppression(Commentaire com){
+    bool waitDelete=false;
+    return showDialog(context: context, builder: (context)=>StatefulBuilder(
+      builder: (context,S) {
+        return AlertDialog(
+          title: Text("Suppression de commentaire",style: GoogleFonts.roboto(fontWeight:FontWeight.w700),),
+          content: Text("Voulez-vous vraiment supprimer ce commentaire?",style: GoogleFonts.roboto()), 
+          actions: [
+            TextButton(onPressed: (){
+              Navigator.pop(context);
+            }, child:const Text("Annuler")),
+            TextButton(onPressed: (){
+              S((){
+                waitDelete=true;
+              });
+              CommentaireService.deleteCommentaire(id:com.id! ).then((value) {
+                if(value.statusCode==200){
+                  setState(() {
+                    showActions=false;
+                  });
+                  widget.setState_(() {
+                    
+                  });
+                  Navigator.pop(context);
+                }
+              }).catchError((e){
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Un problème est survenu veuillez réessayer")));
+              });
+            }, child:!waitDelete? Text("Confirmer"):SizedBox(width: 18,height: 18,child: CircularProgressIndicator(color: couleurPrincipale,strokeWidth: 1.5,),)),
+          ],
+        );
+      }
+    ));
+  }
+
+  dialogUpdate(Commentaire com)async{
+    TextEditingController editController=TextEditingController(text: com.content);
+    bool waitUpdate=false;
+    return showDialog(context: context, builder: (context){
+      return StatefulBuilder(
+        builder: (context,S) {
+          return AlertDialog(
+            title: Text("Modification de commentaire",style: GoogleFonts.roboto(fontSize:18,fontWeight:FontWeight.w600),),
+            content: Container(
+              child: TextFormField(
+                controller: editController,
+                maxLines: 5,
+                minLines: 1,
+                decoration: InputDecoration(
+                  labelText: "Modifier le commentaire",
+                  suffix: IconButton(onPressed: (){
+                    S((){
+                      waitUpdate=true;
+                    });
+                    if(editController.text.isNotEmpty){
+                    CommentaireService.updateCommentaire(id: com.id!, contenu: editController.text).then((value){
+                      S((){
+                        waitUpdate=false;
+                      });
+                      print(value.statusCode);
+                      if(value.statusCode==200){
+                        widget.setState_((){});
+                        Navigator.pop(context);
+                      }
+                      else{
+                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Un problème est survenu")));
+                      }
+                    }).catchError((e){
+                      print(e);
+                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Un problème est survenu")));
+                    });
+                  }
+                  }, icon:!waitUpdate?const Icon(Icons.send):const SizedBox(
+                    width: 18,
+                    height: 18,
+                    child: CircularProgressIndicator(color: couleurPrincipale,strokeWidth: 1.5,),
+                  ))
+                ),
+              ),
+            ),
+          );
+        }
+      );
+    });
   }
 }

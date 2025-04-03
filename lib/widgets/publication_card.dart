@@ -81,7 +81,7 @@ footerPublication(dynamic item){
     return Container(
       margin:const EdgeInsets.symmetric(vertical: 16,horizontal: 12),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        // mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Container(
             width: 42, 
@@ -91,13 +91,20 @@ footerPublication(dynamic item){
               // color: Colors.black12
             ),
             child: ClipOval(child: Image.asset('assets/medias/profile.jpg',fit: BoxFit.cover,))), 
-            Column(
-              children: [
-                Text(pub.user!.userName!,style: GoogleFonts.roboto(fontSize: 14,fontWeight: FontWeight.w500),),
-                style!=1?
-                Text("1",style: GoogleFonts.roboto(fontSize: 11),):Container()
-              ],
-            ), 
+            Container(
+              margin: EdgeInsets.symmetric(horizontal: 16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(pub.user!.userName!,style: GoogleFonts.roboto(fontSize: 14,fontWeight: FontWeight.w500),),
+                  Text("Publié il y'a ${DataController.FormatDate(date: pub.dateCreation!)}",style: GoogleFonts.roboto(fontSize:13,fontStyle:FontStyle.italic),),
+                  // style!=1?
+                  // Text("1",style: GoogleFonts.roboto(fontSize: 11),):Container(), 
+              
+                ],
+              ),
+            ),
+            Spacer(),
             Container(
               child: IconButton(onPressed: (){}, icon:const Icon(Icons.more_horiz)),
             )
@@ -123,8 +130,7 @@ footerPublication(dynamic item){
             Column(
               children: [
                 Text(pub.userName!,style: GoogleFonts.roboto(fontSize: 14,fontWeight: FontWeight.w500),),
-                // style!=1?
-                // Text("1",style: GoogleFonts.roboto(fontSize: 11),):Container()
+                // Text(DataController.FormatDate(date: pub.))
               ],
             ), 
             Container(

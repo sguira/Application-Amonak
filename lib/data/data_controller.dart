@@ -150,7 +150,8 @@ class DataController{
   static List videoControllerHistory=[];
   static String searchQuery="";
 
-  
+  static List<dynamic> notifications=[]; 
+  static List<User> friends=[];
 
   static List<Map<String,String>> personnes=[
     {
@@ -259,6 +260,26 @@ class DataController{
       }
     }
     return null;
+  }
+
+  static FormatDate({
+    required DateTime date
+  }){
+    
+    DateTime now=DateTime.now();
+    int second=now.difference(date).inSeconds;
+    if(second<60){
+      return "$second s";
+    }
+    else if(second<3600){
+      return "${(second/60).round()} m";
+    }
+    else if(second<86400){
+      return "${(second/3600).round()} h";
+    }
+    else if(second<2592000){
+      return "${(second/86400).round()} j";
+    }
   }
 
 }

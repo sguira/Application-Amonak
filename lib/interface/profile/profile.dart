@@ -11,9 +11,12 @@ import 'package:application_amonak/interface/profile/gestion_profile.dart';
 import 'package:application_amonak/interface/profile/list_abonne.dart';
 import 'package:application_amonak/interface/profile/publication_widget.dart';
 import 'package:application_amonak/models/article.dart';
+import 'package:application_amonak/models/user.dart';
 import 'package:application_amonak/services/product.dart';
 import 'package:application_amonak/services/profil.dart';
+import 'package:application_amonak/services/user.dart';
 import 'package:application_amonak/settings/weights.dart';
+import 'package:application_amonak/widgets/list_friend_widget.dart';
 import 'package:application_amonak/widgets/wait_widget.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -33,7 +36,27 @@ class _ProfilePageState extends State<ProfilePage> {
 
   File? selectedFile=null;
   final _picker = ImagePicker();
+  List<User> users=[];
 
+  Future<void> listRequestFriend()async{
+    await UserService.getAllUser(param: {
+      "friendRequest":true.toString(),
+      "user":DataController.user!.id,
+      
+      // "friend":true
+    }).then((value){
+      if(value.statusCode==200){
+        users=[];
+        print("status code eee:${value.statusCode} ");
+        for(var item in jsonDecode(value.body)){
+          users.add(User.fromJson(item));
+        }
+      }
+    }).catchError((e){
+      print("une erreeeeur est survenue \n\n ${e.toString()} ");
+    });
+  }
+  
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -97,7 +120,24 @@ class _ProfilePageState extends State<ProfilePage> {
                   FutureListArticle(userId: DataController.user!.id!),
                   PublicationPage(type: 'default',userId: DataController.user!.id,hideLabel: true, ),
                   PublicationPage(type: 'alerte',userId: DataController.user!.id,hideLabel: true,),
-                  const ListAbonnee()
+                  FutureBuilder(
+                    future: listRequestFriend(),
+                    builder: (context,snapshot){
+                      if(snapshot.connectionState==ConnectionState.waiting){
+                        return Center(child: CircularProgressIndicator());
+                      }
+                      
+                      return  Container(
+                        alignment: Alignment.center,
+                        child: Column(
+                          children: [
+                            ContainerFollowerWidget(users: users),
+                          ],
+                        ));
+                      
+                      
+                    }
+                  )
                 ]),
               ), 
               
@@ -157,6 +197,27 @@ class _ProfilePageState extends State<ProfilePage> {
         Container(
           margin:const EdgeInsets.symmetric(vertical: 4,horizontal: 22),
           child: Text(DataController.user!.description??'Aucune Description',style: GoogleFonts.roboto(fontSize: 11),textAlign: TextAlign.center,),
+        ), 
+        Container(
+          width: 120,
+          decoration: BoxDecoration(
+            color: couleurPrincipale.withAlpha(32), 
+            borderRadius: BorderRadius.circular(4)
+          ),
+          
+          child: TextButton(onPressed: (){}, 
+          style: TextButton.styleFrom(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(4)
+            )
+          ),
+          child: Row(
+            children: [
+              Icon(Icons.shop_2), 
+              Text("Mes achats")
+            ],
+          )
+          ),
         )
       ],
     );
@@ -333,32 +394,29 @@ class FutureListArticle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        margin: EdgeInsets.symmetric(vertical: 36),
-        child: FutureBuilder(
-          future:ProductService.getSingleArticle(userId: userId).then((value) {
-            if(value.statusCode.toString()=='200'){
-              articles=[];
-              for(var item in jsonDecode(value.body) as List){
-                try{
-                  articles.add(ArticleModel.fromJson(item)!);
-                }
-                catch(e){
-                  print(e);
-                }
+      body: FutureBuilder(
+        future:ProductService.getSingleArticle(userId: userId).then((value) {
+          if(value.statusCode.toString()=='200'){
+            articles=[];
+            for(var item in jsonDecode(value.body) as List){
+              try{
+                articles.add(ArticleModel.fromJson(item)!);
+              }
+              catch(e){
+                print(e);
               }
             }
-          }) ,
-          builder: (context,snapshot){
-            if(snapshot.connectionState==ConnectionState.waiting){
-              return WaitWidget();
-            }
-            if(snapshot.hasError){
-              return Text("Une erreur est survenue");
-            }
-            return ListArticle(articleModel: articles);
-          }),
-      ),
+          }
+        }) ,
+        builder: (context,snapshot){
+          if(snapshot.connectionState==ConnectionState.waiting){
+            return WaitWidget();
+          }
+          if(snapshot.hasError){
+            return Text("Une erreur est survenue");
+          }
+          return ListArticle(articleModel: articles);
+        }),
     );
   }
 

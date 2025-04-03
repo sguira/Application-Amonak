@@ -1,19 +1,23 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:application_amonak/colors/colors.dart';
+import 'package:application_amonak/data/data_controller.dart';
 import 'package:application_amonak/interface/accueils/home.dart';
 import 'package:application_amonak/interface/accueils/home_tab_menu.dart';
 import 'package:application_amonak/interface/contact/message.dart';
+import 'package:application_amonak/prod.dart';
 import 'package:application_amonak/services/publication.dart';
 import 'package:application_amonak/widgets/bottom_sheet_header.dart';
 import 'package:application_amonak/widgets/button_importer_fichier.dart';
 import 'package:application_amonak/widgets/gradient_button.dart';
 import 'package:application_amonak/widgets/multiline_form.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
-
+import 'package:socket_io_client/socket_io_client.dart' as IO;
 class CreatePublication extends StatefulWidget {
   const CreatePublication({super.key});
 
@@ -32,6 +36,50 @@ class _CreatePublicationState extends State<CreatePublication> {
   String? code;
   String type='';
   final formKey=GlobalKey<FormState>();
+  IO.Socket? socket;
+
+  initSocket(){
+    socket=IO.io(
+      apiLink+"/publication",
+      IO.OptionBuilder()
+      .setPath("/amonak-api")
+      .setTransports(["websocket"])
+      .setExtraHeaders({
+        "Authorization": "Bearer $tokenValue",
+        "userId":DataController.user!.id
+      })
+      .build()
+    );
+    // print("Sock");
+    socket!.onConnect((_){
+      print("Socket connecté.");
+    });
+
+    socket!.onError((_){
+      print("Socket erreur");
+    });
+
+    socket!.onDisconnect((_){
+      print("Socket déconnecté");
+    });
+  }
+
+  
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    // print("Publication");
+    initSocket();
+  }
+
+  @override
+  void dispose() {
+    socket!.close();
+    super.dispose();
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -67,7 +115,7 @@ class _CreatePublicationState extends State<CreatePublication> {
                           //   ),
                             
                           // ),
-                          if(selectedFile!=null)
+                          if(selectedFile!=null&&kIsWeb==false)
                           FileSelectedViewer(file: selectedFile!, onClose: onClose,type: type,),
                           Container(
                             margin:const EdgeInsets.symmetric(vertical: 12),
@@ -202,8 +250,9 @@ class _CreatePublicationState extends State<CreatePublication> {
         setState(() {
           waitPublication=false;
         });
-        code=value;
+        code=value['code'];
         if(code=='OK'){
+            socket!.emit("newPublicationEvent",{"type":"mobile","data":jsonDecode(value['data'])});
           setState(() {
             messageAlerte='Publication réussie';
           });

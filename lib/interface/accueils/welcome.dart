@@ -16,6 +16,8 @@ import 'package:application_amonak/models/user.dart';
 import 'package:application_amonak/prod.dart';
 import 'package:application_amonak/services/auths.dart';
 import 'package:application_amonak/services/register.dart';
+import 'package:application_amonak/services/socket/notificationSocket.dart';
+import 'package:application_amonak/services/user.dart';
 import 'package:application_amonak/settings/weights.dart';
 import 'package:application_amonak/widgets/bottom_sheet_header.dart';
 import 'package:application_amonak/widgets/gradient_button.dart';
@@ -31,6 +33,7 @@ import 'package:video_player/video_player.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:get/get.dart';
 import 'package:select_form_field/select_form_field.dart';
+
 // import 'package:application_amonak/services/login.dart';
 class WelcomePage extends StatefulWidget {
   const WelcomePage({super.key});
@@ -304,7 +307,7 @@ class _WelcomePageState extends State<WelcomePage> {
     
     TextEditingController userName=TextEditingController(); 
     TextEditingController passWord=TextEditingController();
-    
+    Notificationsocket notificationsocket;
 
 
     
@@ -413,7 +416,21 @@ class _WelcomePageState extends State<WelcomePage> {
                                             else{
                                               LocalStorage.saveToken(jsonDecode(value.body)['accessToken'] as String).then((value){
                                                 print("\n\n\n valeur retour $value \n\n");
+                                                
                                                 LocalStorage.saveUserId(DataController.user!.id!).then((value){
+                                                  UserService.getAllUser(param: {
+                                                    'user':DataController.user!.id!, 
+                                                    'friend':true.toString(),
+                                                    
+                                                  }).then((value){
+                                                    print("value status code amis ${value.statusCode}");
+                                                    print("Amis :${jsonDecode(value.body)}");
+                                                    for(var item in jsonDecode(value.body) as List){
+                                                      DataController.friends.add(User.fromJson(item));
+                                                    }
+                                                  }).catchError((e){
+                                                    print("Execption amis$e");
+                                                  });
                                                   Navigator.push(context, MaterialPageRoute(builder: (context)=>const HomePageTab()));
                                                 });
                                                 

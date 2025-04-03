@@ -176,7 +176,9 @@ class _EditProfilePageState extends State<EditProfilePage> {
           hintText: hint, 
           label: Text(label,style: GoogleFonts.roboto(fontSize: 12),), 
           border:const OutlineInputBorder(
-
+            borderSide: BorderSide(
+              color: Colors.black12
+            )
           )
         ),
       ),

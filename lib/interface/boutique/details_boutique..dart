@@ -10,6 +10,7 @@ import 'package:application_amonak/widgets/wait_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 class DetailsBoutique extends StatefulWidget {
   // final Map boutique;
   final User user;
@@ -152,10 +153,40 @@ class ListArticle extends StatelessWidget {
               ),
             )
           ],
-        ):Text("Aucun element"),
+        ):AucunElement(label: "Aucun article",),
       )
     );
   }
 
   
+}
+
+class AucunElement extends StatelessWidget {
+  final String label;
+  const AucunElement({
+    super.key, required this.label
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding:const EdgeInsets.symmetric(vertical: 16),
+      margin:const EdgeInsets.symmetric(vertical: 18,horizontal: 8),
+      decoration: BoxDecoration(
+        border: Border.all(
+          width: 0.5, 
+          color: couleurPrincipale.withAlpha(80)
+        ), 
+        borderRadius: BorderRadius.circular(12)
+      ),
+      child: Column(
+        children: [
+          SvgPicture.asset("assets/illustration/empty.svg",width: 300,fit: BoxFit.cover,),
+          Container(
+            margin:const EdgeInsets.symmetric(vertical: 16),
+            child: Text(label,style: GoogleFonts.roboto(color:Colors.black,fontSize:22,fontWeight:FontWeight.w600),)),
+        ],
+      ),
+    );
+  }
 }

@@ -2,12 +2,26 @@ import 'package:application_amonak/interface/accueils/home_tab_menu.dart';
 import 'package:application_amonak/interface/accueils/welcome.dart';
 import 'package:application_amonak/local_storage.dart';
 import 'package:application_amonak/services/auths.dart';
+import 'package:application_amonak/services/socket/chatProvider.dart';
+import 'package:application_amonak/services/socket/publication.dart';
 import 'package:application_amonak/settings/weights.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
+import 'package:provider/provider.dart';
+import 'package:application_amonak/services/socket/commentSocket.dart';
+import 'package:application_amonak/services/socket/notificationSocket.dart';
 void main() {
-  runApp(const MyApp());
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_)=>MessageSocket() ), 
+        ChangeNotifierProvider(create: (_)=>PublicationSocket()), 
+        ChangeNotifierProvider(create: (_)=>Commentsocket() ), 
+        ChangeNotifierProvider(create: (_)=>Notificationsocket() )
+      ], 
+     child:const MyApp(),
+    )
+  );
 }
 
 class MyApp extends StatefulWidget {
@@ -19,12 +33,24 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
 
+  late Notificationsocket notificationsocket;
+
   @override
   void initState() {
     
     
-    verificationToken();
+    
     super.initState();
+    // notificationsocket=Notificationsocket();
+    verificationToken();
+
+    
+  }
+
+  @override
+  void dispose() {
+    notificationsocket.dispose();
+    super.dispose();
   }
 
   verificationToken()async{

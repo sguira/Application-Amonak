@@ -23,7 +23,7 @@ class LikeService{
     return await http.get(Uri.parse("$apiLink/comment-likes/").replace(queryParameters: {
       "comment":id
      })).then((value){
-      print("Body ${value.body}\n\n\n");
+      // print("Body ${value.body}\n\n\n");
       return value;
     }).catchError((e){
       return e;
@@ -38,7 +38,7 @@ class LikeService{
       "user":userId,
       "comment":commentId
     })).then((value){
-      print("Body ${value.body}\n\n\n");
+      // print("Body ${value.body}\n\n\n");
       return value;
     }).catchError((e){
       return e;

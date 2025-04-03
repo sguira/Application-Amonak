@@ -16,6 +16,8 @@ import 'package:application_amonak/settings/weights.dart';
 import 'package:application_amonak/widgets/btnLike.dart';
 import 'package:application_amonak/widgets/buttonComment.dart';
 import 'package:application_amonak/widgets/commentaire.dart';
+import 'package:application_amonak/widgets/notification_button.dart';
+import 'package:application_amonak/widgets/wait_widget.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -265,7 +267,7 @@ List likes=[];
                 ],
               ),
             ),
-          ):const Center(child: CircularProgressIndicator(color: couleurPrincipale,strokeWidth: 3,)), 
+          ):const WaitWidget(), 
         header(),
         if(showFavourite==true)
         Animate(
@@ -445,10 +447,8 @@ List likes=[];
         Container(
           child: Text(widget.videoItem.userName!.toUpperCase(),style: GoogleFonts.roboto(fontWeight: FontWeight.w600, fontSize:14,color: Colors.white),),
         ), 
-        Container(
-          child: IconButton(onPressed: (){
-            Navigator.push(context, MaterialPageRoute(builder: (context)=>Notifications()));
-          }, icon:const Icon(FontAwesomeIcons.bell,color: Colors.white,)),
+        ButtonNotificationWidget(
+          color: Colors.white,
         )
       ],),
     ));

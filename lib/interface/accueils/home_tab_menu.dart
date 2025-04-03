@@ -2,9 +2,11 @@ import 'package:application_amonak/colors/colors.dart';
 import 'package:application_amonak/data/data_controller.dart';
 import 'package:application_amonak/interface/accueils/home.dart';
 import 'package:application_amonak/interface/contact/contact.dart';
+import 'package:application_amonak/interface/contact/contact2.dart';
 import 'package:application_amonak/interface/explorer/explorer.dart';
 import 'package:application_amonak/interface/nouveau/new.dart';
 import 'package:application_amonak/interface/profile/profile.dart';
+import 'package:application_amonak/services/socket/notificationSocket.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -22,13 +24,34 @@ class _HomeState extends State<HomePageTab> {
 
   double iconSize=22;
 
-  dynamic widgets=const[ 
-    HomePage(),
-    ExplorerPage(),
-    NewPage(),
+  late Notificationsocket notificationsocket;
+
+  dynamic widgets=[ 
+    const HomePage(),
+    const ExplorerPage(),
+    const NewPage(),
     Contact(),
-    ProfilePage()
+    const ProfilePage()
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    
+    notificationsocket=Notificationsocket();
+
+    
+
+    notificationsocket.socket!.on("refreshNotificationBoxHandler", (handler){
+
+      print("Notification reussi dépuis home !!!");
+
+      if(handler['to']==DataController.user!.id){
+        print("Notification reussi dépuis home !!!");
+      }
+    });
+
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -89,7 +112,7 @@ class _HomeState extends State<HomePageTab> {
                           borderRadius: BorderRadius.circular(86),
                           // border: Border.all(width: 4)
                       ),
-                      child:DataController.user!.avatar!.isEmpty? Image.asset("assets/medias/user.jpg",fit:BoxFit.cover):Image.network(DataController.user!.avatar!.first.url!,fit:BoxFit.fitHeight)),
+                      child:DataController.user!.avatar!.isEmpty? Image.asset("assets/medias/profile.jpg",fit:BoxFit.cover):Image.network(DataController.user!.avatar!.first.url!,fit:BoxFit.fitHeight)),
                   ),
                 ),
     );

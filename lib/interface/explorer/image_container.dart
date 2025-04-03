@@ -6,6 +6,8 @@ import 'package:application_amonak/models/publication.dart';
 import 'package:application_amonak/services/commentaire.dart';
 import 'package:application_amonak/services/notification.dart';
 import 'package:application_amonak/services/publication.dart';
+import 'package:application_amonak/services/socket/notificationSocket.dart';
+import 'package:application_amonak/services/socket/publication.dart';
 import 'package:application_amonak/settings/weights.dart';
 import 'package:application_amonak/widgets/commentaire.dart';
 import 'package:application_amonak/widgets/publication_card.dart';
@@ -14,12 +16,13 @@ import 'package:application_amonak/widgets/zone_commentaire.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import 'package:socket_io_client/socket_io_client.dart';
 
 class ItemPublication extends StatefulWidget {
 
   final Publication pub;
-
-  const ItemPublication({super.key,required this.pub});
+  final PublicationSocket publicationSocket;
+  const ItemPublication({super.key,required this.pub,required this.publicationSocket});
 
   @override
   State<ItemPublication> createState() => _ImageSectionState();
@@ -27,10 +30,13 @@ class ItemPublication extends StatefulWidget {
 
 class _ImageSectionState extends State<ItemPublication> {
 
+ 
   bool isLike=false;
   int nbLike=0;
   int nbComment=0;
   late String idLike;
+  late PublicationSocket publicationSocket;
+  late Notificationsocket notificationsocket;
 
   getNumberComment(){
     CommentaireService.getCommentByPublication(widget.pub.id!).then((value) {
@@ -74,6 +80,26 @@ class _ImageSectionState extends State<ItemPublication> {
     super.initState();
     getLike();
     getNumberComment();
+    
+    publicationSocket=PublicationSocket();
+
+    notificationsocket=Notificationsocket();
+
+    publicationSocket.socket!.onConnect((handler){
+      print("Socket publication connecté");
+    });
+
+    publicationSocket.socket!.on("likePublicationListener", (data){
+      print("publication liké !!! ");
+      print("data like $data" );
+      if(data['_id']==widget.pub.id){
+        setState(() {
+          getLike();
+        });
+      }
+    });
+
+    
   }
 
   @override
@@ -93,8 +119,8 @@ class _ImageSectionState extends State<ItemPublication> {
                     crossAxisAlignment: CrossAxisAlignment.start, 
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: [
-                      headerBoutique(widget.pub, 1), 
-                      bodyContainer(widget.pub), 
+                      headerBoutique(widget.pub, 1),
+                      bodyContainer(widget.pub),
                       footerContainer(widget.pub)
                     ],
                   ),
@@ -156,9 +182,9 @@ class _ImageSectionState extends State<ItemPublication> {
                 onTap: (){
                   showBottomSheet(context: context, builder: (context)=>CommentaireWidget(pubId: publication.id));
                 },
-                child: itemDescription(nbLike.toString(), "Commentaires"),
+                child: itemDescription(nbComment.toString(), "Commentaires"),
               ),
-              itemDescription("10000", "Partages"),
+              itemDescription("0", "Partages"),
             ],
           ), 
           Row(
@@ -242,6 +268,9 @@ onComment(){
     Map data={
       "publication":widget.pub.id, 
       "user":DataController.user!.id,
+      "to":widget.pub.user!.id,
+      "reason":'',
+      "status":true,
       "type":'like'
     };
     Map notification ={
@@ -258,7 +287,9 @@ onComment(){
       PublicationService.addLike(data).then((value) {
         print("Status like ${value.statusCode}\n\n");
         if(value.statusCode!=200){
-
+          print("status code like${value.statusCode}");
+         
+         
           setState(() {
             isLike=false;
             nbLike-=1;
@@ -266,8 +297,13 @@ onComment(){
         }
         else{
           NotificationService.addNotification(notification);
+          Map data=jsonDecode(value.body);
+          print("publication $data");
+          publicationSocket.socket!.emit("likePublicationEvent",{"type":"like","data":data});
+          notificationsocket.socket!.emit("refreshNotificationBox",{"from":DataController.user!.id,"to":widget.pub.user!.id});
         }
       }).catchError((e){
+        print("Error like ${e.toString()}");
         setState(() {
           isLike=false;
           nbLike-=1;

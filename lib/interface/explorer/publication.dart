@@ -3,14 +3,19 @@ import 'dart:convert';
 import 'package:application_amonak/colors/colors.dart';
 import 'package:application_amonak/data/data_controller.dart';
 import 'package:application_amonak/interface/accueils/video_player_widget.dart';
+import 'package:application_amonak/interface/boutique/details_boutique..dart';
 import 'package:application_amonak/interface/explorer/image_container.dart';
 import 'package:application_amonak/interface/explorer/videoPlayerWidget.dart';
 import 'package:application_amonak/models/publication.dart';
+import 'package:application_amonak/prod.dart';
 import 'package:application_amonak/services/publication.dart';
+import 'package:application_amonak/services/socket/notificationSocket.dart';
+import 'package:application_amonak/services/socket/publication.dart';
 import 'package:application_amonak/settings/weights.dart';
 import 'package:application_amonak/widgets/bottom_sheet_header.dart';
 import 'package:application_amonak/widgets/commentaire.dart';
 import 'package:application_amonak/widgets/publication_card.dart';
+import 'package:application_amonak/widgets/wait_widget.dart';
 import 'package:application_amonak/widgets/zone_commentaire.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -19,12 +24,13 @@ import 'package:intl/intl.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:video_player/video_player.dart';
+import 'package:socket_io_client/socket_io_client.dart' as IO;
 // import 'package:popover/popover.dart';
 class PublicationPage extends StatefulWidget {
-  final String type;
+  final String? type;
   final String? userId;
   final bool? hideLabel;
-  const PublicationPage({super.key,required this.type,this.userId,this.hideLabel});
+  const PublicationPage({super.key,this.type,this.userId,this.hideLabel});
 
   
 
@@ -39,32 +45,60 @@ class _PublicationPageState extends State<PublicationPage> {
   late int nbLike=0;
   late bool isLiked=false;
   TextEditingController search=TextEditingController();
-  String type=''; 
+  String type='';
+
+  // IO.Socket? socket;
+
+  late PublicationSocket publicationSocket;
+  late Notificationsocket notificationsocket;
+
+  // PublicationSocket? publicationSocket;
+
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    
+
+    publicationSocket=PublicationSocket();
+    notificationsocket=Notificationsocket();
+
+    publicationSocket.socket!.on("likePublicationListener", (handler){
+      print("La publication a été  liké");
+    });
+    //recevoir des notification
+    notificationsocket.socket!.on("refreshNotificationBoxHandler", (handler){
+      print("Une nouvelle notification < $handler \n\n\n");
+    });
+    // initSocket();
   }
+
+  
 
   getNombreLike()async{
     // await PublicationService.getNumberLike(widget., type)
   }
 
   @override
+  void dispose() {
+    publicationSocket.socket!.close();
+
+    
+
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return FutureBuilder(
-      future: PublicationService.getPublications(type: super.widget.type, userId:widget.userId ).then((value) {
+      future: PublicationService.getPublications(type:widget.type!=null?super.widget.type:null, userId:widget.userId ).then((value) {
         print("Status code : ${value.statusCode}");
-        print(value.body);
+        print("liste des publication ${value.body}");
         publication=[];
         if(value.statusCode.toString()=='200'){
           for(var item in jsonDecode(value.body) as List){
-            print("value ${item['content']}\n\n");
             
-            print("value ${item['user']['userName']}\n\n");
             Publication pub=Publication.fromJson(item);
-            print("ttt ${pub.files[0].type} ");
+            
             publication.add(pub); 
           }
         }
@@ -73,18 +107,7 @@ class _PublicationPageState extends State<PublicationPage> {
       }),
       builder: (context,snapshot) {
         if(snapshot.connectionState==ConnectionState.waiting){
-          return  Container(
-            alignment: Alignment.center,
-            margin:const EdgeInsets.symmetric(vertical: 22),
-            child: const SizedBox(
-              width: 36, 
-              height: 36, 
-              child: CircularProgressIndicator(
-                strokeWidth: 1, 
-                color: couleurPrincipale,
-              ),
-            ),
-          );
+          return const WaitWidget();
         }
         if (snapshot.hasError){
           return Container(
@@ -104,7 +127,7 @@ class _PublicationPageState extends State<PublicationPage> {
                       // alignment: WrapAlignment.center,
                       itemCount: publication.length,
                       itemBuilder: (context, index) {
-                        return ItemPublication(pub: publication[index]);
+                        return ItemPublication(pub: publication[index],publicationSocket: publicationSocket,);
                       },
                       addAutomaticKeepAlives: false,
                       
@@ -114,7 +137,7 @@ class _PublicationPageState extends State<PublicationPage> {
                 ],
               );
             }
-          ):const Center(child: Text("Aucun element trouvé"),);
+          ):const AucunElement(label: "Aucune publication",);
       }
     );
   }

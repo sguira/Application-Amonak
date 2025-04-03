@@ -16,11 +16,20 @@ class UserService{
   
 
 
-  static Future<http.Response> getAllUser()async{
+  static Future<http.Response> getAllUser(
+    {
+      required Map<String,dynamic> param
+    }
+  )async{
     // List<User> users=[];
     print("token value $tokenValue");
-    return await http.get(Uri.parse(server),headers: authHeader ).then((value){
+    return await http.get(Uri.parse(server).replace(
+      queryParameters: param
+    ),headers: authHeader ).then((value){
+      print("Appel des amis ${value.statusCode}");
       return value;
+    }).catchError((e){
+      print("Erreur pour les amies $e");
     });
 
     
@@ -47,10 +56,10 @@ class UserService{
   static Future sendFriend(String id)async{
     String resutl='';
     Map data={
-      'to':id, 
-      'from':DataController.user!.id
+      'to':DataController.user!.id, 
+      'from':id
     };
-    print(" id: $id");
+    print(" id: $id"); 
     print("to ${DataController.user!.id}");
     await http.post(Uri.parse(apiLink+'/friends/send'),body: jsonEncode(data), headers: {"content-type":"application/json"} ).then((value){
       print(value.statusCode);
@@ -63,6 +72,24 @@ class UserService{
     });
 
     return resutl;
+  }
+
+  static Future<http.Response> acceptRequestFriend({
+    required String id, 
+    required String api
+  })async{
+
+    return await http.post(Uri.parse("$apiLink/friends/$api"),headers: authHeader,body: jsonEncode({
+      "from":DataController.user!.id, 
+      "to":id
+    }) ).then((value){
+      print("value status accept ${value.statusCode}");
+      print(value.body);
+      return value;
+    }).catchError((e){
+      return e;
+    });
+
   }
 
   static Future<http.Response> getBoutique({

@@ -103,6 +103,15 @@ class _DetailsUserState extends State<DetailsUser> {
                   );
   }
 
+  isFriend(String id){
+    for(var item in DataController.friends){
+      if(item.id == id){
+        return true;
+      }
+    }
+    return false;
+  }
+
   Column headerProfile() {
     return Column(
       children: [
@@ -137,6 +146,7 @@ class _DetailsUserState extends State<DetailsUser> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
+              isFriend(widget.user.id!)==false?
               Container(
                 padding:const EdgeInsets.symmetric(horizontal: 16),
                 decoration: BoxDecoration(
@@ -152,7 +162,7 @@ class _DetailsUserState extends State<DetailsUser> {
                         // setState_((){
                         //   waitSendFriend
                         // });
-                        return TextButton(onPressed: (){
+                        return  TextButton(onPressed: (){
                           sendFriendRequest(setState_);
                         }, child: Text("S'abonner",style:GoogleFonts.roboto(color: Colors.white,fontSize: 12)));
                       }
@@ -161,6 +171,18 @@ class _DetailsUserState extends State<DetailsUser> {
                 ): Center(child: Container(
                   margin:const EdgeInsets.symmetric(vertical: 4,horizontal: 16),
                   child:const SizedBox(width: 22,height: 22,child: CircularProgressIndicator(color: Colors.white,strokeWidth: 1.5,),)),),
+              ): 
+              Container(
+                margin: EdgeInsets.symmetric(horizontal: 22),
+                decoration: BoxDecoration(
+                  
+                ),
+                          child: Wrap(
+                            children: [
+                              Icon(Icons.check,size: 18,), 
+                              Text("Abonné",style: GoogleFonts.roboto(fontSize: 12),)
+                            ],
+                          ),
               ),
               SizedBox(width: 32,),
               Container( 

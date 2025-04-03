@@ -4,7 +4,7 @@ import 'package:application_amonak/models/user.dart';
 import 'package:intl/intl.dart';
 class Commentaire{
   String? content;
-  String? date; 
+  DateTime? date; 
   String? id;
   String? userId;
   String? publicationId;
@@ -27,9 +27,9 @@ class Commentaire{
     commentaire.content=data['content']; 
     commentaire.id=data['_id'];
     commentaire.user=User.fromJson(data['user']);
-    commentaire.nbLikes=(data['likes'] as List).length;
-    // commentaire.createdAt=DateFormat("yyyy-Mm-dd HH:mm").format(data['createdAt']);
-    if((data['likes'] as List).isNotEmpty){
+    try{
+      commentaire.nbLikes=(data['likes'] as List).length;
+      if((data['likes'] as List).isNotEmpty){
       for(int i=0;i<data['likes'].length;i++){
         Like like=Like();
         like.userId=data['likes'][i]['user'];
@@ -38,6 +38,14 @@ class Commentaire{
         commentaire.likes!.add(like);
       }
     }
+    }
+    catch(e){
+      print(e.toString());
+      commentaire.nbLikes=0;
+    }
+    commentaire.date=DateTime.parse(data['createdAt']);
+    // commentaire.createdAt=DateFormat("yyyy-Mm-dd HH:mm").format(data['createdAt']);
+    
     return commentaire;
   }
 

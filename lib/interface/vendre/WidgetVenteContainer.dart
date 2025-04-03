@@ -284,11 +284,11 @@ class _VenteContenuState extends State<VenteContenu> {
   Container itemNext(String label,int index) {
     return Container(
           child: GestureDetector(
-            onTap: (){
-              setState(() {
-                currentIndex=index;
-              });
-            },
+            // onTap: (){
+            //   setState(() {
+            //     currentIndex=index;
+            //   });
+            // },
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
@@ -337,8 +337,8 @@ class TextFieldDisable extends StatelessWidget {
             child: Text(value,style: GoogleFonts.roboto(fontWeight: FontWeight.w500),),
           ), 
           const Divider(
-            thickness: 2, 
-            color: Colors.black,
+            thickness: 1.5, 
+            color: Color.fromARGB(135, 0, 0, 0),
           )
         ],
        ),

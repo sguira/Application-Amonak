@@ -1,3 +1,9 @@
+import 'dart:convert';
+
+import 'package:application_amonak/models/notifications.dart';
+import 'package:application_amonak/services/notification.dart';
+import 'package:application_amonak/widgets/item_notification.dart';
+import 'package:application_amonak/widgets/list_notification.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -11,6 +17,20 @@ class GestionProfilePage extends StatefulWidget {
 }
 
 class _GestionProfilePageState extends State<GestionProfilePage> {
+
+  // List<NotificationModel> notifications=[];
+
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+
+    // initNotification();
+  }
+
+  
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -37,7 +57,7 @@ class _GestionProfilePageState extends State<GestionProfilePage> {
                   ),
                   body: PageView(
                     children: [
-                      Container(), 
+                      ListeNotification(),
                       Container()
                     ],
                   ),
@@ -47,6 +67,17 @@ class _GestionProfilePageState extends State<GestionProfilePage> {
             )
           ],
         ),
+      ),
+    );
+  }
+
+  listeNotification(List<NotificationModel> notifications){
+    return Container(
+      child: ListView.builder(
+        itemCount: notifications.length,
+        itemBuilder: (context,index){
+          return ItemNotification(notification: notifications[index]);
+        },
       ),
     );
   }

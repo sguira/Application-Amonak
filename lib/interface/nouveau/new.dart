@@ -5,6 +5,7 @@ import 'package:application_amonak/interface/nouveau/add_vendeur.dart';
 import 'package:application_amonak/interface/nouveau/create_alerte.dart';
 import 'package:application_amonak/interface/nouveau/vendre_article.dart';
 import 'package:application_amonak/settings/weights.dart';
+import 'package:application_amonak/widgets/notification_button.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -31,8 +32,25 @@ class _NewPageState extends State<NewPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text("Voir nouveau",style: GoogleFonts.roboto(fontSize: 28,color: Colors.white,fontWeight: FontWeight.w400),textAlign: TextAlign.start,),
-                Text("Voir loin",style: GoogleFonts.roboto(fontSize: 25,color: Colors.white,fontWeight: FontWeight.w400),textAlign: TextAlign.start,),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text("Voir nouveau",style: GoogleFonts.roboto(fontSize: 28,color: Colors.white,fontWeight: FontWeight.w400),textAlign: TextAlign.start,),
+                          Text("Voir loin",style: GoogleFonts.roboto(fontSize: 25,color: Colors.white,fontWeight: FontWeight.w400),textAlign: TextAlign.start,),
+                        ],
+                      ),
+                ),
+                ButtonNotificationWidget(
+                  color: Colors.white,
+                )
+                  ],
+                ),
                 if(DataController.user!.accountType!='seller')
                 Container(
                   child: Row(
@@ -53,6 +71,7 @@ class _NewPageState extends State<NewPage> {
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     itemButtonWithIcon(label: 'Faire une alerte',icon: Icons.add_alert,function: bottomSheetAlerte),
                     itemButtonWithIcon(label: 'Vendre en live',icon: Icons.favorite,function:(){}),

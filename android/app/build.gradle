@@ -26,7 +26,7 @@ android {
     namespace "com.example.application_amonak"
     compileSdk flutter.compileSdkVersion
     ndkVersion flutter.ndkVersion
-    // multiDexEnabled true
+    compileSdkVersion 34
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
@@ -52,6 +52,7 @@ android {
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
         multiDexEnabled true
+        targetSdkVersion 34
     }
 
     buildTypes {
