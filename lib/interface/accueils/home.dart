@@ -71,13 +71,16 @@ class _HomePageState extends State<HomePage> {
             if(value.statusCode.toString()=='200'){
               publication=[];
               for(var item in jsonDecode(value.body) as List){
-                Publication pub=Publication.fromJson(item);
-                print("content- ${pub.content} ${pub.files[0].type}");
-                print("typesss ${pub.files[0].type} ");
-                if(pub.files[0].type=='video'){
-                  publication.add(pub);
+                
+                if(item['type']!='share'){
+                  Publication pub=Publication.fromJson(item);
+                  print("content- ${pub.content} ${pub.files[0].type}");
+                  print("typesss ${pub.files[0].type} ");
+                  if(pub.files[0].type=='video'){
+                    publication.add(pub);
+                  }
                 }
-                // publication.add(pub);
+                
               }
               print("tailles -des vidéos!! ${publication.length} \n type ${publication[0].files[0].type}");
             }
@@ -112,7 +115,9 @@ class _HomePageState extends State<HomePage> {
               ],
             );
           }
-          return PageView.builder(
+          return
+          publication.isNotEmpty?
+           PageView.builder(
             controller: pageController,
             scrollDirection: Axis.vertical, 
             itemCount: publication.length,
@@ -126,12 +131,14 @@ class _HomePageState extends State<HomePage> {
             },
             
             itemBuilder: (context,index){
-              return publication.isNotEmpty? VideoPlayerWidget(videoItem: publication[index],index: index,):Column(
+              return publication.isNotEmpty? VideoPlayerWidget(videoItem: publication[index],index: index,):const Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [Center(child: Text("Aucune publication"),)],);
                 
             },
-           );
+           ):Container( 
+            child:const Text("Aucune publication"),
+            );
         }
       )
     );

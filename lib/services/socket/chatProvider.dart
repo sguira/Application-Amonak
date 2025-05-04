@@ -18,7 +18,7 @@ class MessageSocket extends ChangeNotifier{
   // List<MessageModel> messages=[];
   User? userAuth=DataController.user!;
 
-  StreamController<DateTime> _timeController=StreamController<DateTime>();
+  final StreamController<DateTime> _timeController=StreamController<DateTime>();
 
   MessageSocket(){
     // connectToServer();
@@ -32,7 +32,7 @@ class MessageSocket extends ChangeNotifier{
 
   void _connectSocket(){
     socket=IO.io(
-      apiLink+"/chat", 
+      "$apiLink/chat", 
       IO.OptionBuilder()
       .setTransports(["websocket"])
       .setPath("/amonak-api")
@@ -58,7 +58,7 @@ class MessageSocket extends ChangeNotifier{
   }
 
   void _startTimer(){
-    Timer.periodic(Duration(seconds: 1), (timer) {
+    Timer.periodic(const Duration(seconds: 1), (timer) {
       _timeController.add(DateTime.now());
     });
   }

@@ -47,10 +47,10 @@ class _DetailsBoutiqueState extends State<DetailsBoutique> {
         }),
         builder: (contex,snapshot){
           if(snapshot.hasError){
-            return Text("Une erreur est survenue");
+            return const Text("Une erreur est survenue");
           }
           if(snapshot.connectionState==ConnectionState.waiting){
-            return WaitWidget();
+            return const WaitWidget();
           }
           return pageContainer();
         }
@@ -70,7 +70,7 @@ class _DetailsBoutiqueState extends State<DetailsBoutique> {
               child: Column(
                 children: [
                   Text(widget.user.userName!.toUpperCase(),style: GoogleFonts.roboto(fontSize: 20,fontWeight: FontWeight.w600,letterSpacing: 1.2),), 
-                  Text("Mode"),
+                  const Text("Mode"),
                 ],
               ),
             ),
@@ -92,7 +92,7 @@ class ListArticle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: EdgeInsets.symmetric(vertical: 18),
+      margin: const EdgeInsets.symmetric(vertical: 18),
       width: double.maxFinite,
       child: SingleChildScrollView(
         child:articleModel.isNotEmpty? Wrap(
@@ -153,7 +153,7 @@ class ListArticle extends StatelessWidget {
               ),
             )
           ],
-        ):AucunElement(label: "Aucun article",),
+        ):const AucunElement(label: "Aucun article",),
       )
     );
   }

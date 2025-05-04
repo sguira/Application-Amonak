@@ -1,7 +1,6 @@
 
 import 'package:application_amonak/models/like.dart';
 import 'package:application_amonak/models/user.dart';
-import 'package:intl/intl.dart';
 class Commentaire{
   String? content;
   DateTime? date; 
@@ -43,7 +42,12 @@ class Commentaire{
       print(e.toString());
       commentaire.nbLikes=0;
     }
-    commentaire.date=DateTime.parse(data['createdAt']);
+    try{
+      commentaire.date=DateTime.parse(data['createdAt']);
+    }
+    catch(e){
+      commentaire.date=DateTime.now();
+    }
     // commentaire.createdAt=DateFormat("yyyy-Mm-dd HH:mm").format(data['createdAt']);
     
     return commentaire;

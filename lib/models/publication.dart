@@ -1,10 +1,7 @@
-import 'dart:convert';
 
-import 'package:application_amonak/models/article.dart';
 import 'package:application_amonak/models/ccommentaire.dart';
 import 'package:application_amonak/models/file.dart';
 import 'package:application_amonak/models/user.dart';
-import 'package:intl/intl.dart';
 class Publication{
   String? id;
   String? content;
@@ -13,6 +10,8 @@ class Publication{
   List<Files> files=[];
   String? type;
   String? typePub;
+  String? share;
+  String? shareMessage;
   double? price;
   double frais=1000;
   DateTime? dateCreation;
@@ -20,8 +19,16 @@ class Publication{
   int qte=0;
   List<Commentaire> commentaires=[];
   User? user;
+
+  //une publication de type partage
+  User? userShare;
+  DateTime? shareDate;
+  
   // ArticleModel? article;
   String? productId;
+
+  
+
   static Publication fromJson(Map data){
     Publication publication=Publication();
     // print("dataa $data ");
@@ -33,7 +40,7 @@ class Publication{
       publication.userName=data['user']['userName']??'';
       publication.user=User.fromJson(data['user']);
       publication.typePub=data['type']??'';
-      publication.dateCreation=DateTime.parse(data['createdAt']??'');
+      publication.dateCreation=DateTime.parse(data['createdAt']);
       if(publication.typePub=='sale'){
         // publication.article=ArticleModel(name: data['name']??'', price: double.parse(data['price']), qte: int.parse(data['quantity']));
         publication.productId=data['product'];

@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:application_amonak/data/data_controller.dart';
 import 'package:application_amonak/prod.dart';
-import 'package:application_amonak/services/socket/publication.dart';
 import 'package:mime/mime.dart';
 import 'package:dio/dio.dart';
 import 'package:path/path.dart';
@@ -11,7 +10,7 @@ import 'package:http_parser/http_parser.dart';
 class PublicationService{
 
   
-  static PublicationSocket socket=PublicationSocket();
+  // static PublicationSocket socket=PublicationSocket();
 
   static obtainUrl(dynamic data){
     return data[0]['url'];
@@ -85,6 +84,36 @@ class PublicationService{
 
     return result;
     
+  }
+
+  static Future<http.Response> getPublicationById({
+    required String id
+  })async{
+    return await http.get(Uri.parse("$apiLink/publications/$id")).then((value){
+      print("status code publication: ${value.statusCode}");
+      return value;
+    }).catchError((e){
+      return e;
+    });
+  }
+
+  static Future<http.Response> sharePublication ({
+    required Map<String,dynamic> data
+  })async {
+
+    // Map data={
+    //         'user':DataController.user!.id, 
+    //         'content':pub.content,
+    //         'type':'share',
+    //         'files':getTrushPath(value)
+    // };
+
+    return await http.post(Uri.parse("$apiLink/publications"),headers: authHeader,body: jsonEncode(data) ).then((value){
+      return value;
+    }).catchError((e){
+      print(e);
+      return e;
+    });
   }
 
   static Future<http.Response?> addVente(File file,Map data)async{
@@ -184,7 +213,8 @@ class PublicationService{
   static Future<http.Response> getPublications({
     String? type, 
     String? userId, 
-    String? search 
+    String? search, 
+    int? limite
   })async{
     // String url="$apiLink/publications";
     final Uri url=Uri.parse("$apiLink/publications").replace(queryParameters: {
@@ -193,7 +223,10 @@ class PublicationService{
       if(userId!=null)
       'user':userId,
       if(search!=null)
-      'search':search
+      'search':search,
+      'statut':true.toString(), 
+      // if(limite!=null)
+      // 'limit':limite.toString(),
     });
     return await http.get(url).then((value){
       return value;
@@ -202,6 +235,8 @@ class PublicationService{
       return e;
     });
   }
+
+  
 
   static Future suppression(String id)async{
     String url="$apiLink/publications/$id";

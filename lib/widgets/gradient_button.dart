@@ -40,7 +40,7 @@ Container GradientButton({
                 );
    }
 
-LinearGradient linearGradient=LinearGradient(colors: [
+LinearGradient linearGradient=const LinearGradient(colors: [
 
   Color.fromRGBO(97, 81, 212, 1), 
                       // Color.fromARGB(255, 9, 51, 189),

@@ -137,13 +137,13 @@ class _CreateAccountState extends State<CreateAccount> {
                 children: [
                   Container(
                     
-                    margin: EdgeInsets.only(left: 16),
+                    margin: const EdgeInsets.only(left: 16),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         // const Spacer(flex: 3,),
                         Text("S'inscrire",style: GoogleFonts.roboto(fontWeight: FontWeight.w800,fontSize:18),), 
-                        Spacer(flex: 2,),
+                        const Spacer(flex: 2,),
                         IconButton(onPressed: (){
                           Navigator.pop(context);
                         }, icon:const Icon(Icons.close)),

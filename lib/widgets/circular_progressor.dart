@@ -12,7 +12,7 @@ SizedBox circularProgression(
     width: size??12,
     height: size??12,
     child: CircularProgressIndicator(
-      color: color??null, 
+      color: color, 
       strokeWidth: 1.5,
     ),
   );

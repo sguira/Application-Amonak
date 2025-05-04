@@ -30,7 +30,7 @@ class _HomeState extends State<HomePageTab> {
     const HomePage(),
     const ExplorerPage(),
     const NewPage(),
-    Contact(),
+    const Contact(),
     const ProfilePage()
   ];
 
@@ -112,7 +112,14 @@ class _HomeState extends State<HomePageTab> {
                           borderRadius: BorderRadius.circular(86),
                           // border: Border.all(width: 4)
                       ),
-                      child:DataController.user!.avatar!.isEmpty? Image.asset("assets/medias/profile.jpg",fit:BoxFit.cover):Image.network(DataController.user!.avatar!.first.url!,fit:BoxFit.fitHeight)),
+                      child:DataController.user!.avatar!.isEmpty? Image.asset("assets/medias/profile.jpg",fit:BoxFit.cover):Image.network(DataController.user!.avatar!.first.url!,fit:BoxFit.fitHeight,errorBuilder: (context, error, stackTrace) {
+                                return Image.asset(
+                                    "assets/medias/profile.jpg",
+                                    fit: BoxFit.cover,
+                                    width: 48,
+                                    height: 48,
+                                  );
+                              },)),
                   ),
                 ),
     );

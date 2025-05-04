@@ -8,7 +8,7 @@ import 'package:http/http.dart'as http;
 
 class Register{
 
-  static String server=apiLink+'/auths/register'; 
+  static String server='$apiLink/auths/register'; 
 
 
   static Future createUser({
@@ -20,7 +20,7 @@ class Register{
     Map userData=user.toJson2();
 
     if(picture!=null){
-      dynamic value=await UploadFile.saveFile(picture!);
+      dynamic value=await UploadFile.saveFile(picture);
 
       if(UploadFile.obtainTrushUrl(value)){
         userData['files']=UploadFile.getTrushPath(value);

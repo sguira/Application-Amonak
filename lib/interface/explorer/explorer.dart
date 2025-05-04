@@ -55,7 +55,7 @@ class _ExplorerPageState extends State<ExplorerPage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                     Image.asset("assets/icons/amonak.png",width: 100,), 
-                    ButtonNotificationWidget()
+                    const ButtonNotificationWidget()
                   ],),
                 ),
                 Expanded(

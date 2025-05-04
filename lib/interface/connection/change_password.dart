@@ -34,7 +34,7 @@ class _ChangePasswordState extends State<ChangePassword> {
                       margin:const EdgeInsets.symmetric(vertical: 12),
                       child: Text(title,style: GoogleFonts.roboto(fontWeight: FontWeight.bold,letterSpacing: 1),),
                     ),
-                    Container(
+                    SizedBox(
                       width: ScreenSize.width*0.75,
                       child: Text(description,style: GoogleFonts.roboto(fontSize: 13),)
                     )
@@ -89,7 +89,7 @@ class _ChangePasswordState extends State<ChangePassword> {
                         
                         hintText: hint,
                         hintStyle: GoogleFonts.roboto(fontSize: 12),
-                        enabledBorder: UnderlineInputBorder(
+                        enabledBorder: const UnderlineInputBorder(
                           borderSide: BorderSide(color: Colors.grey),
                         )
                       ),

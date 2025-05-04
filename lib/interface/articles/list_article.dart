@@ -3,10 +3,8 @@ import 'dart:convert';
 import 'package:application_amonak/interface/boutique/details_boutique..dart';
 import 'package:application_amonak/models/article.dart';
 import 'package:application_amonak/services/product.dart';
-import 'package:application_amonak/services/publication.dart';
 import 'package:application_amonak/widgets/wait_widget.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 class Article extends StatefulWidget {
 

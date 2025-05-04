@@ -12,6 +12,7 @@ import 'package:google_fonts/google_fonts.dart';
               if(value!.isEmpty){
                 return 'Veuillez saisir un texte';
               }
+              return null;
             },
             maxLines: 5,
             style: GoogleFonts.roboto(fontSize: 13),

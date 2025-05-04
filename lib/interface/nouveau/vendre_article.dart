@@ -128,7 +128,7 @@ class _VendreArticleState extends State<VendreArticle> {
             if(responseShow)
             Container(
               margin:const EdgeInsets.only(top: 16),
-              padding: EdgeInsets.symmetric(vertical: 6,horizontal: 12),
+              padding: const EdgeInsets.symmetric(vertical: 6,horizontal: 12),
               decoration: BoxDecoration(
                 color: Colors.blueAccent.withOpacity(0.2),
                 borderRadius: BorderRadius.circular(36)
@@ -189,7 +189,7 @@ class _VendreArticleState extends State<VendreArticle> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Container(
+                    SizedBox(
                       width: 200,
                       child: Text('Video chargée :${selectedFile!.path.split('\\').last}',style: GoogleFonts.roboto(fontSize:11,color:Colors.red,decoration: TextDecoration.underline),overflow: TextOverflow.visible,)),
                     
@@ -313,7 +313,7 @@ class _VendreArticleState extends State<VendreArticle> {
         Future.delayed(const Duration(milliseconds: 800),(){
                           Navigator.push(context, MaterialPageRoute(builder: (context)=>const HomePageTab() ));
                         });
-        Future.delayed(Duration(seconds: 2),(){
+        Future.delayed(const Duration(seconds: 2),(){
           setState(() {
             responseShow=false;
           });

@@ -3,7 +3,6 @@ import 'dart:io';
 
 import 'package:application_amonak/data/data_controller.dart';
 import 'package:application_amonak/models/file.dart';
-import 'package:application_amonak/models/user.dart';
 import 'package:application_amonak/prod.dart';
 import 'package:dio/dio.dart';
 import 'package:http/http.dart' as http;

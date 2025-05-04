@@ -1,3 +1,4 @@
+import 'package:application_amonak/colors/colors.dart';
 import 'package:application_amonak/interface/vendre/congrat.dart';
 import 'package:application_amonak/models/article.dart';
 import 'package:application_amonak/settings/weights.dart';
@@ -7,7 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 class VenteContenu extends StatefulWidget {
-  final  articleModel;
+final ArticleModel?  articleModel;
   const VenteContenu({super.key,required this.articleModel});
 
   @override
@@ -29,12 +30,31 @@ class _VenteContenuState extends State<VenteContenu> {
   TextEditingController nomAcheteur=TextEditingController();
   TextEditingController adresse=TextEditingController();
 
+  String orangeIcon="assets/medias/orange.png";
+  String waveIcon="assets/medias/wave.png";
+  String mtnIcon="assets/medias/orange.png";
 
+  Map<String,dynamic> typePayement={
+    "orange":{
+      "icon":"assets/medias/orange.png",
+      "name":"Orange Money",
+    }, 
+    "wave":{
+      "icon":"assets/medias/wave.png",
+      "name":"Wave",
+    }, 
+    "mtn":{
+      "icon":"assets/medias/mtn.png",
+      "name":"MTN Mobile Money",
+    }
+  };
+
+  Map<String,dynamic> currentItem={};
 
   @override
   Widget build(BuildContext context) {
     return  Container(
-          margin:const EdgeInsets.symmetric(horizontal: 22),
+          margin:const EdgeInsets.symmetric(horizontal: 8),
           child: ListView(
             children: [
               Container(
@@ -63,8 +83,20 @@ class _VenteContenuState extends State<VenteContenu> {
                       ),
                       Container(
                         margin:const EdgeInsets.symmetric(vertical: 12),
-                        child: Image.asset("assets/medias/orange.png",width: 100,),
-                      ), 
+                        child: Image.asset(currentItem["icon"],width: 100,),
+                      ),
+                      Container(
+                        alignment: Alignment.center,
+                        
+                        child:Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text("Payez".toUpperCase(),style: GoogleFonts.roboto(fontWeight: FontWeight.w800,fontSize: 22),), 
+                            const SizedBox(width: 12,),
+                            Text(NumberFormat.currency(symbol: widget.articleModel!.currency,decimalDigits: 0,locale: 'fr').format(widget.articleModel!.total),style: GoogleFonts.roboto(color: couleurPrincipale),)
+                          ],
+                        )
+                      ),
                       Container(
                         child: Column(
                           children: [
@@ -81,7 +113,7 @@ class _VenteContenuState extends State<VenteContenu> {
                           borderRadius: BorderRadius.circular(36)
                         ),
                         child: TextButton(onPressed: (){
-                          Navigator.push(context, MaterialPageRoute(builder: (context)=>CongratSeller() ));
+                          Navigator.push(context, MaterialPageRoute(builder: (context)=>const CongratSeller() ));
                         }, child: Center(child: Text('Payer'.toUpperCase(),style: GoogleFonts.roboto(color: Colors.white),))),
                       ), 
                       TextButton(onPressed: (){
@@ -113,8 +145,17 @@ class _VenteContenuState extends State<VenteContenu> {
                               contentPadding:const EdgeInsets.symmetric(horizontal: 18),
                               hintText: hint,
                               hintStyle: GoogleFonts.roboto(),
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(36),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(4),
+                                borderSide:BorderSide(
+                                  color: Colors.grey.shade300,
+                                )
+                              ), 
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(4),
+                                borderSide:BorderSide(
+                                  color: couleurPrincipale.withValues()
+                                )
                               ), 
                               label: Text(label,style: GoogleFonts.roboto(fontSize: 12),)
                             ),
@@ -128,18 +169,14 @@ class _VenteContenuState extends State<VenteContenu> {
                 children: [
                   titrePayement(), 
                   Container(
-                    margin: EdgeInsets.symmetric(vertical: 22),
+                    margin: const EdgeInsets.symmetric(vertical: 22),
                     child: Wrap(
                       spacing: 8,
-                      runSpacing: 12,
+                      runSpacing: 22,
                       children: [
-                        itemTypeVente("Orange Money","assets/medias/orange.png",""),
-                        itemTypeVente("Orange Money","assets/medias/orange.png",""),
-                        itemTypeVente("Orange Money","assets/medias/orange.png",""),
-                        itemTypeVente("Orange Money","assets/medias/orange.png",""),
-                        itemTypeVente("Orange Money","assets/medias/orange.png",""),
-                        itemTypeVente("Orange Money","assets/medias/orange.png",""),
-
+                        itemTypeVente(typePayement["orange"]),
+                        itemTypeVente(typePayement["mtn"]),
+                        itemTypeVente(typePayement["wave"]),
                       ],
                     ),
                     
@@ -181,38 +218,47 @@ class _VenteContenuState extends State<VenteContenu> {
                 );
   }
 
-  Widget itemTypeVente(String label,String image,String value) {
+  Widget itemTypeVente(Map<String,dynamic> item) {
     return GestureDetector(
       onTap: (){
         setState(() {
           currentIndex+=1;
+          currentItem=item;
         });
       },
-      child: Container(
-                            padding: EdgeInsets.all(8),
-                            decoration: BoxDecoration(
-                              border: Border.all(
-                                width: 1, 
-                                color: Colors.black12, 
+      child: Column(
+        children: [
+          Container(
                                 
-                              ), 
-                              borderRadius: BorderRadius.circular(12)
-                            ),
-                            child: Column(
-                              children: [
-                                Image.asset(image,width: 82,),
-                                SizedBox(height: 4,), 
-                                Text(label,style: GoogleFonts.roboto(fontSize:12),)
-                              ],
-                            ),
-                          ),
+                                decoration: BoxDecoration(
+                                  border: Border.all(
+                                    width: 1, 
+                                    color: Colors.black12, 
+                                    
+                                  ), 
+                                  borderRadius: BorderRadius.circular(12)
+                                ),
+                                child: Column(
+                                  children: [
+                                    SizedBox(
+                                      height: 68,
+                                      width: 68,
+                                      child: Image.asset(item['icon'],width: 82,fit: BoxFit.cover,),
+                                    )
+                                    
+                                  ],
+                                ),
+                              ),
+          // Text(item['name'],style: GoogleFonts.roboto(fontSize: 12,fontWeight: FontWeight.w700),)
+        ],
+      ),
     );
   }
 
   Container containerFormulaire() {
     // TextEditingController frais =TextEditingController();
     prix.text=NumberFormat.currency(locale: 'fr',decimalDigits: 0,symbol: widget.articleModel!.currency).format(widget.articleModel!.price);
-    nomAcheteur.text=widget.articleModel.user!.userName.toString();
+    nomAcheteur.text=widget.articleModel!.user!.userName.toString();
     description.text=widget.articleModel!.content??'';
     livraison.text=NumberFormat.currency(locale: 'fr',decimalDigits: 0,symbol: widget.articleModel!.currency).format(widget.articleModel!.livraison);
     frais.text=NumberFormat.currency(locale: 'fr',decimalDigits: 0,symbol: widget.articleModel!.currency).format(widget.articleModel!.frais);
@@ -222,7 +268,7 @@ class _VenteContenuState extends State<VenteContenu> {
       )
     );
     return Container(
-            margin: EdgeInsets.symmetric(horizontal: 12),
+            margin: const EdgeInsets.symmetric(horizontal: 12),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -239,6 +285,8 @@ class _VenteContenuState extends State<VenteContenu> {
                       )
                     ],
                   ),
+                ),
+                TextFieldDisable(label: 'Montant Total', value: NumberFormat.currency(locale: 'fr',decimalDigits: 0,symbol: widget.articleModel!.currency).format(widget.articleModel!.total), 
                 ),
                 TextFieldDisable(label: 'Prix', value: prix.text), 
                 TextFieldDisable(label: 'Vendeur', value: nomAcheteur.text), 
@@ -302,7 +350,7 @@ class _VenteContenuState extends State<VenteContenu> {
                   child:currentIndex==index?const Icon(Icons.check,color:Colors.white,size: 16,):null,
                 ),
                 const SizedBox(width: 4,),
-                Container(
+                SizedBox(
                   width: 70,
                   child: Text(label,style: GoogleFonts.roboto(fontSize: 12),overflow: TextOverflow.ellipsis,) )
               ],

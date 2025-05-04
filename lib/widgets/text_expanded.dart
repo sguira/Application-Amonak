@@ -31,7 +31,7 @@ class _TextExpandedState extends State<TextExpanded> {
             
             children: [
               TextSpan(
-                text: "${isExpanded==false? widget.texte.substring(0,100):widget.texte}", 
+                text: isExpanded==false? widget.texte.substring(0,100):widget.texte, 
                 style: GoogleFonts.roboto(color:Colors.black,letterSpacing:1,fontWeight:FontWeight.w400 )
               ), 
               TextSpan(

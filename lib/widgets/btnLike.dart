@@ -32,7 +32,7 @@ class _ButtonLikeState extends State<ButtonLike> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return SizedBox(
       height: 80,
       child: Column(
         children: [
@@ -85,14 +85,14 @@ class _ButtonLikeState extends State<ButtonLike> {
     Map data={
       "publication":widget.pub.id, 
       "user":DataController.user!.id,
-      "type":'like'
+      // "type":'like'
     };
     Map<String,dynamic> notificationData={
       "publication":widget.pub.id, 
       "from":DataController.user!.id, 
       "type":'like',
       "to":widget.pub.user!.id,
-      // "content":"a aimé votre publication"
+      "content":"publicationBackend.likeYourPublication"
     };
     if(isLiked==false){
       setState(() {

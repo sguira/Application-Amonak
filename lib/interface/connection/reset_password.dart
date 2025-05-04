@@ -2,6 +2,7 @@ import 'package:application_amonak/interface/connection/change_password.dart';
 import 'package:application_amonak/interface/connection/confirm_change.dart';
 import 'package:application_amonak/services/auths.dart';
 import 'package:application_amonak/settings/weights.dart';
+import 'package:application_amonak/widgets/buildModalSheet.dart';
 import 'package:application_amonak/widgets/gradient_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -32,7 +33,7 @@ class _ResetPasswordState extends State<ResetPassword> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding:const EdgeInsets.symmetric(vertical: 12,horizontal: 18),
+      padding:const EdgeInsets.symmetric(vertical: 4,horizontal: 4),
       height: 370,
       child: ListView(
         children: [
@@ -49,18 +50,18 @@ class _ResetPasswordState extends State<ResetPassword> {
                       margin:const EdgeInsets.symmetric(vertical: 12),
                       child: Text(titre,style: GoogleFonts.roboto(fontWeight: FontWeight.bold,letterSpacing: 1,fontSize:15),),
                     ),
-                    Container(
-                      width: ScreenSize.width*0.75,
+                    SizedBox(
+                      width: ScreenSize.width*0.86,
                       child: Text(description,style: GoogleFonts.roboto(fontSize: 13),)
                     )
                     
                   ],
                 ), 
-                Container(
-                  margin:const EdgeInsets.symmetric(vertical: 16),
-                  child: IconButton(onPressed: (){
-                    Navigator.pop(context);
-                  }, icon:const Icon(Icons.close)))
+                // Container(
+                //   margin:const EdgeInsets.symmetric(vertical: 16),
+                //   child: IconButton(onPressed: (){
+                //     Navigator.pop(context);
+                //   }, icon:const Icon(Icons.close)))
               ],
             ),
           ), 
@@ -89,6 +90,7 @@ class _ResetPasswordState extends State<ResetPassword> {
                               if(value.isEmpty){
                                 return 'Champ obligatoire';
                               }
+                              return null;
                             },
                             decoration: InputDecoration(
                               // label: Text()
@@ -108,8 +110,8 @@ class _ResetPasswordState extends State<ResetPassword> {
                    ),
                    
                   Container(
-                    margin:const EdgeInsets.symmetric(vertical: 26),
-                    padding:const EdgeInsets.symmetric(vertical: 6),
+                    margin:const EdgeInsets.symmetric(vertical: 18),
+                    padding:const EdgeInsets.symmetric(vertical: 0),
                     decoration: BoxDecoration(
                       gradient: linearGradient, 
                       borderRadius: BorderRadius.circular(36)
@@ -131,7 +133,7 @@ class _ResetPasswordState extends State<ResetPassword> {
       if(formKey.currentState!.validate()){
         gotoConfirmCode();
       }
-    }, child:waitRequestReset==false? Text(btnTexte.toUpperCase(),style: GoogleFonts.roboto(color: Colors.white),):SizedBox(width: 18,height: 18,child: CircularProgressIndicator(strokeWidth: 2,color: Colors.white,),));
+    }, child:waitRequestReset==false? Text(btnTexte.toUpperCase(),style: GoogleFonts.roboto(color: Colors.white),):const SizedBox(width: 18,height: 18,child: CircularProgressIndicator(strokeWidth: 2,color: Colors.white,),));
   }
 
 
@@ -146,7 +148,7 @@ class _ResetPasswordState extends State<ResetPassword> {
       });
       if(value.statusCode==200){
         Navigator.pop(context);
-        showModalBottomSheet(context: context, builder: (conext)=> ConfirmChange());
+        showCustomModalSheetWidget(context: context, child:const ConfirmChange());
       }
     }).catchError((e){
       setState(() {

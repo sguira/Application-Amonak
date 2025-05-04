@@ -17,7 +17,7 @@ class Notificationsocket extends ChangeNotifier {
 
   _initSocket(){
       socket=IO.io(
-        apiLink+"/chat", 
+        "$apiLink/chat", 
         IO.OptionBuilder()
         .setPath("/amonak-api")
         .setTransports(["websocket"])

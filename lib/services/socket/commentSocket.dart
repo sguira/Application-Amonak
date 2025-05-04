@@ -9,7 +9,7 @@ class Commentsocket extends ChangeNotifier {
 
   Commentsocket(){
     socket=IO.io(
-      apiLink+"/comment",
+      "$apiLink/comment",
       
       IO.OptionBuilder()
       .setTransports(["websocket"])

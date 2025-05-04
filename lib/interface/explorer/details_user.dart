@@ -173,20 +173,20 @@ class _DetailsUserState extends State<DetailsUser> {
                   child:const SizedBox(width: 22,height: 22,child: CircularProgressIndicator(color: Colors.white,strokeWidth: 1.5,),)),),
               ): 
               Container(
-                margin: EdgeInsets.symmetric(horizontal: 22),
-                decoration: BoxDecoration(
+                margin: const EdgeInsets.symmetric(horizontal: 22),
+                decoration: const BoxDecoration(
                   
                 ),
                           child: Wrap(
                             children: [
-                              Icon(Icons.check,size: 18,), 
+                              const Icon(Icons.check,size: 18,), 
                               Text("Abonné",style: GoogleFonts.roboto(fontSize: 12),)
                             ],
                           ),
               ),
-              SizedBox(width: 32,),
+              const SizedBox(width: 32,),
               Container( 
-                padding: EdgeInsets.symmetric(horizontal: 16),
+                padding: const EdgeInsets.symmetric(horizontal: 16),
                 decoration: BoxDecoration(
                   gradient: linearGradient,
                   borderRadius: BorderRadius.circular(36)

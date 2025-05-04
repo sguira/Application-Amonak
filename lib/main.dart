@@ -6,7 +6,6 @@ import 'package:application_amonak/services/socket/chatProvider.dart';
 import 'package:application_amonak/services/socket/publication.dart';
 import 'package:application_amonak/settings/weights.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 import 'package:application_amonak/services/socket/commentSocket.dart';
 import 'package:application_amonak/services/socket/notificationSocket.dart';

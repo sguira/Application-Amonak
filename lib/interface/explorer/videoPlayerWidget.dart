@@ -51,12 +51,12 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget2> {
   @override
   Widget build(BuildContext context) {
     return AspectRatio(
-      aspectRatio: videoPlayerController!.value.aspectRatio,
+      aspectRatio: videoPlayerController!.value.aspectRatio*2,
       
       child: videoPlayerController!.value.isInitialized? Stack(
         children: [
           Positioned(
-            top: 150, 
+            // top: 150, 
             left: ScreenSize.width*0.4,
             child: Center(
               child:IconButton(onPressed: (){}, icon:const Icon(Icons.play_arrow,color: Colors.red,))
@@ -73,7 +73,7 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget2> {
               }
             },
             child: Container(
-              constraints: BoxConstraints(
+              constraints: const BoxConstraints(
                 // maxHeight: 450
               ),
               child: VideoPlayer(
@@ -83,25 +83,28 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget2> {
                 ),
             ),
           ),
-          Positioned(
-            bottom: 1,
-            child: Container(
-              decoration: BoxDecoration(
-                color: Colors.black.withOpacity(0.5),
-              ),
-              child:IconButton(onPressed: (){
-                if(videoPlayerController!.value.isPlaying){
-                  setState(() {
-                    videoPlayerController!.pause();
-                  });
-                }
-                else{
-                  setState(() {
-                    videoPlayerController!.play();
-                  });
-                }
-              }, icon: Icon(!videoPlayerController!.value.isPlaying? Icons.play_arrow:Icons.pause,color: Colors.black,size: 24,))
-            )
+          Center(
+            child: Positioned(
+              // bottom: 1,
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.black.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(5)
+                ),
+                child:IconButton(onPressed: (){
+                  if(videoPlayerController!.value.isPlaying){
+                    setState(() {
+                      videoPlayerController!.pause();
+                    });
+                  }
+                  else{
+                    setState(() {
+                      videoPlayerController!.play();
+                    });
+                  }
+                }, icon: Icon(!videoPlayerController!.value.isPlaying? Icons.play_arrow:Icons.pause,color: Colors.black,size: 24,))
+              )
+            ),
           ),
         ],
       ):Container(

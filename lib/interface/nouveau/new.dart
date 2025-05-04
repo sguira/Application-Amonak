@@ -5,6 +5,7 @@ import 'package:application_amonak/interface/nouveau/add_vendeur.dart';
 import 'package:application_amonak/interface/nouveau/create_alerte.dart';
 import 'package:application_amonak/interface/nouveau/vendre_article.dart';
 import 'package:application_amonak/settings/weights.dart';
+import 'package:application_amonak/widgets/buildModalSheet.dart';
 import 'package:application_amonak/widgets/notification_button.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -46,7 +47,7 @@ class _NewPageState extends State<NewPage> {
                         ],
                       ),
                 ),
-                ButtonNotificationWidget(
+                const ButtonNotificationWidget(
                   color: Colors.white,
                 )
                   ],
@@ -64,7 +65,7 @@ class _NewPageState extends State<NewPage> {
               ],
             ),
           ),
-          Spacer(),
+          const Spacer(),
           Container(
             margin:const EdgeInsets.symmetric(vertical: 18,horizontal: 18),
             child: Row(
@@ -88,10 +89,10 @@ class _NewPageState extends State<NewPage> {
   }
 
   vendreArticle(){
-    return showModalBottomSheet(
+    return showCustomModalSheetWidget(
       context: context,
-      isScrollControlled: true,
-      builder: (context)=>const VendreArticle() 
+      
+      child:  VendreArticle() 
     );
   }
 
@@ -123,30 +124,30 @@ class _NewPageState extends State<NewPage> {
   }
 
   bottomSheetAlerte(){
-    return showModalBottomSheet(
+    return showCustomModalSheetWidget(
       context: context,
-      isScrollControlled: true,
-      builder: (context){
-      return Container(
+      
+      child:  Container(
         constraints: BoxConstraints(
           maxHeight: ScreenSize.height*0.8
         ),
         child:const CreateAlertePage(),
-      );
-    });
+      
+    ));
   }
 
   bottomSheetPublication(){
-    return showModalBottomSheet(
+    return showCustomModalSheetWidget(
       context: context,
-      isScrollControlled: true,
-      builder: (context){
-      return Container(
-        constraints: BoxConstraints(
-          maxHeight: ScreenSize.height*0.7
-        ),
-        child:const CreatePublication()
-      );
-    });
+      child:
+       SingleChildScrollView(
+         child: Container(
+          constraints: BoxConstraints(
+            maxHeight: ScreenSize.height*0.7
+          ),
+          child:const CreatePublication()
+               ),
+       )
+    );
   }
 }

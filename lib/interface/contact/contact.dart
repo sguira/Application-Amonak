@@ -139,64 +139,76 @@ class _ContactState extends State<Contact> {
                           onTap: (){
                             Navigator.push(context, MaterialPageRoute(builder: (context)=>MessagePage(user:item.iSend? item.to:item.from) ));
                           },
-                          child: Column(
-                            children: [
-                              Container(
-                                margin:const EdgeInsets.symmetric(vertical: 6,horizontal: 0),
-                                padding:const EdgeInsets.all(8),
-                                decoration: BoxDecoration(
-                                  // border: Border.all(
-                                  //   width: 1, 
-                                  //   color: couleurPrincipale.withAlpha(40)
-                                  // ), 
-                                  borderRadius: BorderRadius.circular(8)
-                                ),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.start,
-                                  children: [
-                                    Container(
-                                      // margin: ,
-                                      padding:const EdgeInsets.all(4),
-                                      decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(36),
-                                        
-                                        border: Border.all(
-                                          width: 1.5,
-                                          color: couleurPrincipale
+                          child: Container(
+                            constraints: const BoxConstraints(
+                              maxHeight: 88
+                            ),
+                            child: Column(
+                              children: [
+                                Container(
+                                  margin:const EdgeInsets.symmetric(vertical: 6,horizontal: 0),
+                                  padding:const EdgeInsets.all(2),
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(8)
+                                  ),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    children: [
+                                      Container(
+                                        // margin: ,
+                                        padding:const EdgeInsets.all(4),
+                                        decoration: BoxDecoration(
+                                          borderRadius: BorderRadius.circular(36),
                                           
-                                        )
-                                      ),
-                                      width: 42, 
-                                      height: 42, 
-                                      child: ClipRRect(
-                                        borderRadius: BorderRadius.circular(11),
-                                        child: item.to.avatar!.isEmpty? Image.asset("assets/medias/profile.jpg",fit: BoxFit.cover,):Image.network(item.to.avatar!.first.url!,fit: BoxFit.fitHeight,),
-                                      ),
-                                    ), 
-                                    Container(
-                                      constraints: BoxConstraints(maxWidth: ScreenSize.width*0.6),
-                                      margin:const EdgeInsets.only(left: 16),
-                                      child: Column(
-                                        mainAxisAlignment: MainAxisAlignment.start,
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          Text(item.iSend==true? item.to.userName!:item.from.userName,style:GoogleFonts.roboto(fontWeight: FontWeight.w600)),
-                                          Row(
-                                            children: [
-                                              // Icon(FontAwesomeIcons.checkDouble,size: 16,),
-                                              Text(item.content,style: GoogleFonts.roboto(fontSize:12)),
-                                            ],
+                                          border: Border.all(
+                                            width: 1.5,
+                                            color: couleurPrincipale
+                                            
                                           )
-                                        ],
+                                        ),
+                                        width: 36, 
+                                        height: 36, 
+                                        child: ClipRRect(
+                                          borderRadius: BorderRadius.circular(11),
+                                          child: item.to.avatar!.isEmpty? Image.asset("assets/medias/profile.jpg",fit: BoxFit.cover,):Image.network(item.to.avatar!.first.url!,fit: BoxFit.fitHeight,errorBuilder: (context, error, stackTrace) {
+                                            return Image.asset(
+                                                "assets/medias/profile.jpg",
+                                                fit: BoxFit.cover,
+                                                width: 48,
+                                                height: 48,
+                                              );
+                                          },),
+                                        ),
+                                      ), 
+                                      Container(
+                                        constraints: BoxConstraints(maxWidth: ScreenSize.width*0.6),
+                                        margin:const EdgeInsets.only(left: 16),
+                                        child: Column(
+                                          mainAxisAlignment: MainAxisAlignment.start,
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Text(item.iSend==true? item.to.userName!:item.from.userName,style:GoogleFonts.roboto(fontWeight: FontWeight.w600)),
+                                            Row(
+                                              children: [
+                                                // Icon(FontAwesomeIcons.checkDouble,size: 16,),
+                                                Container(
+                                                  constraints:const BoxConstraints(
+                                                    maxWidth: 200
+                                                  ),
+                                                  child: Text(item.content,style: GoogleFonts.roboto(fontSize:12))),
+                                              ],
+                                            )
+                                          ],
+                                        ),
                                       ),
-                                    ),
-                                    const Spacer(), 
-                                    const Icon(Icons.arrow_right_outlined,color: couleurPrincipale,)
-                                  ],
+                                      const Spacer(), 
+                                      const Icon(Icons.arrow_right_outlined,color: couleurPrincipale,)
+                                    ],
+                                  ),
                                 ),
-                              ),
-                              Divider()
-                            ],
+                                const Divider()
+                              ],
+                            ),
                           ),
                         )
                       ],

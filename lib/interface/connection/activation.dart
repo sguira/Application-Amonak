@@ -77,7 +77,7 @@ class _ConfirmCodeActivationState extends State<ConfirmCodeActivation> {
                     if(value.statusCode==200){
                       LocalStorage.saveToken(jsonDecode(value.body)['accessToken'] as String).then((value){
                                                 print("\n\n\n valeur retour $value \n\n");
-                                                Navigator.push(context, MaterialPageRoute(builder: (context)=>HomePageTab()));
+                                                Navigator.push(context, MaterialPageRoute(builder: (context)=>const HomePageTab()));
                                               });
                     }
                     print("value ${value.body}");
@@ -88,7 +88,7 @@ class _ConfirmCodeActivationState extends State<ConfirmCodeActivation> {
                   });
                   
                 }
-              }, child:isWailt==false? Text("Confirmation",style: GoogleFonts.roboto(color:Colors.white)):ButtonProgress()),
+              }, child:isWailt==false? Text("Confirmation",style: GoogleFonts.roboto(color:Colors.white)):const ButtonProgress()),
             ),
             Container(
               margin:const EdgeInsets.symmetric(vertical: 12,horizontal: 16),
@@ -110,7 +110,7 @@ class _ConfirmCodeActivationState extends State<ConfirmCodeActivation> {
                   waitResend=false;
                 });
                 });
-              }, child:waitResend==false? Text("Renvoyer le code",style: GoogleFonts.roboto(color:Colors.white),):ButtonProgress()),
+              }, child:waitResend==false? Text("Renvoyer le code",style: GoogleFonts.roboto(color:Colors.white),):const ButtonProgress()),
             )
           ],
         ),

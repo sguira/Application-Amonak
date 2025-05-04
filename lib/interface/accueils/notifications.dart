@@ -44,10 +44,10 @@ class _NotificationsState extends State<Notifications> {
             if(snapshot.connectionState==ConnectionState.waiting){
               return Container(
                 alignment: Alignment.center,
-                child: SpinKitWaveSpinner(color: couleurPrincipale));
+                child: const SpinKitWaveSpinner(color: couleurPrincipale));
             }
             if(snapshot.hasError){
-              return Text("Error");
+              return const Text("Error");
             }
             return Container(
               child: ListView.builder(
@@ -74,7 +74,7 @@ class _NotificationsState extends State<Notifications> {
                           ),
                         ),
                         Container(
-                          margin: EdgeInsets.only(left: 4),
+                          margin: const EdgeInsets.only(left: 4),
                           // color: Colors.red,
                           width: ScreenSize.width*0.72,
                           child: Column(
@@ -88,7 +88,7 @@ class _NotificationsState extends State<Notifications> {
                               ),
                               if(notification[index].content!.isNotEmpty)
                           
-                              Container(
+                              SizedBox(
                                 // margin: EdgeInsets.symmetric(horizontal: 4),
                                 width: ScreenSize.width*0.65,
                                 // color: Colors.black,

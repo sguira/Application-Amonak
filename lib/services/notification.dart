@@ -19,7 +19,7 @@ class NotificationService{
       queryParameters: {
         'user':DataController.user!.id, 
         'status':true.toString(),
-        // 'limit':100
+        'limit':202.toString()
       }
     ),headers: authHeader).then((value){
       print("Appel notification");
@@ -28,6 +28,14 @@ class NotificationService{
       return value;
     }).catchError((e){
       print("Erreur avec les notifications $e");
+      return e;
+    });
+  }
+
+  static Future<http.Response> deleteNotification(String id){
+    return http.delete(Uri.parse("$apiLink/notifications/$id"),headers: authHeader).then((value){
+      return value;
+    }).catchError((e){
       return e;
     });
   }

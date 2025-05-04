@@ -1,6 +1,5 @@
 import 'package:application_amonak/widgets/wait_widget.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:video_player/video_player.dart';
 
 class VideoBacground extends StatefulWidget {

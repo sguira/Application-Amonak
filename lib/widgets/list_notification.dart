@@ -7,6 +7,7 @@ import 'package:application_amonak/services/notification.dart';
 import 'package:application_amonak/services/socket/chatProvider.dart';
 import 'package:application_amonak/widgets/circular_progressor.dart';
 import 'package:application_amonak/widgets/item_notification.dart';
+import 'package:application_amonak/widgets/wait_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 class ListeNotification extends StatefulWidget {
@@ -24,13 +25,17 @@ class _ListeNotificationState extends State<ListeNotification> {
 
   late Future<String> data;
 
+
+
   Future<String> initNotification()async{
     await NotificationService.getNotification().then((value){
       print("Notifications liste status code ${value.statusCode}");
       if(value.statusCode==200){
-        print(value.body);
+       
+        notifications=[];
         for(var notif in jsonDecode(value.body) as List){
-            
+            print(notif);
+            print('\n\n');
             NotificationModel notificationModel=NotificationModel.fromJson(notif);
             
             setState(() {
@@ -47,15 +52,16 @@ class _ListeNotificationState extends State<ListeNotification> {
     // TODO: implement initState
     super.initState();
     messageSocket=MessageSocket();
-    data=initNotification();
+    
 
-    //ecoute de nouveau notification
+    // ecoute de nouveau notification
     messageSocket.socket!.on("refreshNotificationBoxHandler", (handler){
       print("Nouvelle Notification recu");
       setState(() {
         initNotification();
       });
     });
+    data=initNotification();
   }
   @override
   Widget build(BuildContext context) {
@@ -66,21 +72,21 @@ class _ListeNotificationState extends State<ListeNotification> {
         centerTitle: true,
         title: Row(
           children: [
-            Spacer(),
+            const Spacer(),
             Text("Notifications".toUpperCase(),style: GoogleFonts.roboto(fontSize: 16,fontWeight: FontWeight.w500),),
-            Spacer(),
+            const Spacer(),
             IconButton(onPressed: (){
               Navigator.pop(context);
-            }, icon: Icon(Icons.close))
+            }, icon: const Icon(Icons.close))
           ],
         ),
       ),
       body:  FutureBuilder(future:data, builder: (context,snapshot){
         if(snapshot.connectionState==ConnectionState.waiting){
-          return circularProgression();
+          return const WaitWidget();
         }
         else if(snapshot.hasError){
-          return Text("Error");
+          return const Text("Error");
         }
         else{
           return notifications.isNotEmpty? Container(
@@ -91,7 +97,7 @@ class _ListeNotificationState extends State<ListeNotification> {
             child: ListView.builder(
               itemCount: notifications.length,
               itemBuilder: (context,index){
-                return ItemNotification(notification: notifications[index]);
+                return ItemNotification(notification: notifications[index],reloadNotificationData: initNotification);
               },
             ),
           ):Container();

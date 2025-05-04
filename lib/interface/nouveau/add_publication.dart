@@ -30,7 +30,7 @@ class _CreatePublicationState extends State<CreatePublication> {
   TextEditingController texte = TextEditingController();
 
   File? selectedFile; 
-  ImagePicker _picker=ImagePicker();
+  final ImagePicker _picker=ImagePicker();
   String messageAlerte="";
   bool waitPublication=false;
   String? code;
@@ -40,7 +40,7 @@ class _CreatePublicationState extends State<CreatePublication> {
 
   initSocket(){
     socket=IO.io(
-      apiLink+"/publication",
+      "$apiLink/publication",
       IO.OptionBuilder()
       .setPath("/amonak-api")
       .setTransports(["websocket"])
@@ -84,7 +84,7 @@ class _CreatePublicationState extends State<CreatePublication> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin:const EdgeInsets.symmetric(horizontal: 18),
+      margin:const EdgeInsets.symmetric(horizontal: 0),
       child: ListView(
         children: [
           headerBottomSheet(context, 'Faire Une publication'),
@@ -142,7 +142,7 @@ class _CreatePublicationState extends State<CreatePublication> {
                               child: Center(child:waitPublication==false? Text('publier',style: GoogleFonts.roboto(fontSize: 12,color: Colors.white)):const SizedBox(width: 18,height: 18,child: CircularProgressIndicator(color: Colors.white,strokeWidth: 1.5,),))
                             ),
                           ), 
-                          code!=null? alerteMessagePublication(messageAlerte,code!):Center()
+                          code!=null? alerteMessagePublication(messageAlerte,code!):const Center()
                         ],
                       ),
                     ),
@@ -226,7 +226,7 @@ class _CreatePublicationState extends State<CreatePublication> {
     return Container(
                           padding:const EdgeInsets.symmetric(vertical: 4,horizontal: 16),
                           decoration: BoxDecoration(
-                            color: Color.fromARGB(255, 84, 163, 87), 
+                            color: const Color.fromARGB(255, 84, 163, 87), 
                             borderRadius: BorderRadius.circular(36),
                           ),
                           child: Row(
@@ -303,7 +303,7 @@ class _CreatePublicationState extends State<CreatePublication> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Container(
+                    SizedBox(
                       width: 200,
                       child: Text('Fichier chargé :${selectedFile!.path.split('/').last}',style: GoogleFonts.roboto(fontSize:11,color:Colors.red,decoration: TextDecoration.underline),overflow: TextOverflow.visible,)),
                     

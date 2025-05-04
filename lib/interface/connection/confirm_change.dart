@@ -43,7 +43,7 @@ class _ResetPasswordState extends State<ConfirmChange> {
                       margin:const EdgeInsets.symmetric(vertical: 12),
                       child: Text(titre,style: GoogleFonts.roboto(fontWeight: FontWeight.bold,letterSpacing: 1),),
                     ),
-                    Container(
+                    SizedBox(
                       width: ScreenSize.width*0.75,
                       child: Text(description,style: GoogleFonts.roboto(fontSize: 13),)
                     )
@@ -130,7 +130,7 @@ class _ResetPasswordState extends State<ConfirmChange> {
           waitRequestReset=false;
         });
       }
-    }, child:waitRequestReset==false? Text(btnTexte.toUpperCase(),style: GoogleFonts.roboto(color: Colors.white),):SizedBox(width: 18,height: 18,child: CircularProgressIndicator(strokeWidth: 2,color: Colors.white,),));
+    }, child:waitRequestReset==false? Text(btnTexte.toUpperCase(),style: GoogleFonts.roboto(color: Colors.white),):const SizedBox(width: 18,height: 18,child: CircularProgressIndicator(strokeWidth: 2,color: Colors.white,),));
   }
 
   

@@ -1,6 +1,4 @@
-import 'dart:convert';
 import 'dart:io';
-import 'package:application_amonak/data/data_controller.dart';
 import 'package:application_amonak/prod.dart';
 import 'package:mime/mime.dart';
 import 'package:dio/dio.dart';

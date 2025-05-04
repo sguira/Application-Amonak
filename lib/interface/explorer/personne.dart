@@ -1,14 +1,9 @@
 import 'dart:convert';
 
-import 'package:application_amonak/colors/colors.dart';
 import 'package:application_amonak/data/data_controller.dart';
 import 'package:application_amonak/services/user.dart';
-import 'package:application_amonak/widgets/circular_progressor.dart';
-import 'package:application_amonak/widgets/error_snackbar.dart';
-import 'package:application_amonak/widgets/follow_user_widget.dart';
 import 'package:application_amonak/widgets/list_friend_widget.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:application_amonak/models/user.dart';
 class ListePersonnePage extends StatefulWidget {

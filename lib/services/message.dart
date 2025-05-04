@@ -7,7 +7,7 @@ import 'package:application_amonak/services/upLoadFile.dart';
 import 'package:http/http.dart' as http;
 class MessageService{
 
-  static final String url="$apiLink/messages";
+  static const String url="$apiLink/messages";
 
   static Future<http.Response> sendMessage({
     required MessageModel message, 

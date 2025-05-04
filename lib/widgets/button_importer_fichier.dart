@@ -11,7 +11,7 @@ buttonImportFile({
   }){
     return Container(
       margin:const EdgeInsets.symmetric(vertical: 4),
-      width:size?? null,
+      width:size,
       child: TextButton(
         onPressed: ()async{await function();},
         style: TextButton.styleFrom(

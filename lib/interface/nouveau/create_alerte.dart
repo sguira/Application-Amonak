@@ -26,7 +26,7 @@ class _CreateAlertePageState extends State<CreateAlertePage> {
   TextEditingController texte=TextEditingController();
 
   File? selectedFile;
-  ImagePicker _picker=ImagePicker();
+  final ImagePicker _picker=ImagePicker();
 
   bool waitAlerte=false; 
   TextEditingController description=TextEditingController();
@@ -40,8 +40,8 @@ class _CreateAlertePageState extends State<CreateAlertePage> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin:const EdgeInsets.symmetric(horizontal: 12),
-      child: Column(
+      margin:const EdgeInsets.symmetric(horizontal: 0),
+      child: ListView(
         children: [
           headerBottomSheet(context, 'Faire Une Alerte'),
           SingleChildScrollView(
@@ -132,7 +132,7 @@ class _CreateAlertePageState extends State<CreateAlertePage> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Container(
+                    SizedBox(
                       width: 200,
                       child: Text('Video chargée :${selectedFile!.path.split('\\').last}',style: GoogleFonts.roboto(fontSize:11,color:Colors.red,decoration: TextDecoration.underline),overflow: TextOverflow.visible,)),
                     

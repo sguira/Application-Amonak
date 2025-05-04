@@ -23,7 +23,7 @@ class PublicationSocket extends ChangeNotifier{
 
   _connexionSocket(){
       socket=IO.io(
-        apiLink+"/publication", 
+        "$apiLink/publication", 
         IO.OptionBuilder()
         .setTransports(["websocket"])
         .setPath("/amonak-api")
@@ -48,7 +48,7 @@ class PublicationSocket extends ChangeNotifier{
       });
 
       socket!.onError((_){
-        print("Socket error");  
+        // print("Socket error");  
       });
 
       socket!.onDisconnect((_){
@@ -77,7 +77,7 @@ class PublicationSocket extends ChangeNotifier{
     required Map<String,dynamic> data
   }){
     socket!.on(event,(data)=>{
-      this.publication.insert(1, Publication.fromJson(data)),
+      publication.insert(1, Publication.fromJson(data)),
       notifyListeners()
     });
   }

@@ -12,14 +12,17 @@ import 'package:application_amonak/interface/accueils/home_tab_menu.dart';
 import 'package:application_amonak/local_storage.dart';
 import 'package:application_amonak/models/adresse.dart';
 import 'package:application_amonak/models/auth.dart';
+import 'package:application_amonak/models/notifications.dart';
 import 'package:application_amonak/models/user.dart';
 import 'package:application_amonak/prod.dart';
 import 'package:application_amonak/services/auths.dart';
+import 'package:application_amonak/services/notification.dart';
 import 'package:application_amonak/services/register.dart';
 import 'package:application_amonak/services/socket/notificationSocket.dart';
 import 'package:application_amonak/services/user.dart';
 import 'package:application_amonak/settings/weights.dart';
 import 'package:application_amonak/widgets/bottom_sheet_header.dart';
+import 'package:application_amonak/widgets/buildModalSheet.dart';
 import 'package:application_amonak/widgets/gradient_button.dart';
 import 'package:application_amonak/widgets/item_form.dart';
 import 'package:image_picker/image_picker.dart';
@@ -106,12 +109,10 @@ class _WelcomePageState extends State<WelcomePage> {
         tokenValue=token;
 
         if(token!=null){
-        await Login.checkToken(token).then((token) {
+        await Login.checkToken(token).then((token)async {
           
           print("Token status code ${value.statusCode}\n\n\n");
-          if(value.statusCode==200){
-            Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>const HomePageTab() ));
-          }
+          
         });
       }
       else{
@@ -165,7 +166,7 @@ class _WelcomePageState extends State<WelcomePage> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Container(
-                  margin: EdgeInsets.symmetric(vertical: 56),
+                  margin: const EdgeInsets.symmetric(vertical: 56),
                   child: Image.asset("assets/icons/amonak2.png",width: 220,)),
               ],
             ),
@@ -229,12 +230,9 @@ class _WelcomePageState extends State<WelcomePage> {
   }
 
    bottomSheetInscription(){
-    return showModalBottomSheet(
-      isScrollControlled: true,
-      context: context, builder: (context)=>SingleChildScrollView(
+    return showCustomModalSheetWidget(
       
-        child:const CreateAccount(),
-      ));
+      context: context, child:  const CreateAccount());
   }
 
   
@@ -301,6 +299,33 @@ class _WelcomePageState extends State<WelcomePage> {
     );
   }
 
+//chargement des données après login
+
+loadData() async{
+  return [
+    NotificationService.getNotification().then((value){
+      if(value.statusCode==200){
+        for(var item in jsonDecode(value.body)){
+          NotificationModel notif=NotificationModel.fromJson(item);
+          DataController.notifications.add(notif);
+        }
+      }
+    }),
+    UserService.getAllUser(param: {
+      'user':DataController.user!.id!, 
+      'friend':true.toString(),
+    }).then((value){
+      print("value status code amis ${value.statusCode}");
+      print("Amis :${jsonDecode(value.body)}");
+      for(var item in jsonDecode(value.body) as List){
+        DataController.friends.add(User.fromJson(item));
+      }
+    }).catchError((e){
+      print("Execption amis$e");
+    })
+
+  ];
+}
   
 
   bottomSheetConnectionWidget(){
@@ -313,167 +338,176 @@ class _WelcomePageState extends State<WelcomePage> {
     
     bool showError=false;
     String errorMessage='Problème';
-    return showModalBottomSheet(context: context,
-    isScrollControlled: true,
-    builder: (context){
-      return Container(
-        margin:const EdgeInsets.symmetric(horizontal: 25,vertical: 18),
-        height: 420,
-        child: StatefulBuilder(
-          builder: (context,setState_) {
-            return Padding(
-              padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
-              child:ListView(
-                  children: [
-                    // headerBottomSheet(context, 'Authentification'),
-                    Container(
-                      margin:const EdgeInsets.symmetric(vertical: 22),
-                      child:Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children:[
-                          // const Spacer(flex: 2,),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text("Se Connecter",style:GoogleFonts.roboto(fontSize:20,fontWeight:FontWeight.w500)),
-                              Container(
-                                width: ScreenSize.width*0.70,
-                                child: Text("Nous sommes content de vous revoir ! Reprenons où les choses se sont arrétées.",style: GoogleFonts.roboto(fontSize:13),))
-                            ],
-                          ),
-                          const Spacer(),
-                          IconButton(onPressed: (){
-                            Navigator.pop(context);
-                          }, icon:const Icon(Icons.close))
-                        ]
-                      )
-                    ),
-                    Container(
-                      child: Form(
-                        key:logingForm,
-                        child: Column(
-                          children: [
-                            itemForm(hint: 'Ex. sguira96@gmail.com', label: "Nom d'utilisateur",controller: userName,requiet: true), 
-                            itemForm(hint: '****', label: "Mot de passe",controller: passWord,requiet: true),
-                            const SizedBox(height:22 ,),
-                            if(showError==true)
-                            widgetErrorAlert(errorMessage, setState_, showError),
+    return showCustomModalSheetWidget(context: context,
+    
+    child: 
+       Container(
+        
+        
+        child: Container(
+          margin:const EdgeInsets.symmetric(horizontal: 25,vertical: 18),
+          height: 420,
+          child: StatefulBuilder(
+            builder: (context,setState_) {
+              return Padding(
+                padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+                child:ListView(
+                    children: [
+                      // headerBottomSheet(context, 'Authentification'),
+                      Container(
+                        margin:const EdgeInsets.symmetric(vertical: 22),
+                        child:Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children:[
+                            // const Spacer(flex: 2,),
                             Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                GestureDetector(
-                                  onTap: (){
-                                    Navigator.pop(context);
-                                    showModalBottomSheet(context: context, builder:(context)=> ResetPassword());
-                                  },
-                                  child: Container(
-                                    margin:const EdgeInsets.symmetric(vertical: 12),
-                                    child: Text('Mot de passe oublié ?',style: GoogleFonts.roboto(fontSize: 15,decoration: TextDecoration.underline),),
-                                  ),
-                                ),
-                                Container(
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(36),
-                                    gradient:const LinearGradient(
-                                      colors: [
-                                       Color.fromRGBO(97, 81, 212, 1), 
-                                                        // Color.fromARGB(255, 9, 51, 189),
-                                      Color.fromRGBO(132, 62, 201, 1)
-                                      ]
-                                      )
-                                  ),
-                                  child: TextButton(
-                                    style: TextButton.styleFrom(
-                                      
+                                Text("Se Connecter",style:GoogleFonts.roboto(fontSize:20,fontWeight:FontWeight.w500)),
+                                SizedBox(
+                                  width: ScreenSize.width*0.70,
+                                  child: Text("Nous sommes content de vous revoir ! Reprenons où les choses se sont arrétées.",style: GoogleFonts.roboto(fontSize:13),))
+                              ],
+                            ),
+                            const Spacer(),
+                            IconButton(onPressed: (){
+                              Navigator.pop(context);
+                            }, icon:const Icon(Icons.close))
+                          ]
+                        )
+                      ),
+                      Container(
+                        child: Form(
+                          key:logingForm,
+                          child: Column(
+                            children: [
+                              itemForm(hint: 'Ex. sguira96@gmail.com', label: "Nom d'utilisateur",controller: userName,requiet: true), 
+                              itemForm(hint: '****', label: "Mot de passe",controller: passWord,requiet: true),
+                              const SizedBox(height:22 ,),
+                              if(showError==true)
+                              widgetErrorAlert(errorMessage, setState_, showError),
+                              Column(
+                                children: [
+                                  GestureDetector(
+                                    onTap: (){
+                                      Navigator.pop(context);
+                                      showCustomModalSheetWidget(context: context,child: const ResetPassword());
+                                    },
+                                    child: Container(
+                                      margin:const EdgeInsets.symmetric(vertical: 12),
+                                      child: Text('Mot de passe oublié ?',style: GoogleFonts.roboto(fontSize: 15,decoration: TextDecoration.underline),),
                                     ),
-                                    onPressed: (){
-                                      if(logingForm.currentState!.validate()){
-                                        setState_(() {
-                                          wailLoging=!wailLoging;
-                                          Auth auth=Auth(userName: userName.text,passWord: passWord.text);
-                                          Login.authenticated(auth).then((value){
-                                            setState_((){
-                                              wailLoging=false;
-                                            });
-                                            print("\n\n\n valeur retour $value \n\n");
-                                            if(value.statusCode!=200){
-                                             if(jsonDecode(value.body)['message']=='validation.accountNotActivate'){
-                                              Navigator.pop(context);
-                                              showModalBottomSheet(context: context, builder: (context)=> ConfirmCodeActivation(email:userName.text,) );
-                                             }
-                                             else{
-                                               errorMessage="Verifiez vos coordonnées";
-                                                setState_((){
-                                                  showError=true;
-                                                  Future.delayed(const Duration(milliseconds: 3000)).then((value){
-                                                    setState_((){
-                                                      showError=false;
+                                  ),
+                                  Container(
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(36),
+                                      gradient:const LinearGradient(
+                                        colors: [
+                                         Color.fromRGBO(97, 81, 212, 1), 
+                                                          // Color.fromARGB(255, 9, 51, 189),
+                                        Color.fromRGBO(132, 62, 201, 1)
+                                        ]
+                                        )
+                                    ),
+                                    child: TextButton(
+                                      style: TextButton.styleFrom(
+                                        
+                                      ),
+                                      onPressed: (){
+                                        if(logingForm.currentState!.validate()){
+                                          setState_(() {
+                                            wailLoging=!wailLoging;
+                                            Auth auth=Auth(userName: userName.text,passWord: passWord.text);
+                                            Login.authenticated(auth).then((value)async{
+                                              setState_((){
+                                                wailLoging=false;
+                                              });
+                                              print("\n\n\n valeur retour $value \n\n");
+                                              if(value.statusCode!=200){
+                                               if(jsonDecode(value.body)['message']=='validation.accountNotActivate'){
+                                                Navigator.pop(context);
+                                                showCustomModalSheetWidget(context: context, child: ConfirmCodeActivation(email:userName.text,) );
+                                               }
+                                               else{
+                                                 errorMessage="Verifiez vos coordonnées";
+                                                  setState_((){
+                                                    showError=true;
+                                                    Future.delayed(const Duration(milliseconds: 3000)).then((value){
+                                                      setState_((){
+                                                        showError=false;
+                                                      });
                                                     });
                                                   });
-                                                });
-                                             }
-                                            }
-                                            else{
-                                              LocalStorage.saveToken(jsonDecode(value.body)['accessToken'] as String).then((value){
-                                                print("\n\n\n valeur retour $value \n\n");
-                                                
-                                                LocalStorage.saveUserId(DataController.user!.id!).then((value){
-                                                  UserService.getAllUser(param: {
-                                                    'user':DataController.user!.id!, 
-                                                    'friend':true.toString(),
-                                                    
-                                                  }).then((value){
-                                                    print("value status code amis ${value.statusCode}");
-                                                    print("Amis :${jsonDecode(value.body)}");
-                                                    for(var item in jsonDecode(value.body) as List){
-                                                      DataController.friends.add(User.fromJson(item));
-                                                    }
-                                                  }).catchError((e){
-                                                    print("Execption amis$e");
+                                               }
+                                              }
+                                              else{
+                                                LocalStorage.saveToken(jsonDecode(value.body)['accessToken'] as String).then((value){
+                                                  print("\n\n\n valeur retour $value \n\n");
+                                                  
+                                                  LocalStorage.saveUserId(DataController.user!.id!).then((value){
+                                                    loadData();
                                                   });
-                                                  Navigator.push(context, MaterialPageRoute(builder: (context)=>const HomePageTab()));
+            
+                                                  
                                                 });
+                                              //   NotificationService.getNotification().then((value){
+                                              //   print("Notifications liste status code ${value.statusCode}");
+                                              //   if(value.statusCode==200){
+                                              //     print(value.body);
+                                              //     DataController.notifications=[];
+                                              //     for(var notif in jsonDecode(value.body) as List){
+                                                      
+                                              //         NotificationModel notificationModel=NotificationModel.fromJson(notif);
+                                                      
+                                              //         setState(() {
+                                              //           DataController.notifications.add(notificationModel);
+                                              //         });
+                                              //     }
+                                              //   }
                                                 
+                                              // });
+                                              Navigator.push(context, MaterialPageRoute(builder: (context)=>const HomePageTab()));
+                                                
+                                              }
+                                            }).catchError((e){
+                                              setState_((){
+                                                wailLoging=false;
+                                                errorMessage='Un problème est survenue';
+                                                showError=true;
                                               });
-                                              
-                                            }
-                                          }).catchError((e){
-                                            setState_((){
-                                              wailLoging=false;
-                                              errorMessage='Un problème est survenue';
-                                              showError=true;
                                             });
-                                          });
-                                      });
-                                      }
+                                        });
+                                        }
+                                      },
+                                      child:Center(child: wailLoging==false? Text('Connexion',style: GoogleFonts.roboto(color:Colors.white),):const SizedBox(width: 28,height: 28, child: CircularProgressIndicator(color: Colors.white,strokeWidth: 1.5,))  )
+                                    ),
+                                  ),
+                                  GestureDetector(
+                                    onTap: (){
+                                      Navigator.pop(context);
+                                      bottomSheetInscription();
                                     },
-                                    child:Center(child: wailLoging==false? Text('Connexion',style: GoogleFonts.roboto(color:Colors.white),):SizedBox(width: 28,height: 28, child: CircularProgressIndicator(color: Colors.white,strokeWidth: 1.5,))  )
+                                    child: Container(
+                                      margin:const EdgeInsets.symmetric(vertical: 12),
+                                      child: Text("Je n'ai pas encore de compte",style: GoogleFonts.roboto(fontSize: 15,decoration: TextDecoration.underline),),
+                                    ),
                                   ),
-                                ),
-                                GestureDetector(
-                                  onTap: (){
-                                    Navigator.pop(context);
-                                    bottomSheetInscription();
-                                  },
-                                  child: Container(
-                                    margin:const EdgeInsets.symmetric(vertical: 12),
-                                    child: Text("Je n'ai pas encore de compte",style: GoogleFonts.roboto(fontSize: 15,decoration: TextDecoration.underline),),
-                                  ),
-                                ),
-                              ],
-                            )
-                          ],
+                                ],
+                              )
+                            ],
+                          ),
                         ),
-                      ),
-                    )
-                  ],
-                ),
-              
-            );
-          }
+                      )
+                    ],
+                  ),
+                
+              );
+            }
+          ),
         ),
-      );
-    });
+      )
+    );
   }
 
   Container widgetErrorAlert(String errorMessage, StateSetter setState_, bool showError) {
@@ -505,9 +539,9 @@ class _WelcomePageState extends State<WelcomePage> {
   
 
  gotoChangePassword()async{
-    await Future.delayed(Duration(seconds: 5));
+    await Future.delayed(const Duration(seconds: 5));
     Navigator.pop(context);
-    return showModalBottomSheet(context: context, builder: (context)=>ChangePassword() );
+    return showModalBottomSheet(context: context, builder: (context)=>const ChangePassword() );
   }
 
   TextButton buttonAction( Function onPressed, String btnTexte) {
@@ -521,6 +555,6 @@ class _WelcomePageState extends State<WelcomePage> {
           waitRequestReset=false;
         });
       }
-    }, child:waitRequestReset==false? Text(btnTexte.toUpperCase(),style: GoogleFonts.roboto(color: Colors.white),):SizedBox(width: 18,height: 18,child: CircularProgressIndicator(strokeWidth: 2,color: Colors.white,),));
+    }, child:waitRequestReset==false? Text(btnTexte.toUpperCase(),style: GoogleFonts.roboto(color: Colors.white),):const SizedBox(width: 18,height: 18,child: CircularProgressIndicator(strokeWidth: 2,color: Colors.white,),));
   }
 }

@@ -17,7 +17,7 @@ class AuthSocket{
   }){
     initializeData();
     
-    socket = IO.io(apiLink+'/auth',
+    socket = IO.io('$apiLink/auth',
       IO.OptionBuilder()
       .setTransports(["websocket"])
       .setPath(path)
@@ -47,7 +47,7 @@ class AuthSocket{
     });
     
     socket.onError((value){
-      print("Socket Error $value \n\n");
+      // print("Socket Error $value \n\n");
     });
 
     socket.onDisconnect((_){

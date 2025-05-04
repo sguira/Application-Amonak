@@ -14,6 +14,7 @@ import 'package:application_amonak/services/product.dart';
 import 'package:application_amonak/services/publication.dart';
 import 'package:application_amonak/settings/weights.dart';
 import 'package:application_amonak/widgets/btnLike.dart';
+import 'package:application_amonak/widgets/buildModalSheet.dart';
 import 'package:application_amonak/widgets/buttonComment.dart';
 import 'package:application_amonak/widgets/commentaire.dart';
 import 'package:application_amonak/widgets/notification_button.dart';
@@ -49,7 +50,7 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
   bool showFavourite=false;
   bool isExpanded=false;
   nombreComment()async{
-    await CommentaireService.getCommentByPublication(widget.videoItem.id!).then((value){
+    await CommentaireService.getCommentByPublication(pubId: widget.videoItem.id!).then((value){
       if(value.statusCode.toString()=='200'){
         setState(() {
           nbComment=(jsonDecode(value.body) as List).length;
@@ -320,7 +321,7 @@ List likes=[];
           ],
         ),
       )
-    ):Center();
+    ):const Center();
   }
 
   calculateDiffenceDate({
@@ -347,7 +348,7 @@ List likes=[];
             
             children: [
               TextSpan(
-                text: "${isExpanded==false? super.widget.videoItem.content!.substring(0,100):widget.videoItem.content!}", 
+                text: isExpanded==false? super.widget.videoItem.content!.substring(0,100):widget.videoItem.content!, 
                 style: GoogleFonts.roboto(color:Colors.white)
               ), 
               TextSpan(
@@ -389,7 +390,7 @@ List likes=[];
                       ButtonLike(pub: widget.videoItem,color: Colors.white,),
                       
                       // itemButton(double.parse("80000"),Icons.repeat,false,onComment),
-                      CommentaireButton(pubId: widget.videoItem.id!,color: Colors.white,),
+                      CommentaireButton(pubId: widget.videoItem.id!,color: Colors.white,pub: widget.videoItem,),
                       Container(
                         child: Column(
                           children: [
@@ -447,7 +448,7 @@ List likes=[];
         Container(
           child: Text(widget.videoItem.userName!.toUpperCase(),style: GoogleFonts.roboto(fontWeight: FontWeight.w600, fontSize:14,color: Colors.white),),
         ), 
-        ButtonNotificationWidget(
+        const ButtonNotificationWidget(
           color: Colors.white,
         )
       ],),
@@ -505,13 +506,8 @@ List likes=[];
 
   onComment(){
     print("Commentaire \n\n");
-    return showModalBottomSheet(
-      context: context,
-      enableDrag: true, 
-      isScrollControlled: true,
-      builder: (context)=>Container(
-      width: ScreenSize.height*0.6,
-      child: CommentaireWidget(pubId: widget.videoItem.id)));
+    return showCustomModalSheetWidget(context: context,child: CommentaireWidget(pubId: widget.videoItem.id,pub:widget.videoItem) );
+    
   }
 
   likePublication()async{
@@ -562,7 +558,7 @@ class _HeartAnimationState extends State<HeartAnimation> with TickerProviderStat
   void initState() {
     // TODO: implement initState
     super.initState();
-    _controllerAnimation=AnimationController(vsync: this,duration: Duration(milliseconds: 800));
+    _controllerAnimation=AnimationController(vsync: this,duration: const Duration(milliseconds: 800));
 
     scaleAnimation=Tween<double>(
       begin: 0.5, 

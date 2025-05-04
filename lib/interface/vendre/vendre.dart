@@ -1,19 +1,10 @@
 import 'dart:convert';
 
-import 'package:application_amonak/colors/colors.dart';
 import 'package:application_amonak/interface/vendre/WidgetVenteContainer.dart';
-import 'package:application_amonak/interface/vendre/congrat.dart';
 import 'package:application_amonak/models/article.dart';
-import 'package:application_amonak/models/publication.dart';
 import 'package:application_amonak/services/product.dart';
-import 'package:application_amonak/settings/weights.dart';
-import 'package:application_amonak/widgets/gradient_button.dart';
 import 'package:application_amonak/widgets/wait_widget.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:intl/intl.dart';
 class VendrePage extends StatefulWidget {
   final String? articleId;
   final ArticleModel? article;

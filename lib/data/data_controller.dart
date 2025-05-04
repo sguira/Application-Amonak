@@ -1,3 +1,4 @@
+import 'package:application_amonak/models/notifications.dart';
 import 'package:application_amonak/models/user.dart';
 class DataController{
 
@@ -150,8 +151,10 @@ class DataController{
   static List videoControllerHistory=[];
   static String searchQuery="";
 
-  static List<dynamic> notifications=[]; 
+  static List<NotificationModel> notifications=[]; 
   static List<User> friends=[];
+
+  
 
   static List<Map<String,String>> personnes=[
     {
@@ -267,19 +270,20 @@ class DataController{
   }){
     
     DateTime now=DateTime.now();
-    int second=now.difference(date).inSeconds;
-    if(second<60){
-      return "$second s";
-    }
-    else if(second<3600){
-      return "${(second/60).round()} m";
-    }
-    else if(second<86400){
-      return "${(second/3600).round()} h";
-    }
-    else if(second<2592000){
-      return "${(second/86400).round()} j";
-    }
+    int seconds=now.difference(date).inSeconds;
+    if (seconds < 60) {
+    return "$seconds s";
+  } else if (seconds < 3600) {
+    return "${(seconds / 60).round()} m";
+  } else if (seconds < 86400) {
+    return "${(seconds / 3600).round()} h";
+  } else if (seconds < 2592000) { // moins de 30 jours
+    return "${(seconds / 86400).round()} j";
+  } else if (seconds < 31536000) { // moins d'un an
+    return "${(seconds / 2592000).round()} mois";
+  } else {
+    return "${(seconds / 31536000).round()} an${(seconds / 31536000).round() > 1 ? 's' : ''}";
+  }
   }
 
 }

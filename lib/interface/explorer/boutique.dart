@@ -68,7 +68,7 @@ class _BoutiquePageState extends State<BoutiquePage> {
       }),
       builder: (context, snapshot ){
         if(snapshot.connectionState==ConnectionState.waiting){
-          return WaitWidget();
+          return const WaitWidget();
         }
         if(snapshot.hasError){
           return const Text("Une erreur est survenue");

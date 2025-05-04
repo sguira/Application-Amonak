@@ -57,7 +57,7 @@ class _GestionProfilePageState extends State<GestionProfilePage> {
                   ),
                   body: PageView(
                     children: [
-                      ListeNotification(),
+                      const ListeNotification(),
                       Container()
                     ],
                   ),
@@ -76,7 +76,9 @@ class _GestionProfilePageState extends State<GestionProfilePage> {
       child: ListView.builder(
         itemCount: notifications.length,
         itemBuilder: (context,index){
-          return ItemNotification(notification: notifications[index]);
+          return null;
+        
+          // return ItemNotification(notification: notifications[index]);
         },
       ),
     );

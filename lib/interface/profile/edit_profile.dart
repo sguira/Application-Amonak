@@ -57,7 +57,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
         child: ListView(
           children: [
             Container(
-              margin: EdgeInsets.symmetric(vertical: 18),
+              margin: const EdgeInsets.symmetric(vertical: 18),
               alignment: Alignment.center,
               child: Text("Modifier Mon profil".toUpperCase(),style: GoogleFonts.roboto(fontWeight: FontWeight.w600),),
             ), 
@@ -101,6 +101,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                           if(value!.isEmpty){
                             return 'Veuillez entrer votre description';
                           }
+                          return null;
                         },
                         maxLines: 4,
                         style: GoogleFonts.roboto(fontSize:12),

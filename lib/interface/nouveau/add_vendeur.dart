@@ -31,7 +31,7 @@ class _BecomeSellerState extends State<BecomeSeller> {
 
   bool waitSend=false;
 
-  ImagePicker _picker=ImagePicker();
+  final ImagePicker _picker=ImagePicker();
 
   int currentIndex=1;
 
@@ -57,7 +57,7 @@ class _BecomeSellerState extends State<BecomeSeller> {
         child: ListView(
           children: [
             Container(
-              margin: EdgeInsets.symmetric(vertical: 18,horizontal: 8),
+              margin: const EdgeInsets.symmetric(vertical: 18,horizontal: 8),
               child: Text("""Avec le profil vendeur, vos articles mis en vente pourront être payé directement en ligne ou à la livraison. Le client n’a plus besoin de vous contacter avant d’acheter. Vous bénéficiez par ailleurs de la possibilité de gérer et personnaliser votre boutique. Un profil vendeur, c’est l’équivalent d’un site e-commerce.
             Ce formulaire, permettra à notre équipe d’étudier votre profil afin de vous confirmer officiellement comme vendeur Amonak.""",style: GoogleFonts.roboto(fontSize: 10),textAlign: TextAlign.center,),
             ), 
@@ -117,7 +117,7 @@ class _BecomeSellerState extends State<BecomeSeller> {
                   child:currentIndex==index?const Icon(Icons.check,color:Colors.white,size: 16,):null,
                 ),
                 const SizedBox(width: 4,),
-                Container(
+                SizedBox(
                   width: 70,
                   child: Text(label,style: GoogleFonts.roboto(fontSize: 13),overflow: TextOverflow.ellipsis,) )
               ],
@@ -271,7 +271,7 @@ class _BecomeSellerState extends State<BecomeSeller> {
           Container(
             child: Text("Comment souhaitez vous recevoir l’argent de vos acheté sur Amonak ?",style: GoogleFonts.roboto(fontSize: 14),),
           ), 
-          SizedBox(height: 22), 
+          const SizedBox(height: 22), 
           Container(
             alignment: Alignment.center,
             margin:const EdgeInsets.symmetric(horizontal: 16),

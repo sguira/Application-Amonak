@@ -16,7 +16,7 @@ class WaitWidget extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.center,
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          SpinKitWaveSpinner(color: couleurPrincipale),
+          const SpinKitWaveSpinner(color: couleurPrincipale),
           if(label!=null)
           Container(
             child: Text(label!,style: GoogleFonts.roboto(),),

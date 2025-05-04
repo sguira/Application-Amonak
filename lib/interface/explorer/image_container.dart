@@ -1,6 +1,8 @@
 import 'dart:convert';
 
+import 'package:application_amonak/colors/colors.dart';
 import 'package:application_amonak/data/data_controller.dart';
+import 'package:application_amonak/interface/details/details_publication.dart';
 import 'package:application_amonak/interface/explorer/videoPlayerWidget.dart';
 import 'package:application_amonak/models/publication.dart';
 import 'package:application_amonak/services/commentaire.dart';
@@ -10,7 +12,9 @@ import 'package:application_amonak/services/socket/notificationSocket.dart';
 import 'package:application_amonak/services/socket/publication.dart';
 import 'package:application_amonak/settings/weights.dart';
 import 'package:application_amonak/widgets/commentaire.dart';
+import 'package:application_amonak/widgets/error_snackbar.dart';
 import 'package:application_amonak/widgets/publication_card.dart';
+import 'package:application_amonak/widgets/share_widget.dart';
 import 'package:application_amonak/widgets/text_expanded.dart';
 import 'package:application_amonak/widgets/zone_commentaire.dart';
 import 'package:flutter/material.dart';
@@ -37,9 +41,14 @@ class _ImageSectionState extends State<ItemPublication> {
   late String idLike;
   late PublicationSocket publicationSocket;
   late Notificationsocket notificationsocket;
+  bool waitShare=false;
+
+  bool wantedShare=false;
+  String currentPubToShare="";
+  TextEditingController shareMessage=TextEditingController();
 
   getNumberComment(){
-    CommentaireService.getCommentByPublication(widget.pub.id!).then((value) {
+    CommentaireService.getCommentByPublication(pubId: widget.pub.id!).then((value) {
       if(value.statusCode==200){
         setState(() {
           nbComment=(jsonDecode(value.body) as List).length;
@@ -104,26 +113,42 @@ class _ImageSectionState extends State<ItemPublication> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-                  // width: ScreenSize.width*0.9,
-                  margin:const EdgeInsets.symmetric(horizontal: 16,vertical: 6),
-                  padding:const EdgeInsets.symmetric(vertical: 2,horizontal: 12),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(4),
-                    border: Border.all(
-                      width: 1, 
-                      color: Colors.black12
-                    )
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start, 
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      headerBoutique(widget.pub, 1),
-                      bodyContainer(widget.pub),
-                      footerContainer(widget.pub)
-                    ],
-                  ),
+    return Column(
+      children: [
+        
+        Container(
+                      // width: ScreenSize.width*0.9,
+                      margin:const EdgeInsets.symmetric(horizontal: 8,vertical: 6),
+                      padding:const EdgeInsets.symmetric(vertical: 2,horizontal: 12),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(4),
+                        border: Border.all(
+                          width: 1, 
+                          color: Colors.black12
+                        )
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start, 
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          
+                          headerBoutiquecustom(user: widget.pub.user!,dateCreation: widget.pub.dateCreation!, style: 1,typeLateralBtn: "",context: context),
+                          InkWell(
+                            onTap: (){
+                             showModalBottomSheet(context: context,
+                             isScrollControlled: true,
+                            //  shape: RoundedRectangleBorder(
+                            //   borderRadius: BorderRadius.circular(11)
+                            //  ),
+                             builder: (context)=>DetailsPublication(pubId: widget.pub.id!) );
+                            },
+                            child: bodyContainer(widget.pub),
+                          ),
+                          footerContainer(widget.pub)
+                        ],
+                      ),
+        ),
+      ],
     );
   }
 
@@ -159,7 +184,14 @@ class _ImageSectionState extends State<ItemPublication> {
       // ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(11),
-        child:image!=''?Image.network(image!): Image.asset("assets/medias/user.jpg",fit: BoxFit.cover,)),
+        child:image!=''?Image.network(image!,errorBuilder: (context, error, stackTrace) {
+                                return Image.asset(
+                                    "assets/medias/profile.jpg",
+                                    fit: BoxFit.cover,
+                                    width: 48,
+                                    height: 48,
+                                  );
+                              },): Image.asset("assets/medias/profile.jpg",fit: BoxFit.cover,)),
     );
   }
 
@@ -180,7 +212,13 @@ class _ImageSectionState extends State<ItemPublication> {
               itemDescription("$nbLike", "Likes"), 
               GestureDetector(
                 onTap: (){
-                  showBottomSheet(context: context, builder: (context)=>CommentaireWidget(pubId: publication.id));
+                  showBottomSheet(
+                    context: context,
+                    elevation: 10, 
+                    showDragHandle: true,
+                    
+                    enableDrag: true,
+                     builder: (context)=>CommentaireWidget(pubId: publication.id,pub: publication, ));
                 },
                 child: itemDescription(nbComment.toString(), "Commentaires"),
               ),
@@ -204,7 +242,15 @@ class _ImageSectionState extends State<ItemPublication> {
               Container(
                 child: IconButton(onPressed: (){
                   // zoneCommentaire(context, pub, pubId)
-                  onComment();
+                  showModalBottomSheet(
+                    enableDrag: true,
+                    elevation: 0,
+                    showDragHandle: true,
+                    isScrollControlled: true,
+
+                    useSafeArea: true,
+
+                    context: context, builder: (context)=>DetailsPublication(pubId: widget.pub.id!) );
                 }, icon:const Icon(Icons.comment)),
               ),
               buttonIcon(Icons.repeat)
@@ -217,13 +263,45 @@ class _ImageSectionState extends State<ItemPublication> {
 
 onComment(){
     print("Commentaire \n\n");
-    return showBottomSheet(context: context, builder: (context)=>CommentaireWidget(pubId: widget.pub.id));
+    return showBottomSheet(context: context, builder: (context)=>CommentaireWidget(pubId: widget.pub.id,pub:widget.pub));
 }
   
 
-  Container buttonIcon(IconData icon) => Container(
-    margin:const EdgeInsets.symmetric(horizontal: 3),
-    child: Icon(icon,size: 22,));
+  Widget buttonIcon(IconData icon) => InkWell(
+    onTap: (){
+      setState(() {
+        if(wantedShare==false){
+           showModalBottomSheet(
+            
+            context: context,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(6)
+            ),
+            builder: (context)=>Padding(
+              padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+              child:ShareWidget(itemPub: widget.pub,) )
+            );
+        }
+        else{
+          wantedShare=false;
+        }
+      });
+    },
+    child: Container(
+      margin:const EdgeInsets.symmetric(horizontal: 3),
+      child: Icon(icon,size: 22,)),
+  );
+
+  sharePublication(Publication pub){
+
+    Publication sharePub=pub;
+
+    sharePub.share=DataController.user!.id;
+    sharePub.shareMessage=shareMessage.text;
+
+    // PublicationService.
+    
+  }
 
   itemDescription(String value,String label){
     return Container(
@@ -233,7 +311,7 @@ onComment(){
         children: [
           Text(NumberFormat.compact(locale: 'fr', ).format(int.parse(value)),style: GoogleFonts.roboto(fontWeight: FontWeight.w600,fontSize: 12),),
           const SizedBox(width: 2,), 
-          Container(
+          SizedBox(
             width: 32,
             child: Text(label,style: GoogleFonts.roboto(fontSize: 11),overflow: TextOverflow.ellipsis,))
         ],
@@ -315,3 +393,4 @@ onComment(){
   }
 
 }
+

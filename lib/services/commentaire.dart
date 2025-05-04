@@ -22,10 +22,14 @@ class CommentaireService{
     });
   }
 
-  static Future<http.Response> getCommentByPublication(String pubId)async{
+  static Future<http.Response> getCommentByPublication({
+    required String pubId, 
+    int? limite
+  })async{
     final Uri uri=Uri.parse("$apiLink/comments").replace(
       queryParameters: {
-        'publication':pubId
+        'publication':pubId, 
+        'limit':limite!=null?limite.toString():null
       }
     );
     return await http.get(uri).then((value) {

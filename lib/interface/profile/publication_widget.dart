@@ -14,7 +14,7 @@ class ArticleWidget extends StatelessWidget {
       child: Wrap(
         children: [
           for(var item in DataController.articles)
-          Container(
+          SizedBox(
             width: ScreenSize.width*0.5,
             height: ScreenSize.width*0.5,
             child: Image.network("https://picsum.photos/200/300",fit: BoxFit.cover,),

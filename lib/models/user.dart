@@ -148,7 +148,7 @@ class User{
   afficherUser(){
     print("Utilisateur".toUpperCase());
     print("----------------------");
-    print("Nom: ${firstName}\tEmail:${email}\tPassword:${password} LastName:$lastName");
+    print("Nom: $firstName\tEmail:$email\tPassword:$password LastName:$lastName");
   }
 
 }

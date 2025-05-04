@@ -7,8 +7,6 @@ import 'package:application_amonak/models/file.dart';
 import 'package:application_amonak/models/user.dart';
 // import 'package:get_thumbnail_video/index.dart';
 // import 'package:get_thumbnail_video/video_thumbnail.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:path_provider/path_provider.dart';
 // import 'package:video_compress/video_compress.dart';
 
 class ArticleModel{

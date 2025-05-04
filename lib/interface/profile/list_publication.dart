@@ -13,7 +13,7 @@ class _ListePublicationState extends State<ListePublication> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      child: SingleChildScrollView(
+      child: const SingleChildScrollView(
         child: Wrap(
           children: [
             // for(var item in DataController.publications)

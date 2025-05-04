@@ -103,7 +103,7 @@ class _DetailArticleState extends State<DetailArticle> {
               children: [
                 
                 
-                Container(
+                SizedBox(
                   width: ScreenSize.width*0.75,
                   child: Column(
                     children: [
@@ -131,9 +131,10 @@ class _DetailArticleState extends State<DetailArticle> {
 
   Container formContainer(BuildContext context) {
     return Container(
-      margin: EdgeInsets.only(left: 16),
+      margin: const EdgeInsets.only(left: 16),
             child: Column(
               children: [
+                TextFieldDisable(label: "Montant Total", value: NumberFormat.currency(locale: 'fr',decimalDigits: 0,symbol: widget.article.currency).format(widget.article.livraison)),
                 TextFieldDisable(label: "Livraison", value: NumberFormat.currency(locale: 'fr',decimalDigits: 0,symbol: widget.article.currency).format(widget.article.livraison)), 
                 TextFieldDisable(label: "Frais", value: NumberFormat.currency(locale: 'fr',decimalDigits: 0,symbol: widget.article.currency).format(widget.article.frais)), 
 
@@ -174,7 +175,7 @@ class _DetailArticleState extends State<DetailArticle> {
                       ButtonLike(pub: widget.article)
                     ],
                   )),
-                CommentaireButton(pubId: widget.article.id!)
+                CommentaireButton(pubId: widget.article.id!,pub:widget.article)
               ],
                               );
   }
@@ -218,7 +219,7 @@ class _DetailArticleState extends State<DetailArticle> {
                         border:const UnderlineInputBorder(
                           borderSide: BorderSide(color: Colors.grey,width: 3),
                         ), 
-                        enabledBorder: UnderlineInputBorder(
+                        enabledBorder: const UnderlineInputBorder(
                           borderSide: BorderSide(color: Colors.black,width: 2),
                         )
                       ),

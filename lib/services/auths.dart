@@ -9,7 +9,7 @@ import 'package:http/http.dart' as http;
 import 'package:application_amonak/models/user.dart';
 class Login{
 
-  static String server=apiLink+'/auths/login';
+  static String server='$apiLink/auths/login';
 
   static User? user;
   static Map<String,String> header={
