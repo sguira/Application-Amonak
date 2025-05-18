@@ -1,26 +1,35 @@
+import 'dart:convert';
+
+import 'package:application_amonak/colors/colors.dart';
+import 'package:application_amonak/data/data_controller.dart';
+import 'package:application_amonak/interface/accueils/home.dart';
 import 'package:application_amonak/interface/accueils/home_tab_menu.dart';
 import 'package:application_amonak/interface/accueils/welcome.dart';
 import 'package:application_amonak/local_storage.dart';
+import 'package:application_amonak/models/user.dart';
+import 'package:application_amonak/prod.dart';
 import 'package:application_amonak/services/auths.dart';
 import 'package:application_amonak/services/socket/chatProvider.dart';
 import 'package:application_amonak/services/socket/publication.dart';
+import 'package:application_amonak/services/user.dart';
 import 'package:application_amonak/settings/weights.dart';
 import 'package:flutter/material.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:provider/provider.dart';
 import 'package:application_amonak/services/socket/commentSocket.dart';
 import 'package:application_amonak/services/socket/notificationSocket.dart';
+import 'package:google_fonts/google_fonts.dart';
+
 void main() {
-  runApp(
-    MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (_)=>MessageSocket() ), 
-        ChangeNotifierProvider(create: (_)=>PublicationSocket()), 
-        ChangeNotifierProvider(create: (_)=>Commentsocket() ), 
-        ChangeNotifierProvider(create: (_)=>Notificationsocket() )
-      ], 
-     child:const MyApp(),
-    )
-  );
+  runApp(MultiProvider(
+    providers: [
+      ChangeNotifierProvider(create: (_) => MessageSocket()),
+      ChangeNotifierProvider(create: (_) => PublicationSocket()),
+      ChangeNotifierProvider(create: (_) => Commentsocket()),
+      ChangeNotifierProvider(create: (_) => Notificationsocket())
+    ],
+    child: const MyApp(),
+  ));
 }
 
 class MyApp extends StatefulWidget {
@@ -31,19 +40,70 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-
   late Notificationsocket notificationsocket;
+  bool isAuth = false;
+  bool loading = true;
+  veriticationUserIsConnect() async {
+    await LocalStorage.getToken().then((value) {
+      if (value != null) {
+        tokenValue = value;
+      }
+    }).catchError((e) {
+      setState(() {
+        loading = false;
+        isAuth = false;
+      });
+    });
+
+    try {
+      if (tokenValue != null) {
+        await LocalStorage.getDateTokenTimeout().then((value) {
+          if (value != null) {
+            print("La date est ${value}");
+            if (DateTime.parse(value).isAfter(DateTime.now())) {
+              // loadData();
+              LocalStorage.getUserId().then((value) async {
+                if (value != null) {
+                  UserService.getUser(userId: value).then((value) {
+                    if (value.statusCode == 200) {
+                      DataController.user =
+                          User.fromJson(jsonDecode(value.body));
+                      print("ok ok");
+                      setState(() {
+                        isAuth = true;
+                        loading = false;
+                      });
+                    }
+                  });
+                }
+              }).catchError((e) {
+                setState(() {
+                  loading = false;
+                  isAuth = false;
+                });
+              });
+            }
+          }
+        });
+      } else {
+        setState(() {
+          loading = false;
+          isAuth = false;
+        });
+      }
+    } catch (e) {
+      setState(() {
+        loading = false;
+        isAuth = false;
+      });
+    }
+  }
 
   @override
   void initState() {
-    
-    
-    
     super.initState();
     // notificationsocket=Notificationsocket();
-    verificationToken();
-
-    
+    veriticationUserIsConnect();
   }
 
   @override
@@ -52,41 +112,51 @@ class _MyAppState extends State<MyApp> {
     super.dispose();
   }
 
-  verificationToken()async{
-    await LocalStorage.getToken().then((token)async {
-      print("Valeur du token: $token");
-      if(token!=null){
-        await Login.checkToken(token).then((value) {
-          print("Token status code ${value.statusCode}\n\n\n");
-          if(value.statusCode==200){
-            Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>const HomePageTab() ));
-          }
-        });
-      }
-      else{
-
-      }
-    });
-  }
-
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    ScreenSize.width=MediaQuery.of(context).size.width;
-    ScreenSize.height=MediaQuery.of(context).size.height;
+    ScreenSize.width = MediaQuery.of(context).size.width;
+    ScreenSize.height = MediaQuery.of(context).size.height;
     return MaterialApp(
-      title: 'Flutter Demo',
-      debugShowCheckedModeBanner: false,
-      routes:{
-        '/home':(context) =>const HomePageTab()
-      },
-      theme: ThemeData(
-        
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
-        
+        title: 'Flutter Demo',
+        debugShowCheckedModeBanner: false,
+        routes: {'/home': (context) => const HomePageTab()},
+        theme: ThemeData(
+          colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+          useMaterial3: true,
+        ),
+        home: loading == true
+            ? const Loading()
+            : !isAuth
+                ? const WelcomePage()
+                : const HomePageTab());
+  }
+}
+
+class Loading extends StatelessWidget {
+  const Loading({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: couleurPrincipale.withAlpha(60),
+      body: Center(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              child: Image.asset("assets/icons/amonak2.png"),
+            ),
+            Container(
+              child: LoadingAnimationWidget.newtonCradle(
+                color: Colors.white,
+                size: 36,
+              ),
+            ),
+          ],
+        ),
       ),
-      home:const WelcomePage()
     );
   }
 }

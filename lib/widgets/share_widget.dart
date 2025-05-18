@@ -70,13 +70,12 @@ class _ShareWidgetState extends State<ShareWidget> {
                               height: 48,
                               errorBuilder: (context, error, stackTrace) {
                                 return Image.asset(
-                                    "assets/medias/profile.jpg",
-                                    fit: BoxFit.cover,
-                                    width: 48,
-                                    height: 48,
-                                  );
+                                  "assets/medias/profile.jpg",
+                                  fit: BoxFit.cover,
+                                  width: 48,
+                                  height: 48,
+                                );
                               },
-                              
                             ),
                     ),
                   ),

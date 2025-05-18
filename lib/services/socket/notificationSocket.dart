@@ -8,41 +8,38 @@ import 'package:flutter/material.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 
 class Notificationsocket extends ChangeNotifier {
-
   IO.Socket? socket;
-  List<dynamic> notification=[];
-  Notificationsocket(){
+  List<dynamic> notification = [];
+  Notificationsocket() {
     _initSocket();
   }
 
-  _initSocket(){
-      socket=IO.io(
-        "$apiLink/chat", 
+  _initSocket() {
+    socket = IO.io(
+        "$apiLink/chat",
         IO.OptionBuilder()
-        .setPath("/amonak-api")
-        .setTransports(["websocket"])
-        .enableMultiplex()
-        .setExtraHeaders(
-          {
-            "Authorization":"Bearer $tokenValue", 
-            "userId":DataController.user!.id
-          }
-        ).build()
-    );
+            .setPath("/amonak-api")
+            .setTransports(["websocket"])
+            .enableMultiplex()
+            .setExtraHeaders({
+              "Authorization": "Bearer $tokenValue",
+              "userId": DataController.user!.id
+            })
+            .build());
 
-    socket!.onConnect((_){
+    socket!.onConnect((_) {
       print("Connected to notificaation socket");
     });
 
-    socket!.onDisconnect((_){
+    socket!.onDisconnect((_) {
       print("Disconnected from notificaation socket");
     });
 
-    socket!.on("refreshNotificationBoxHandler", (data){
+    socket!.on("refreshNotificationBoxHandler", (data) {
       print("Nouvelle notification d: $data");
-      NotificationService.getNotification().then((value){
-        if(value.statusCode==200){
-          for(var item in jsonDecode(value.body) as List){
+      NotificationService.getNotification().then((value) {
+        if (value!.statusCode == 200) {
+          for (var item in jsonDecode(value.body) as List) {
             print("value:$item");
             notification.add(NotificationModel.fromJson(item));
           }
@@ -55,8 +52,7 @@ class Notificationsocket extends ChangeNotifier {
   emitNotificationEvent({
     required String event,
     required dynamic data,
-  }){
-
+  }) {
     socket!.emit(event, data);
   }
 
@@ -65,5 +61,4 @@ class Notificationsocket extends ChangeNotifier {
     socket!.close();
     super.dispose();
   }
-
 }

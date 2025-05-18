@@ -25,11 +25,11 @@ class _NewPageState extends State<NewPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: couleurPrincipale,
-      body: Column( 
+      body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
-            margin:const EdgeInsets.symmetric(vertical: 18,horizontal: 18),
+            margin: const EdgeInsets.symmetric(vertical: 18, horizontal: 18),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -42,42 +42,73 @@ class _NewPageState extends State<NewPage> {
                         mainAxisAlignment: MainAxisAlignment.start,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text("Voir nouveau",style: GoogleFonts.roboto(fontSize: 28,color: Colors.white,fontWeight: FontWeight.w400),textAlign: TextAlign.start,),
-                          Text("Voir loin",style: GoogleFonts.roboto(fontSize: 25,color: Colors.white,fontWeight: FontWeight.w400),textAlign: TextAlign.start,),
+                          Text(
+                            "Voir nouveau",
+                            style: GoogleFonts.roboto(
+                                fontSize: 28,
+                                color: Colors.white,
+                                fontWeight: FontWeight.w400),
+                            textAlign: TextAlign.start,
+                          ),
+                          Text(
+                            "Voir loin",
+                            style: GoogleFonts.roboto(
+                                fontSize: 25,
+                                color: Colors.white,
+                                fontWeight: FontWeight.w400),
+                            textAlign: TextAlign.start,
+                          ),
                         ],
                       ),
-                ),
-                const ButtonNotificationWidget(
-                  color: Colors.white,
-                )
+                    ),
+                    const ButtonNotificationWidget(
+                      color: Colors.white,
+                    )
                   ],
                 ),
-                if(DataController.user!.accountType!='seller')
-                Container(
-                  child: Row(
+                if (DataController.user!.accountType != 'seller')
+                  Container(
+                      child: Row(
                     children: [
-                      itemButtonWithIcon(label: 'Dévenez Vendeur',function: (){
-                        Navigator.push(context, MaterialPageRoute(builder: (context)=>const BecomeSeller() ));
-                      }),
+                      itemButtonWithIcon(
+                          label: 'Dévenez Vendeur',
+                          function: () {
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) =>
+                                        const BecomeSeller()));
+                          }),
                     ],
-                  )
-                )
+                  ))
               ],
             ),
           ),
           const Spacer(),
           Container(
-            margin:const EdgeInsets.symmetric(vertical: 18,horizontal: 18),
+            margin: const EdgeInsets.symmetric(vertical: 18, horizontal: 18),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    itemButtonWithIcon(label: 'Faire une alerte',icon: Icons.add_alert,function: bottomSheetAlerte),
-                    itemButtonWithIcon(label: 'Vendre en live',icon: Icons.favorite,function:(){}),
-                    itemButtonWithIcon(label: 'Faire une publication',icon: Icons.edit,function: bottomSheetPublication),
-                    itemButtonWithIcon(label: 'Vendre un article',icon: Icons.shopping_cart,function: vendreArticle),
+                    itemButtonWithIcon(
+                        label: 'Faire une alerte',
+                        icon: Icons.add_alert,
+                        function: bottomSheetAlerte),
+                    itemButtonWithIcon(
+                        label: 'Vendre en live',
+                        icon: Icons.favorite,
+                        function: () {}),
+                    itemButtonWithIcon(
+                        label: 'Faire une publication',
+                        icon: Icons.edit,
+                        function: bottomSheetPublication),
+                    itemButtonWithIcon(
+                        label: 'Vendre un article',
+                        icon: Icons.shopping_cart,
+                        function: vendreArticle),
                   ],
                 ),
               ],
@@ -88,66 +119,53 @@ class _NewPageState extends State<NewPage> {
     );
   }
 
-  vendreArticle(){
-    return showCustomModalSheetWidget(
-      context: context,
-      
-      child:  VendreArticle() 
-    );
+  vendreArticle() {
+    return showCustomModalSheetWidget(context: context, child: VendreArticle());
   }
 
-  itemButtonWithIcon({
-    required String label, 
-    IconData? icon, 
-    required Function function
-  }) {
+  itemButtonWithIcon(
+      {required String label, IconData? icon, required Function function}) {
     return Padding(
-      padding:const EdgeInsets.symmetric(vertical: 4),
+      padding: const EdgeInsets.symmetric(vertical: 4),
       child: TextButton(
-                      onPressed: (){
-                        function();
-                      },
-                      style: TextButton.styleFrom(
-                        backgroundColor: Colors.white, 
-                        padding:const EdgeInsets.symmetric(horizontal: 18,vertical: 12)
-                      ),
-                      child:Row(
-                        children: [
-                          if(icon!=null)
-                          Icon(icon),
-                          const SizedBox(width: 4,),
-                          Text(label,style: GoogleFonts.roboto(fontSize: 14),),
-                        ],
-                      )
-                    ),
+          onPressed: () {
+            function();
+          },
+          style: TextButton.styleFrom(
+              backgroundColor: Colors.white,
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 18, vertical: 12)),
+          child: Row(
+            children: [
+              if (icon != null) Icon(icon),
+              const SizedBox(
+                width: 4,
+              ),
+              Text(
+                label,
+                style: GoogleFonts.roboto(fontSize: 14),
+              ),
+            ],
+          )),
     );
   }
 
-  bottomSheetAlerte(){
+  bottomSheetAlerte() {
     return showCustomModalSheetWidget(
-      context: context,
-      
-      child:  Container(
-        constraints: BoxConstraints(
-          maxHeight: ScreenSize.height*0.8
-        ),
-        child:const CreateAlertePage(),
-      
-    ));
+        context: context,
+        child: Container(
+          constraints: BoxConstraints(maxHeight: ScreenSize.height * 0.8),
+          child: const CreateAlertePage(),
+        ));
   }
 
-  bottomSheetPublication(){
+  bottomSheetPublication() {
     return showCustomModalSheetWidget(
-      context: context,
-      child:
-       SingleChildScrollView(
-         child: Container(
-          constraints: BoxConstraints(
-            maxHeight: ScreenSize.height*0.7
-          ),
-          child:const CreatePublication()
-               ),
-       )
-    );
+        context: context,
+        child: SingleChildScrollView(
+          child: Container(
+              constraints: BoxConstraints(maxHeight: ScreenSize.height * 0.7),
+              child: const CreatePublication()),
+        ));
   }
 }

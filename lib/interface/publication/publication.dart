@@ -4,8 +4,8 @@ import 'package:application_amonak/colors/colors.dart';
 import 'package:application_amonak/data/data_controller.dart';
 import 'package:application_amonak/interface/accueils/video_player_widget.dart';
 import 'package:application_amonak/interface/boutique/details_boutique..dart';
-import 'package:application_amonak/interface/explorer/image_container.dart';
-import 'package:application_amonak/interface/explorer/videoPlayerWidget.dart';
+import 'package:application_amonak/interface/publication/image_container.dart';
+import 'package:application_amonak/interface/publication/videoPlayerWidget.dart';
 import 'package:application_amonak/models/publication.dart';
 import 'package:application_amonak/models/user.dart';
 import 'package:application_amonak/prod.dart';
@@ -34,7 +34,9 @@ class PublicationPage extends StatefulWidget {
   final String? type;
   final String? userId;
   final bool? hideLabel;
-  const PublicationPage({super.key, this.type, this.userId, this.hideLabel});
+  final List<Publication>? publications;
+  const PublicationPage(
+      {super.key, this.type, this.userId, this.hideLabel, this.publications});
 
   @override
   State<PublicationPage> createState() => _PublicationPageState();
@@ -42,7 +44,7 @@ class PublicationPage extends StatefulWidget {
 
 class _PublicationPageState extends State<PublicationPage> {
   List<Publication> publication = [];
-  late VideoPlayerController videoController;
+
   late int nbLike = 0;
   late bool isLiked = false;
   TextEditingController search = TextEditingController();
@@ -64,7 +66,7 @@ class _PublicationPageState extends State<PublicationPage> {
 
     publicationSocket = PublicationSocket();
     notificationsocket = Notificationsocket();
-
+    print("Type de publication ${widget.type}");
     publicationSocket.socket!.on("likePublicationListener", (handler) {
       print("La publication a été  liké");
     });
@@ -78,7 +80,14 @@ class _PublicationPageState extends State<PublicationPage> {
   }
 
   loadData() async {
-    await PublicationService.getPublications(userId: widget.userId, limite: 10)
+    if (widget.publications != null) {
+      print("taille des pub ${widget.publications!.length}");
+      setState(() {
+        publication = widget.publications!;
+      });
+      // return null;
+    }
+    await PublicationService.getPublications(userId: widget.userId, limite: 7)
         .then((value) async {
       print("Status code : ${value.statusCode}");
       print("liste des publication ${value.body}");
@@ -91,7 +100,7 @@ class _PublicationPageState extends State<PublicationPage> {
 
               publication.add(pub);
             }
-            if (item['type'] == 'share') {
+            if (item['type'] == 'share' && widget.type != 'alerte') {
               if (item['share'] != null) {
                 await PublicationService.getPublicationById(id: item['share'])
                     .then((value) {
@@ -151,21 +160,22 @@ class _PublicationPageState extends State<PublicationPage> {
                             // alignment: WrapAlignment.center,
                             itemCount: publication.length,
                             shrinkWrap: true,
-                           
+
                             scrollDirection: Axis.vertical,
-                            
+
                             itemBuilder: (context, index) {
                               return publication[index].share == null
                                   ? ItemPublication(
                                       pub: publication[index],
+                                      type: widget.type,
                                       publicationSocket: publicationSocket,
                                     )
                                   : Container(
                                       margin: const EdgeInsets.symmetric(
                                           horizontal: 8),
                                       decoration: BoxDecoration(
-                                          border: Border.all(
-                                              width: 1, color: Colors.black12)),
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
                                       child: Column(
                                         children: [
                                           Container(
@@ -190,7 +200,6 @@ class _PublicationPageState extends State<PublicationPage> {
                                       ),
                                     );
                             },
-                            
                           ),
                         ),
                       ),
@@ -261,7 +270,7 @@ class _PublicationPageState extends State<PublicationPage> {
   footerContainer(Publication publication) {
     return Container(
       // margin: ,
-      margin: const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
+      margin: const EdgeInsets.symmetric(horizontal: 0, vertical: 2),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [

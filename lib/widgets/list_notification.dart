@@ -10,6 +10,7 @@ import 'package:application_amonak/widgets/item_notification.dart';
 import 'package:application_amonak/widgets/wait_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+
 class ListeNotification extends StatefulWidget {
   const ListeNotification({super.key});
 
@@ -18,29 +19,26 @@ class ListeNotification extends StatefulWidget {
 }
 
 class _ListeNotificationState extends State<ListeNotification> {
-
-  List<NotificationModel> notifications=[];
+  List<NotificationModel> notifications = [];
 
   late MessageSocket messageSocket;
 
   late Future<String> data;
 
+  Future<String> initNotification() async {
+    await NotificationService.getNotification().then((value) {
+      print("Notifications liste status code ${value!.statusCode}");
+      if (value!.statusCode == 200) {
+        notifications = [];
+        for (var notif in jsonDecode(value.body) as List) {
+          print(notif);
+          print('\n\n');
+          NotificationModel notificationModel =
+              NotificationModel.fromJson(notif);
 
-
-  Future<String> initNotification()async{
-    await NotificationService.getNotification().then((value){
-      print("Notifications liste status code ${value.statusCode}");
-      if(value.statusCode==200){
-       
-        notifications=[];
-        for(var notif in jsonDecode(value.body) as List){
-            print(notif);
-            print('\n\n');
-            NotificationModel notificationModel=NotificationModel.fromJson(notif);
-            
-            setState(() {
-              notifications.add(notificationModel);
-            });
+          setState(() {
+            notifications.add(notificationModel);
+          });
         }
       }
     });
@@ -51,58 +49,66 @@ class _ListeNotificationState extends State<ListeNotification> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    messageSocket=MessageSocket();
-    
+    messageSocket = MessageSocket();
 
     // ecoute de nouveau notification
-    messageSocket.socket!.on("refreshNotificationBoxHandler", (handler){
+    messageSocket.socket!.on("refreshNotificationBoxHandler", (handler) {
       print("Nouvelle Notification recu");
       setState(() {
         initNotification();
       });
     });
-    data=initNotification();
+    data = initNotification();
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        // backgroundColor:const Color(0x1F9F9FF),
-        backgroundColor: Colors.white,
-        centerTitle: true,
-        title: Row(
-          children: [
-            const Spacer(),
-            Text("Notifications".toUpperCase(),style: GoogleFonts.roboto(fontSize: 16,fontWeight: FontWeight.w500),),
-            const Spacer(),
-            IconButton(onPressed: (){
-              Navigator.pop(context);
-            }, icon: const Icon(Icons.close))
-          ],
-        ),
-      ),
-      body:  FutureBuilder(future:data, builder: (context,snapshot){
-        if(snapshot.connectionState==ConnectionState.waiting){
-          return const WaitWidget();
-        }
-        else if(snapshot.hasError){
-          return const Text("Error");
-        }
-        else{
-          return notifications.isNotEmpty? Container(
-              decoration:const BoxDecoration(
-                // color: Color(0x1F9F9FF)
-                color: Colors.white
+        appBar: AppBar(
+          // backgroundColor:const Color(0x1F9F9FF),
+          backgroundColor: Colors.white,
+          centerTitle: true,
+          title: Row(
+            children: [
+              const Spacer(),
+              Text(
+                "Notifications".toUpperCase(),
+                style: GoogleFonts.roboto(
+                    fontSize: 16, fontWeight: FontWeight.w500),
               ),
-            child: ListView.builder(
-              itemCount: notifications.length,
-              itemBuilder: (context,index){
-                return ItemNotification(notification: notifications[index],reloadNotificationData: initNotification);
-              },
-            ),
-          ):Container();
-        }
-      })
-    );
+              const Spacer(),
+              IconButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  icon: const Icon(Icons.close))
+            ],
+          ),
+        ),
+        body: FutureBuilder(
+            future: data,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const WaitWidget();
+              } else if (snapshot.hasError) {
+                return const Text("Error");
+              } else {
+                return notifications.isNotEmpty
+                    ? Container(
+                        decoration: const BoxDecoration(
+                            // color: Color(0x1F9F9FF)
+                            color: Colors.white),
+                        child: ListView.builder(
+                          itemCount: notifications.length,
+                          itemBuilder: (context, index) {
+                            return ItemNotification(
+                                notification: notifications[index],
+                                reloadNotificationData: initNotification);
+                          },
+                        ),
+                      )
+                    : Container();
+              }
+            }));
   }
 }

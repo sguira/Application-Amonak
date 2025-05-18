@@ -89,17 +89,14 @@ class _MessagePageState extends State<MessagePage> {
     // );
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Future.delayed(
-        Duration(seconds: 5), 
-       
-      );  
-       scrollJump();
+        Duration(seconds: 5),
+      );
+      scrollJump();
     });
   }
 
-  scrollJump()async {
-    await Future.delayed(
-      Duration(seconds: 3)
-    );
+  scrollJump() async {
+    await Future.delayed(Duration(seconds: 3));
     scrollController.jumpTo(scrollController.position.maxScrollExtent);
     // ou pour un scroll animé :
     // scrollController.animateTo(
@@ -145,7 +142,6 @@ class _MessagePageState extends State<MessagePage> {
           }
           print("itemmmm $item");
         }
-        
       }
       await loadUser();
       setState(() {
@@ -179,162 +175,183 @@ class _MessagePageState extends State<MessagePage> {
                           controller: scrollController,
                           itemCount: listMessage.length,
                           itemBuilder: (contxt, index) {
-                            return GestureDetector(
-                              onTap: () {
-                                if (listMessage[index].iSend) {
-                                  setState(() {
-                                    showAction = !showAction;
-                                    currentsate = index;
-                                  });
-                                }
-                              },
-                              child: Row(
-                                mainAxisAlignment: listMessage[index].iSend
-                                    ? MainAxisAlignment.end
-                                    : MainAxisAlignment.start,
-                                children: [
-                                  Row(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.center,
-                                    children: [
-                                      Container(
-                                        margin: const EdgeInsets.only(
-                                            top: 16, right: 8, left: 22),
-                                        child: Column(
+                            return listMessage[index].type != 'alerte'
+                                ? GestureDetector(
+                                    onTap: () {
+                                      if (listMessage[index].iSend) {
+                                        setState(() {
+                                          showAction = !showAction;
+                                          currentsate = index;
+                                        });
+                                      }
+                                    },
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          listMessage[index].iSend
+                                              ? MainAxisAlignment.end
+                                              : MainAxisAlignment.start,
+                                      children: [
+                                        Row(
                                           crossAxisAlignment:
-                                              CrossAxisAlignment.end,
+                                              CrossAxisAlignment.center,
                                           children: [
                                             Container(
-                                              padding:
-                                                  const EdgeInsets.symmetric(
-                                                      horizontal: 18,
-                                                      vertical: 18),
-                                              decoration: BoxDecoration(
-                                                  color: !listMessage[index].iSend
-                                                      ? couleurPrincipale
-                                                          .withAlpha(40)
-                                                      : const Color.fromARGB(255, 88, 77, 77)
-                                                          .withAlpha(20),
-                                                  // border:Border.all(color: couleurPrincipale.withAlpha(100),width: 0.5),
-                                                  borderRadius: listMessage[index].iSend
-                                                      ? const BorderRadius.only(
-                                                          topLeft: Radius.circular(
-                                                              26),
-                                                          topRight: Radius.circular(
-                                                              5),
-                                                          bottomLeft: Radius
-                                                              .circular(5),
-                                                          bottomRight:
-                                                              Radius.circular(
-                                                                  5))
-                                                      : const BorderRadius.only(
-                                                          topRight: Radius.circular(26),
-                                                          bottomLeft: Radius.circular(5),
-                                                          bottomRight: Radius.circular(5),
-                                                          topLeft: Radius.circular(5))),
-                                              child: Container(
-                                                constraints:
-                                                    const BoxConstraints(
-                                                        maxWidth: 200),
-                                                child: Column(
-                                                  crossAxisAlignment:
-                                                      CrossAxisAlignment.start,
-                                                  children: [
-                                                    Text(
-                                                      listMessage[index].iSend
-                                                          ? DataController
-                                                              .user!.userName!
-                                                          : from!.userName!,
-                                                      style: GoogleFonts.roboto(
-                                                          fontWeight:
-                                                              FontWeight.bold),
+                                              margin: const EdgeInsets.only(
+                                                  top: 16, right: 8, left: 22),
+                                              child: Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.end,
+                                                children: [
+                                                  Container(
+                                                    padding: const EdgeInsets
+                                                        .symmetric(
+                                                        horizontal: 18,
+                                                        vertical: 18),
+                                                    decoration: BoxDecoration(
+                                                        color: !listMessage[index].iSend
+                                                            ? couleurPrincipale
+                                                                .withAlpha(40)
+                                                            : const Color.fromARGB(255, 88, 77, 77)
+                                                                .withAlpha(20),
+                                                        // border:Border.all(color: couleurPrincipale.withAlpha(100),width: 0.5),
+                                                        borderRadius: listMessage[index].iSend
+                                                            ? const BorderRadius.only(
+                                                                topLeft: Radius.circular(
+                                                                    26),
+                                                                topRight:
+                                                                    Radius.circular(
+                                                                        5),
+                                                                bottomLeft:
+                                                                    Radius.circular(
+                                                                        5),
+                                                                bottomRight:
+                                                                    Radius.circular(
+                                                                        5))
+                                                            : const BorderRadius.only(
+                                                                topRight: Radius.circular(26),
+                                                                bottomLeft: Radius.circular(5),
+                                                                bottomRight: Radius.circular(5),
+                                                                topLeft: Radius.circular(5))),
+                                                    child: Container(
+                                                      constraints:
+                                                          const BoxConstraints(
+                                                              maxWidth: 200),
+                                                      child: Column(
+                                                        crossAxisAlignment:
+                                                            CrossAxisAlignment
+                                                                .start,
+                                                        children: [
+                                                          Text(
+                                                            listMessage[index]
+                                                                    .iSend
+                                                                ? DataController
+                                                                    .user!
+                                                                    .userName!
+                                                                : from!
+                                                                    .userName!,
+                                                            style: GoogleFonts
+                                                                .roboto(
+                                                                    fontWeight:
+                                                                        FontWeight
+                                                                            .bold),
+                                                          ),
+                                                          Text(
+                                                            listMessage[index]
+                                                                .content,
+                                                            style: GoogleFonts
+                                                                .roboto(),
+                                                          )
+                                                        ],
+                                                      ),
                                                     ),
-                                                    Text(
-                                                      listMessage[index]
-                                                          .content,
-                                                      style:
-                                                          GoogleFonts.roboto(),
-                                                    )
-                                                  ],
-                                                ),
-                                              ),
-                                            ),
-                                            if (listMessage[index]
-                                                .files
-                                                .isNotEmpty)
-                                              Container(
-                                                // height: 120,
-                                                // width: 80,
-                                                margin:
-                                                    const EdgeInsets.symmetric(
-                                                        vertical: 8),
-                                                decoration: BoxDecoration(
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            8)),
-                                                constraints: BoxConstraints(
-                                                    maxWidth:
-                                                        ScreenSize.width * 0.4),
-                                                // color: Colors.black12,
-                                                child: ClipRRect(
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            11),
-                                                    child: Image.network(
-                                                        listMessage[index]
-                                                            .files
-                                                            .first
-                                                            .url!,errorBuilder: (context, error, stackTrace) {
-                                                            return Image.asset(
+                                                  ),
+                                                  if (listMessage[index]
+                                                      .files
+                                                      .isNotEmpty)
+                                                    Container(
+                                                      // height: 120,
+                                                      // width: 80,
+                                                      margin: const EdgeInsets
+                                                          .symmetric(
+                                                          vertical: 8),
+                                                      decoration: BoxDecoration(
+                                                          borderRadius:
+                                                              BorderRadius
+                                                                  .circular(8)),
+                                                      constraints: BoxConstraints(
+                                                          maxWidth:
+                                                              ScreenSize.width *
+                                                                  0.4),
+                                                      // color: Colors.black12,
+                                                      child: ClipRRect(
+                                                          borderRadius:
+                                                              BorderRadius
+                                                                  .circular(11),
+                                                          child: Image.network(
+                                                            listMessage[index]
+                                                                .files
+                                                                .first
+                                                                .url!,
+                                                            errorBuilder:
+                                                                (context, error,
+                                                                    stackTrace) {
+                                                              return Image
+                                                                  .asset(
                                                                 "assets/medias/profile.jpg",
-                                                                fit: BoxFit.cover,
+                                                                fit: BoxFit
+                                                                    .cover,
                                                                 width: 48,
                                                                 height: 48,
                                                               );
-                                                          },)),
+                                                            },
+                                                          )),
+                                                    ),
+                                                ],
+                                              ),
+                                            ),
+                                            if (currentsate == index &&
+                                                showAction &&
+                                                listMessage[index].iSend)
+                                              Animate(
+                                                effects: const [
+                                                  SlideEffect(
+                                                      begin: Offset(1, 0),
+                                                      end: Offset(0, 0),
+                                                      duration: Duration(
+                                                          milliseconds: 100))
+                                                ],
+                                                child: Container(
+                                                  margin: const EdgeInsets.only(
+                                                      right: 8),
+                                                  child: Row(
+                                                    children: [
+                                                      IconButton(
+                                                          onPressed: () {
+                                                            dialogEdit(index);
+                                                          },
+                                                          icon: const Icon(
+                                                              Icons.edit,
+                                                              size: 18)),
+                                                      IconButton(
+                                                          onPressed: () {
+                                                            dialogDeleteMessage(
+                                                                index);
+                                                          },
+                                                          icon: const Icon(
+                                                              Icons.delete,
+                                                              size: 18)),
+                                                    ],
+                                                  ),
+                                                ),
                                               ),
                                           ],
                                         ),
-                                      ),
-                                      if (currentsate == index &&
-                                          showAction &&
-                                          listMessage[index].iSend)
-                                        Animate(
-                                          effects: const [
-                                            SlideEffect(
-                                                begin: Offset(1, 0),
-                                                end: Offset(0, 0),
-                                                duration:
-                                                    Duration(milliseconds: 100))
-                                          ],
-                                          child: Container(
-                                            margin: const EdgeInsets.only(
-                                                right: 16),
-                                            child: Row(
-                                              children: [
-                                                IconButton(
-                                                    onPressed: () {
-                                                      dialogEdit(index);
-                                                    },
-                                                    icon: const Icon(Icons.edit,
-                                                        size: 18)),
-                                                IconButton(
-                                                    onPressed: () {
-                                                      dialogDeleteMessage(
-                                                          index);
-                                                    },
-                                                    icon: const Icon(
-                                                        Icons.delete,
-                                                        size: 18)),
-                                              ],
-                                            ),
-                                          ),
-                                        ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            );
+                                      ],
+                                    ),
+                                  )
+                                : Container(
+                                    child: Text("Guira"),
+                                  );
                           },
                         )
                       : const SpinKitWaveSpinner(
@@ -364,7 +381,7 @@ class _MessagePageState extends State<MessagePage> {
                                 margin: const EdgeInsets.symmetric(vertical: 8),
                                 decoration: BoxDecoration(
                                     color: Colors.black12,
-                                    borderRadius: BorderRadius.circular(36)),
+                                    borderRadius: BorderRadius.circular(8)),
                                 // alignment: Alignment.center,
                                 child: Row(
                                   crossAxisAlignment: CrossAxisAlignment.center,
@@ -374,7 +391,7 @@ class _MessagePageState extends State<MessagePage> {
                                         pickeImage();
                                       },
                                       child: Container(
-                                        margin: const EdgeInsets.only(left: 16),
+                                        margin: const EdgeInsets.only(left: 12),
                                         // color: Colors.black,
                                         // margin:const EdgeInsets.only(top: 36,right: 12),
                                         child: const Icon(
@@ -493,55 +510,54 @@ class _MessagePageState extends State<MessagePage> {
     return showCustomModalSheetWidget(
         context: context,
         child: StatefulBuilder(builder: (context, S) {
-              return Container(
-                height: 120,
-                margin:
-                    const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
-                child: ListView(
-                  children: [
-                    Text(
-                      "Modification de message",
-                      style: GoogleFonts.roboto(fontWeight: FontWeight.bold),
-                    ),
-                    Container(
-                      height: 58,
-                      margin: const EdgeInsets.only(top: 28),
-                      child: TextFormField(
-                        controller: editMessage,
-                        // maxLines: 7,
-                        minLines: 1,
-                        autofocus: true,
-                        decoration: InputDecoration(
-                            filled: true,
-                            focusedBorder: OutlineInputBorder(
-                                borderSide: const BorderSide(
-                                    color: Colors.transparent, width: 2.0),
-                                borderRadius: BorderRadius.circular(36)),
-                            enabledBorder: OutlineInputBorder(
-                                borderSide: const BorderSide(
-                                    color: Colors.transparent, width: 2.0),
-                                borderRadius: BorderRadius.circular(36)),
-                            // labelText: 'Modifier le message',
-                            suffix: IconButton(
-                                onPressed: () {
-                                  if (editMessage.text.isNotEmpty) {
-                                    MessageService.modifierMessage(
-                                            messageId: listMessage[index].id,
-                                            data: {'content': editMessage.text})
-                                        .then((value) {
-                                      if (value.statusCode == 200) {
-                                        setState(() {});
-                                      }
-                                    }).catchError((e) {});
-                                  }
-                                },
-                                icon: const Icon(Icons.send))),
-                      ),
-                    )
-                  ],
+          return Container(
+            height: 120,
+            margin: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+            child: ListView(
+              children: [
+                Text(
+                  "Modification de message",
+                  style: GoogleFonts.roboto(fontWeight: FontWeight.bold),
                 ),
-              );
-            }));
+                Container(
+                  height: 58,
+                  margin: const EdgeInsets.only(top: 28),
+                  child: TextFormField(
+                    controller: editMessage,
+                    // maxLines: 7,
+                    minLines: 1,
+                    autofocus: true,
+                    decoration: InputDecoration(
+                        filled: true,
+                        focusedBorder: OutlineInputBorder(
+                            borderSide: const BorderSide(
+                                color: Colors.transparent, width: 2.0),
+                            borderRadius: BorderRadius.circular(36)),
+                        enabledBorder: OutlineInputBorder(
+                            borderSide: const BorderSide(
+                                color: Colors.transparent, width: 2.0),
+                            borderRadius: BorderRadius.circular(36)),
+                        // labelText: 'Modifier le message',
+                        suffix: IconButton(
+                            onPressed: () {
+                              if (editMessage.text.isNotEmpty) {
+                                MessageService.modifierMessage(
+                                        messageId: listMessage[index].id,
+                                        data: {'content': editMessage.text})
+                                    .then((value) {
+                                  if (value.statusCode == 200) {
+                                    setState(() {});
+                                  }
+                                }).catchError((e) {});
+                              }
+                            },
+                            icon: const Icon(Icons.send))),
+                  ),
+                )
+              ],
+            ),
+          );
+        }));
   }
 
   dialogDeleteMessage(int index) {
@@ -625,6 +641,7 @@ class _MessagePageState extends State<MessagePage> {
         });
         if (value.statusCode == 200) {
           // socket!.emit("sendMessage",)
+          message.text = '';
           messageSocket.socket!.emit(
               "sendMessage", {"room": room, "message": jsonDecode(value.body)});
           messageSocket.socket!.emit("refreshMessageBox",
@@ -652,8 +669,11 @@ class _MessagePageState extends State<MessagePage> {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: GestureDetector(
-        onTap: (){
-          Navigator.push(context, MaterialPageRoute(builder: (context)=>DetailsUser(user: widget.user) ));
+        onTap: () {
+          Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => DetailsUser(user: widget.user)));
         },
         child: Container(
           margin: const EdgeInsets.symmetric(vertical: 12),
@@ -746,10 +766,10 @@ class _FileSelectedViewerState extends State<FileSelectedViewer> {
     return Container(
       margin: const EdgeInsets.only(left: 16),
       decoration: BoxDecoration(
-          border: Border.all(width: 0.5, color: couleurPrincipale),
-          borderRadius: BorderRadius.circular(16)),
-      width: 90,
-      height: 100,
+          border: Border.all(width: 0.5, color: Colors.black12),
+          borderRadius: BorderRadius.circular(8)),
+      width: 60,
+      height: 60,
       child: Stack(
         children: [
           Positioned.fill(
@@ -757,7 +777,7 @@ class _FileSelectedViewerState extends State<FileSelectedViewer> {
               // width: 90,
               // height: 90,
               child: ClipRRect(
-                  borderRadius: BorderRadius.circular(16),
+                  borderRadius: BorderRadius.circular(8),
                   child: widget.type != 'video'
                       ? Image.file(
                           widget.file,
@@ -779,14 +799,17 @@ class _FileSelectedViewerState extends State<FileSelectedViewer> {
             child: Container(
                 decoration: BoxDecoration(
                     color: Colors.black.withAlpha(100),
-                    border: Border.all(width: 2, color: Colors.white),
+                    border: Border.all(width: 1, color: Colors.white),
                     borderRadius: BorderRadius.circular(16)),
                 child: IconButton(
                     onPressed: () {
                       widget.onClose();
                     },
-                    icon:
-                        const Icon(Icons.close_rounded, color: Colors.white))),
+                    icon: const Icon(
+                      Icons.close_rounded,
+                      color: Colors.white,
+                      size: 18,
+                    ))),
           )
         ],
       ),

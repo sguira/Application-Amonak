@@ -1,8 +1,8 @@
 import 'dart:convert';
 
 import 'package:application_amonak/data/data_controller.dart';
-import 'package:application_amonak/interface/explorer/image_container.dart';
-import 'package:application_amonak/interface/explorer/videoPlayerWidget.dart';
+import 'package:application_amonak/interface/publication/image_container.dart';
+import 'package:application_amonak/interface/publication/videoPlayerWidget.dart';
 import 'package:application_amonak/models/publication.dart';
 import 'package:application_amonak/services/commentaire.dart';
 import 'package:application_amonak/services/notification.dart';
@@ -13,6 +13,7 @@ import 'package:application_amonak/settings/weights.dart';
 import 'package:application_amonak/widgets/buildModalSheet.dart';
 import 'package:application_amonak/widgets/commentaire.dart';
 import 'package:application_amonak/widgets/header_publication.dart';
+import 'package:application_amonak/widgets/imageSkeleton.dart';
 import 'package:application_amonak/widgets/publication_card.dart';
 import 'package:application_amonak/widgets/share_widget.dart';
 import 'package:application_amonak/widgets/text_expanded.dart';
@@ -163,17 +164,12 @@ class _ImageSectionState extends State<DetailsItemPubliction> {
       // ),
       child: ClipRRect(
           borderRadius: BorderRadius.circular(11),
-          child: image == ''
-              ? Image.network(
-                  image!,
-                  errorBuilder: (context, error, stackTrace) {
-                    return Image.asset(
-                      "assets/medias/profile.jpg",
-                      fit: BoxFit.cover,
-                      width: 48,
-                      height: 48,
-                    );
-                  },
+          child: image != ''
+              ? LoadImage(
+                  imageUrl: image,
+                  width: ScreenSize.width * 0.9,
+                  height: 300,
+                  fit: BoxFit.cover,
                 )
               : Image.asset(
                   "assets/medias/user.jpg",

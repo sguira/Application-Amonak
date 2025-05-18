@@ -7,22 +7,22 @@ Future<void> showCustomModalSheetWidget({
   await showModalBottomSheet(
     context: context,
     isScrollControlled: true,
-    
     isDismissible: true,
     enableDrag: true,
-    elevation: 0, 
+    elevation: 0,
     showDragHandle: true,
-    shape:const RoundedRectangleBorder(
+    shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(
-        top: Radius.circular(16.0),
+        top: Radius.circular(16),
       ),
     ),
+    backgroundColor: Colors.white,
     builder: (BuildContext context) {
       return Padding(
         padding: EdgeInsets.only(
-          left: 16.0,
-          right: 16.0,
-          top: 16.0,
+          left: 8.0,
+          right: 8.0,
+          top: 4.0,
           bottom: MediaQuery.of(context).viewInsets.bottom + 16.0,
         ),
         child: child,

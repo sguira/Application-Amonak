@@ -5,7 +5,7 @@ import 'package:application_amonak/colors/colors.dart';
 import 'package:application_amonak/data/data_controller.dart';
 import 'package:application_amonak/interface/connection/activation.dart';
 import 'package:application_amonak/interface/boutique/details_boutique..dart';
-import 'package:application_amonak/interface/explorer/publication.dart';
+import 'package:application_amonak/interface/publication/publication.dart';
 import 'package:application_amonak/interface/profile/edit_profile.dart';
 import 'package:application_amonak/interface/profile/gestion_profile.dart';
 import 'package:application_amonak/interface/profile/list_abonne.dart';
@@ -440,13 +440,13 @@ class _ProfilePageState extends State<ProfilePage> {
                         DataController.user!.avatar!.first.url!,
                         fit: BoxFit.cover,
                         errorBuilder: (context, error, stackTrace) {
-                                return Image.asset(
-                                    "assets/medias/profile.jpg",
-                                    fit: BoxFit.cover,
-                                    width: 48,
-                                    height: 48,
-                                  );
-                              },
+                          return Image.asset(
+                            "assets/medias/profile.jpg",
+                            fit: BoxFit.cover,
+                            width: 48,
+                            height: 48,
+                          );
+                        },
                       ),
               ),
             ));
