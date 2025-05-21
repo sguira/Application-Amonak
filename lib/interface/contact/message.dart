@@ -540,7 +540,8 @@ class _MessagePageState extends State<MessagePage> {
                         // labelText: 'Modifier le message',
                         suffix: IconButton(
                             onPressed: () {
-                              if (editMessage.text.isNotEmpty) {
+                              if (editMessage.text.isNotEmpty ||
+                                  fileSelected != null) {
                                 MessageService.modifierMessage(
                                         messageId: listMessage[index].id,
                                         data: {'content': editMessage.text})
@@ -626,7 +627,7 @@ class _MessagePageState extends State<MessagePage> {
   }
 
   sendMessage(dynamic setState_) {
-    if (message.text != '') {
+    if (message.text != '' || fileSelected != null) {
       setState_(() {
         waitingSend = true;
       });

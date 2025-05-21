@@ -2,6 +2,8 @@ import 'dart:convert';
 
 import 'package:application_amonak/colors/colors.dart';
 import 'package:application_amonak/interface/accueils/welcome.dart';
+import 'package:application_amonak/interface/boutique/portefeuille.dart';
+import 'package:application_amonak/interface/boutique/statistique.dart';
 import 'package:application_amonak/local_storage.dart';
 import 'package:application_amonak/models/notifications.dart';
 import 'package:application_amonak/services/notification.dart';
@@ -20,14 +22,9 @@ class GestionProfilePage extends StatefulWidget {
 }
 
 class _GestionProfilePageState extends State<GestionProfilePage> {
-  // List<NotificationModel> notifications=[];
-
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
-
-    // initNotification();
   }
 
   @override
@@ -36,7 +33,6 @@ class _GestionProfilePageState extends State<GestionProfilePage> {
       child: Scaffold(
         appBar: customAppBar(context: context, title: ''),
         body: Column(
-          // mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Center(
               child: Container(
@@ -57,8 +53,8 @@ class _GestionProfilePageState extends State<GestionProfilePage> {
                   bottom: TabBar(
                       tabs: [itemTab("portefeuille"), itemTab("statistique")]),
                 ),
-                body: PageView(
-                  children: [Container(), Container()],
+                body: TabBarView(
+                  children: [const Portefeuille(), AmonakDashboardScreen()],
                 ),
               ),
             ))

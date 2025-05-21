@@ -1,6 +1,7 @@
 import 'package:application_amonak/colors/colors.dart';
 import 'package:application_amonak/data/data_controller.dart';
 import 'package:application_amonak/interface/accueils/home.dart';
+import 'package:application_amonak/interface/accueils/home2.dart';
 import 'package:application_amonak/interface/contact/contact.dart';
 import 'package:application_amonak/interface/contact/contact2.dart';
 import 'package:application_amonak/interface/explorer/explorer.dart';
@@ -22,12 +23,12 @@ class HomePageTab extends StatefulWidget {
 class _HomeState extends State<HomePageTab> {
   int currentIndex = 0;
 
-  double iconSize = 22;
+  double iconSize = 24; // Slightly increased icon size
 
   late Notificationsocket notificationsocket;
 
   dynamic widgets = [
-    const HomePage(),
+    const PublicationList(),
     const ExplorerPage(),
     const NewPage(),
     const Contact(),
@@ -41,11 +42,7 @@ class _HomeState extends State<HomePageTab> {
     notificationsocket = Notificationsocket();
 
     notificationsocket.socket!.on("refreshNotificationBoxHandler", (handler) {
-      print("Notification reussi dépuis home !!!");
-
-      if (handler['to'] == DataController.user!.id) {
-        print("Notification reussi dépuis home !!!");
-      }
+      if (handler['to'] == DataController.user!.id) {}
     });
   }
 
@@ -53,131 +50,112 @@ class _HomeState extends State<HomePageTab> {
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
-          body: widgets[currentIndex],
-          bottomNavigationBar: personnalityBottomBar()),
+          body: IndexedStack(index: currentIndex, children: widgets),
+          bottomNavigationBar: _buildModernBottomBar()),
     );
   }
 
-  Container personnalityBottomBar() {
+  Widget _buildModernBottomBar() {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 12),
-      // decoration: BoxDecoration(
-      //   color: Colors.red
-      // ),
-      child: Container(
-        margin: const EdgeInsets.only(top: 6),
-        child: Wrap(
-          alignment: WrapAlignment.spaceBetween,
-          children: [
-            itemNavigation('Accueil', Icons.home, Icons.home, 0),
-            itemNavigation('Explorer', Icons.search, Icons.search, 1),
-            itemHome(2),
-            itemNavigation(
-                'Discussions', Icons.comment, Icons.comment_outlined, 3),
-            itemNavigation('Profil', Icons.person, Icons.person, 4),
-          ],
-        ),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            spreadRadius: 0,
+            blurRadius: 10,
+            offset: const Offset(0, -3), // changes position of shadow
+          ),
+        ],
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(25)),
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+          _buildNavBarItem(
+              'Accueil', Icons.home_rounded, Icons.home_outlined, 0),
+          _buildNavBarItem(
+              'Explorer', Icons.search_rounded, Icons.search_outlined, 1),
+          _buildAddItem(2),
+          _buildNavBarItem('Discussions', Icons.chat_bubble_rounded,
+              Icons.chat_bubble_outline_rounded, 3),
+          _buildNavBarItem(
+              'Profil', Icons.person_rounded, Icons.person_outline_rounded, 4),
+        ],
       ),
     );
   }
 
-  GestureDetector itemProfile(int index) {
-    return GestureDetector(
-      onTap: () {
-        print(currentIndex);
-        setState(() {
-          currentIndex = index;
-        });
-      },
-      child: Container(
-        width: 36,
-        height: 36,
-        margin: const EdgeInsets.only(bottom: 8),
-        decoration: BoxDecoration(
-            border: Border.all(
-                width: 2,
-                color: currentIndex == index
-                    ? couleurPrincipale
-                    : Colors.black.withAlpha(60)),
-            borderRadius: BorderRadius.circular(8)),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(4),
-          child: Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(86),
-                // border: Border.all(width: 4)
-              ),
-              child: DataController.user!.avatar!.isEmpty
-                  ? Image.asset("assets/medias/profile.jpg", fit: BoxFit.cover)
-                  : Image.network(
-                      DataController.user!.avatar!.first.url!,
-                      fit: BoxFit.fitHeight,
-                      errorBuilder: (context, error, stackTrace) {
-                        return Image.asset(
-                          "assets/medias/profile.jpg",
-                          fit: BoxFit.cover,
-                          width: 48,
-                          height: 48,
-                        );
-                      },
-                    )),
-        ),
-      ),
-    );
-  }
-
-  GestureDetector itemHome(int index) {
+  Widget _buildNavBarItem(
+      String label, IconData activeIcon, IconData inactiveIcon, int index) {
     return GestureDetector(
       onTap: () {
         setState(() {
           currentIndex = index;
         });
       },
-      child: Container(
-        // margin:const EdgeInsets.symmetric(horizontal:12,vertical: 2),
-        padding: const EdgeInsets.symmetric(horizontal: 8),
-        height: 46,
-        width: 46,
-        decoration: BoxDecoration(
-            color: currentIndex == index ? couleurPrincipale : Colors.white,
-            borderRadius: BorderRadius.circular(36),
-            border: Border.all(
-                width: 1,
-                color: currentIndex == index
-                    ? couleurPrincipale
-                    : Colors.black.withAlpha(60))),
-        child: Center(
-            child: Icon(Icons.add,
-                size: iconSize,
-                color: currentIndex == index ? Colors.white : Colors.black)),
-      ),
-    );
-  }
-
-  itemNavigation(String label, IconData icon, IconData icon2, int index) {
-    return GestureDetector(
-      onTap: () {
-        setState(() {
-          currentIndex = index;
-        });
-      },
-      child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 8),
-        child: Column(
-          children: [
-            Icon(
-              currentIndex == index ? icon : icon2,
-              weight: 36,
-              size: iconSize,
-              color: currentIndex == index ? couleurPrincipale : Colors.black,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            currentIndex == index ? activeIcon : inactiveIcon,
+            size: iconSize,
+            color: currentIndex == index
+                ? couleurPrincipale
+                : Colors.grey.shade600,
+          ),
+          const SizedBox(height: 4),
+          Text(
+            label,
+            style: GoogleFonts.roboto(
+              fontSize: 10,
+              color: currentIndex == index
+                  ? couleurPrincipale
+                  : Colors.grey.shade600,
+              fontWeight:
+                  currentIndex == index ? FontWeight.bold : FontWeight.normal,
             ),
-            Text(label,
-                style: GoogleFonts.roboto(
-                    fontSize: 9,
-                    color: currentIndex == index
-                        ? couleurPrincipale
-                        : Colors.black))
-          ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAddItem(int index) {
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          currentIndex = index;
+        });
+      },
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: currentIndex == index ? couleurPrincipale : Colors.white,
+          shape: BoxShape.circle,
+          boxShadow: currentIndex == index
+              ? [
+                  BoxShadow(
+                    color: couleurPrincipale.withOpacity(0.4),
+                    spreadRadius: 2,
+                    blurRadius: 8,
+                    offset: const Offset(0, 4),
+                  ),
+                ]
+              : [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.1),
+                    spreadRadius: 1,
+                    blurRadius: 5,
+                    offset: const Offset(0, 3),
+                  ),
+                ],
+        ),
+        child: Icon(
+          Icons.add_rounded,
+          size: iconSize + 8, // Make the add icon larger
+          color: currentIndex == index ? Colors.white : couleurPrincipale,
         ),
       ),
     );

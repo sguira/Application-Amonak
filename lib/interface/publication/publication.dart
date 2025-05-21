@@ -42,7 +42,8 @@ class PublicationPage extends StatefulWidget {
   State<PublicationPage> createState() => _PublicationPageState();
 }
 
-class _PublicationPageState extends State<PublicationPage> {
+class _PublicationPageState extends State<PublicationPage>
+    with AutomaticKeepAliveClientMixin {
   List<Publication> publication = [];
 
   late int nbLike = 0;
@@ -87,7 +88,7 @@ class _PublicationPageState extends State<PublicationPage> {
       });
       // return null;
     }
-    await PublicationService.getPublications(userId: widget.userId, limite: 7)
+    await PublicationService.getPublications(userId: widget.userId, limite: 10)
         .then((value) async {
       print("Status code : ${value.statusCode}");
       print("liste des publication ${value.body}");
@@ -137,7 +138,11 @@ class _PublicationPageState extends State<PublicationPage> {
   }
 
   @override
+  bool get wantKeepAlive => true;
+
+  @override
   Widget build(BuildContext context) {
+    super.build(context);
     return FutureBuilder(
         future: loadDataResult,
         builder: (context, snapshot) {

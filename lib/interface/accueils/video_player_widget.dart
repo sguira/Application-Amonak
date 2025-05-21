@@ -1,9 +1,9 @@
 import 'dart:convert';
-
 import 'dart:ui';
 
 import 'package:application_amonak/colors/colors.dart';
 import 'package:application_amonak/data/data_controller.dart';
+import 'package:application_amonak/data/video_controller_cache.dart'; // Import the new cache
 import 'package:application_amonak/interface/accueils/notifications.dart';
 import 'package:application_amonak/interface/explorer/details_user.dart';
 import 'package:application_amonak/interface/vendre/vendre.dart';
@@ -17,6 +17,7 @@ import 'package:application_amonak/widgets/btnLike.dart';
 import 'package:application_amonak/widgets/buildModalSheet.dart';
 import 'package:application_amonak/widgets/buttonComment.dart';
 import 'package:application_amonak/widgets/commentaire.dart';
+import 'package:application_amonak/widgets/imageSkeleton.dart';
 import 'package:application_amonak/widgets/notification_button.dart';
 import 'package:application_amonak/widgets/wait_widget.dart';
 import 'package:flutter/cupertino.dart';
@@ -28,19 +29,31 @@ import 'package:video_player/video_player.dart';
 import 'package:intl/intl.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:flutter/foundation.dart'; // Import for kDebugMode
 
 class VideoPlayerWidget extends StatefulWidget {
   final Publication videoItem;
   final int index;
+  final bool isCurrentPage;
   const VideoPlayerWidget(
-      {super.key, required this.videoItem, required this.index});
+      {super.key,
+      required this.videoItem,
+      required this.index,
+      required this.isCurrentPage});
 
   @override
   State<VideoPlayerWidget> createState() => _VideoPlayerWidgetState();
 }
 
 class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
-  late VideoPlayerController controller;
+  VideoPlayerController? controller;
+  final VideoControllerCache _videoCache =
+      VideoControllerCache(); // Get the cache instance
+
+  PageController pageController = PageController();
+
+  int currentpage = 0;
+
   int nbLike = 0;
   bool isLike = false;
   late String idLike;
@@ -69,7 +82,9 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
           article = ArticleModel.fromJson(jsonDecode(value.body));
         }
       }).catchError((e) {
-        print(e);
+        if (kDebugMode) {
+          print(e);
+        }
       });
     }
   }
@@ -79,39 +94,120 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
   int nbComment = 0;
 
   List likes = [];
+  String? type;
+
+  @override
+  void didUpdateWidget(covariant VideoPlayerWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (type == 'video' &&
+        controller != null &&
+        controller!.value.isInitialized) {
+      if (widget.isCurrentPage) {
+        setState(() {
+          controller!.play();
+        });
+      } else {
+        setState(() {
+          controller!.pause();
+          controller!.seekTo(Duration.zero);
+        });
+      }
+    }
+  }
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
+    type = widget.videoItem.files.first.type;
     getArticle();
+
     setState(() {
       getNombreLike();
       nombreComment();
     });
-    print("Video ID ${widget.videoItem.id}\n\n");
 
-    controller = DataController.getVideoControllerById(widget.videoItem.id!) ??
-        VideoPlayerController.networkUrl(
-            Uri.parse(super.widget.videoItem.files[0].url!))
-      ..initialize().then((value) {
-        controller.setLooping(true);
-        controller.play();
-        setState(() {});
-        Map video = {'id': widget.videoItem.id, 'controller': controller};
-        DataController.addVideoToHistory(widget.videoItem.id!, controller);
-      });
-    // DataController.addVideoToHistory(widget.videoItem.id!, controller);
+    if (widget.videoItem.files.first.type == 'video') {
+      // Try to get controller from cache
+      controller = _videoCache.getController(widget.videoItem.id!);
+
+      if (controller == null) {
+        // If not in cache, create a new one
+        controller = VideoPlayerController.networkUrl(
+            Uri.parse(widget.videoItem.files[0].url!));
+        controller!.initialize().then((_) {
+          controller!.setLooping(true);
+
+          setState(() {
+            viewBtn = true; // Set viewBtn to true after initialization
+          });
+          // Add the newly initialized controller to the cache
+          _videoCache.addController(widget.videoItem.id!, controller!);
+
+          // if (widget.isCurrentPage) {
+          //   setState(() {
+          //     controller!.play();
+          //   });
+          // } else {
+          //   setState(() {
+          //     controller!.pause();
+          //   });
+          // }
+          setState(() {
+            controller!.play();
+          });
+        }).catchError((e) {
+          if (kDebugMode) {
+            print('Error initializing video controller: $e');
+          }
+          // Handle error, e.g., show a placeholder or error message
+        });
+      } else {
+        // If controller exists in cache, just set viewBtn and play/pause based on current page
+        setState(() {
+          viewBtn = true; // Controller is already initialized
+        });
+        if (widget.isCurrentPage) {
+          setState(() {
+            controller!.play();
+          });
+        } else {
+          setState(() {
+            controller!.pause();
+          });
+        }
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    // We no longer dispose the controller directly here.
+    // The cache will manage the disposal based on its LRU policy or explicit calls.
+    // If you want to explicitly dispose of controllers when they are removed
+    // from the widget tree (e.g., if you navigate away from the page entirely),
+    // you might want to call _videoCache.disposeController(widget.videoItem.id!);
+    // However, for a TikTok-like feed, keeping them in cache for quick re-use is often desired.
+    if (type == 'video' && controller != null) {
+      // Pause the video when the widget is disposed to prevent background audio
+      controller!.pause();
+      // Optional: You could choose to dispose here if you don't want to cache controllers
+      // controller!.dispose();
+    }
+    super.dispose();
   }
 
   getNombreLike() async {
     await PublicationService.getNumberLike(widget.videoItem.id!, 'like')
         .then((value) {
-      print("nombre like");
+      if (kDebugMode) {
+        print("nombre like");
+      }
       if (value!.statusCode.toString() == '200') {
         setState(() {
           nbLike = (jsonDecode(value.body) as List).length;
-          print("nombre de like $nbLike\n\n $isLike");
+          if (kDebugMode) {
+            print("nombre de like $nbLike\n\n $isLike");
+          }
         });
 
         if (nbLike > 0) {
@@ -132,14 +228,18 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
         isLike = false;
         nbLike = 0;
       });
-      print("ERORRRT $e \n\n");
+      if (kDebugMode) {
+        print("ERORRRT $e \n\n");
+      }
     });
   }
 
   deleteLike() async {
     if (isLike) {
       await PublicationService.deleteLike(idLike).then((value) {
-        print("SUppression like ${value.statusCode} .. \n\n");
+        if (kDebugMode) {
+          print("SUppression like ${value.statusCode} .. \n\n");
+        }
         setState(() {
           isLike = false;
           nbLike -= 1;
@@ -161,102 +261,114 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        controller.value.isInitialized
-            ? Center(
-                child: GestureDetector(
-                  onDoubleTap: () {
-                    // showHeart();
-                    setState(() {
-                      showFavourite = true;
-                    });
-                    Future.delayed(const Duration(milliseconds: 1200), () {
+    return Container(
+      decoration: const BoxDecoration(color: Colors.black),
+      child: Stack(
+        children: [
+          Center(
+            child: GestureDetector(
+              onDoubleTap: () {
+                setState(() {
+                  showFavourite = true;
+                });
+                Future.delayed(const Duration(milliseconds: 1200), () {
+                  setState(() {
+                    showFavourite = false;
+                  });
+                });
+                if (isLike == false) {
+                  likePublication();
+                } else {
+                  deleteLike();
+                }
+              },
+              onTapUp: (details) {
+                if (kDebugMode) {
+                  print("on tap Up");
+                }
+              },
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  GestureDetector(
+                    onTap: () {
                       setState(() {
-                        showFavourite = false;
+                        viewBtn = !viewBtn;
                       });
-                    });
-                    if (isLike == false) {
-                      likePublication();
-                    } else {
-                      deleteLike();
-                    }
-                  },
-                  onTapUp: (details) {
-                    print("on tap Up");
-                  },
-                  child: Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      GestureDetector(
-                        onTap: () {
-                          setState(() {
-                            viewBtn = !viewBtn;
-                          });
-                          Future.delayed(const Duration(milliseconds: 4000),
-                              () {
-                            setState(() {
-                              viewBtn = false;
-                            });
-                          });
-                        },
-                        child: VideoPlayer(controller),
-                      ),
-
-                      if (viewBtn)
-                        GestureDetector(
-                          child: Container(
-                            width: 150,
-                            height: 150,
-                            color: Colors.transparent,
-                            child: Container(
-                                padding: const EdgeInsets.all(18),
-                                decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(58),
-                                    color: Colors.black.withAlpha(80)),
-                                child: IconButton(
-                                    onPressed: () {
-                                      setState(() {
-                                        if (controller.value.isPlaying) {
-                                          controller.pause();
-                                        } else {
-                                          controller.play();
-                                        }
-                                      });
-                                    },
-                                    icon: Icon(
-                                      controller.value.isPlaying
-                                          ? Icons.play_arrow
-                                          : Icons.pause,
-                                      color: couleurPrincipale,
-                                      size: 56,
-                                    ))),
-                          ),
-                        ),
-                      // Icon(
-                      //   Icons.favourit
-                      // )
-                    ],
+                      Future.delayed(const Duration(milliseconds: 4000), () {
+                        setState(() {
+                          viewBtn = false;
+                        });
+                      });
+                    },
+                    child: Container(
+                        child: widget.videoItem.files.first.type == 'video'
+                            ? (controller != null &&
+                                    controller!.value.isInitialized
+                                ? AspectRatio(
+                                    aspectRatio: controller!.value.aspectRatio,
+                                    child: VideoPlayer(controller!))
+                                : const WaitWidget())
+                            : Center(
+                                child: LoadImage(
+                                imageUrl: widget.videoItem.files.first.url,
+                                fit: BoxFit.cover,
+                              ))),
                   ),
-                ),
-              )
-            : const WaitWidget(),
-        header(),
-        if (showFavourite == true)
-          Animate(
-              effects: const [
-                ScaleEffect(duration: Duration(milliseconds: 500)),
-                ShakeEffect(duration: Duration(milliseconds: 500))
-              ],
-              child: const Center(
-                  child: Icon(
-                Icons.favorite,
-                color: Colors.red,
-                size: 90,
-              ))),
-        containerButton(),
-        containerDescription()
-      ],
+                  if (viewBtn)
+                    if (type == 'video')
+                      GestureDetector(
+                        child: Container(
+                          width: 150,
+                          height: 150,
+                          color: Colors.transparent,
+                          child: Container(
+                              padding: const EdgeInsets.all(18),
+                              decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(58),
+                                  color: Colors.black.withAlpha(80)),
+                              child: IconButton(
+                                  onPressed: () {
+                                    setState(() {
+                                      if (controller!.value.isPlaying) {
+                                        controller!.pause();
+                                      } else {
+                                        controller!.play();
+                                      }
+                                    });
+                                  },
+                                  icon: Icon(
+                                    controller!.value.isPlaying
+                                        ? Icons
+                                            .pause // Changed to pause when playing
+                                        : Icons
+                                            .play_arrow, // Changed to play when paused
+                                    color: couleurPrincipale,
+                                    size: 56,
+                                  ))),
+                        ),
+                      ),
+                ],
+              ),
+            ),
+          ),
+          header(),
+          if (showFavourite == true)
+            Animate(
+                effects: const [
+                  ScaleEffect(duration: Duration(milliseconds: 500)),
+                  ShakeEffect(duration: Duration(milliseconds: 500))
+                ],
+                child: const Center(
+                    child: Icon(
+                  Icons.favorite,
+                  color: Colors.red,
+                  size: 90,
+                ))),
+          containerButton(),
+          containerDescription()
+        ],
+      ),
     );
   }
 
@@ -305,7 +417,6 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
                   Container(
                     margin:
                         const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                    // child: Text(calculateTimeDifferenceBetween(startDate: widget.videoItem.dateCreation!, endDate: DateTime.now()),style: GoogleFonts.roboto(color:Colors.white,fontSize:10),),
                   )
                 ],
               ),
@@ -320,9 +431,7 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
   Container TextExpanded() {
     return Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        decoration: BoxDecoration(
-            // color: Colors.black.withAlpha(80),
-            borderRadius: BorderRadius.circular(4)),
+        decoration: BoxDecoration(borderRadius: BorderRadius.circular(4)),
         width: ScreenSize.width * 0.75,
         constraints: BoxConstraints(
             maxHeight: isExpanded == false ? 130 : ScreenSize.height * 0.6),
@@ -358,10 +467,8 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
         bottom: 20,
         right: 20,
         child: Container(
-          // width: 100,
           child: Column(
             children: [
-              // Text("T"),
               Container(
                 margin: const EdgeInsets.symmetric(vertical: 22),
                 padding: const EdgeInsets.symmetric(vertical: 16),
@@ -374,8 +481,6 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
                       pub: widget.videoItem,
                       color: Colors.white,
                     ),
-
-                    // itemButton(double.parse("80000"),Icons.repeat,false,onComment),
                     CommentaireButton(
                       pubId: widget.videoItem.id!,
                       color: Colors.white,
@@ -410,7 +515,6 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
 
   header() {
     return Positioned(
-        // top: 0,
         child: Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
       decoration: BoxDecoration(
@@ -527,7 +631,9 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
   void onShare() {}
 
   onComment() {
-    print("Commentaire \n\n");
+    if (kDebugMode) {
+      print("Commentaire \n\n");
+    }
     return showCustomModalSheetWidget(
         context: context,
         child: CommentaireWidget(
@@ -546,7 +652,9 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
         nbLike += 1;
       });
       PublicationService.addLike(data).then((value) {
-        print("Status like ${value.statusCode}\n\n");
+        if (kDebugMode) {
+          print("Status like ${value.statusCode}\n\n");
+        }
         if (value.statusCode.toString() != '200') {
           setState(() {
             isLike = false;
@@ -577,7 +685,6 @@ class _HeartAnimationState extends State<HeartAnimation>
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     _controllerAnimation = AnimationController(
         vsync: this, duration: const Duration(milliseconds: 800));
@@ -590,9 +697,7 @@ class _HeartAnimationState extends State<HeartAnimation>
 
   @override
   void dispose() {
-    // TODO: implement dispose
     _controllerAnimation.dispose();
-
     super.dispose();
   }
 

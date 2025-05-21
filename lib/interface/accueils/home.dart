@@ -18,7 +18,8 @@ class HomePage extends StatefulWidget {
   State<HomePage> createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _HomePageState extends State<HomePage>
+    with AutomaticKeepAliveClientMixin {
   List<Color> colors = [Colors.red, Colors.blue, Colors.yellow, Colors.green];
 
   late Future<void> _initializeVideoPlayerFuture;
@@ -35,25 +36,28 @@ class _HomePageState extends State<HomePage> {
 
       );
 
-  loadVideoTenVideoController() {
-    for (int i = 0; i < DataController.videos.length && i < 10; i++) {
-      videoPlayerController = VideoPlayerController.networkUrl(
-          Uri.parse(DataController.videos[i].files[0].url!))
-        ..initialize().then((value) {
-          videoPlayerController.setLooping(true);
-          videoPlayerController.pause();
-          setState(() {});
-          Map video = {
-            'id': DataController.videos[i].id,
-            'controller': videoPlayerController
-          };
-          DataController.addVideoToHistory(
-              DataController.videos[0].id!, videoPlayerController);
-        });
-      DataController.addVideoToHistory(
-          DataController.videos[i].id!, videoPlayerController);
-    }
-  }
+  // loadVideoTenVideoController() {
+  //   for (int i = 0; i < DataController.videos.length && i < 10;) {
+  //     if (DataController.videos[i].files.first.type == 'video') {
+  //       videoPlayerController = VideoPlayerController.networkUrl(
+  //           Uri.parse(DataController.videos[i].files[0].url!))
+  //         ..initialize().then((value) {
+  //           videoPlayerController.setLooping(true);
+  //           videoPlayerController.pause();
+  //           setState(() {});
+  //           Map video = {
+  //             'id': DataController.videos[i].id,
+  //             'controller': videoPlayerController
+  //           };
+  //           DataController.addVideoToHistory(
+  //               DataController.videos[0].id!, videoPlayerController);
+  //         });
+  //       DataController.addVideoToHistory(
+  //           DataController.videos[i].id!, videoPlayerController);
+  //       i++;
+  //     }
+  //   }
+  // }
 
   @override
   void initState() {
@@ -83,12 +87,13 @@ class _HomePageState extends State<HomePage> {
               Publication pub = Publication.fromJson(item);
               print("content- ${pub.content} ${pub.files[0].type}");
               print("typesss ${pub.files[0].type} ");
-              if (pub.files[0].type == 'video') {
+              if (pub.files[0].type == 'video' ||
+                  pub.files.first.type == 'image') {
                 DataController.videos.add(pub);
               }
             }
           }
-          loadVideoTenVideoController();
+          // loadVideoTenVideoController();
         }
       } catch (e) {
         print(e);
@@ -99,7 +104,11 @@ class _HomePageState extends State<HomePage> {
   }
 
   @override
+  bool get wantKeepAlive => true;
+
+  @override
   Widget build(BuildContext context) {
+    super.build(context);
     return Scaffold(
         body: FutureBuilder(
             future: _initializeVideoPlayerFuture,
@@ -128,42 +137,74 @@ class _HomePageState extends State<HomePage> {
                 );
               }
               return DataController.videos.isNotEmpty
-                  ? PageView.builder(
-                      controller: pageController,
-                      scrollDirection: Axis.vertical,
-                      itemCount: DataController.videos.length,
-                      padEnds: true,
-                      onPageChanged: (index) {
-                        // setState(() {
-                        //   currentPage=index;
-                        // });
-                        //arret de la vidéo précedente
-                      },
-                      itemBuilder: (context, index) {
-                        return DataController.videos.isNotEmpty
-                            ? VideoPlayerWidget(
-                                videoItem: DataController.videos[index],
-                                index: index,
-                              )
-                            : const Column(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  Center(
-                                    child: Text("Aucune publication"),
-                                  )
-                                ],
-                              );
-                      },
+                  ? VideoScrollWidget(
+                      publications: DataController.videos,
                     )
                   : Container(
                       child: const Text("Aucune publication"),
                     );
             }));
   }
+}
 
-  videoContainer() {
-    return Container(
-      child: VideoPlayer(videoPlayerController),
+class VideoScrollWidget extends StatefulWidget {
+  const VideoScrollWidget({
+    super.key,
+    required this.publications,
+  });
+
+  final List<Publication> publications;
+
+  @override
+  State<VideoScrollWidget> createState() => _VideoScrollWidgetState();
+}
+
+class _VideoScrollWidgetState extends State<VideoScrollWidget> {
+  PageController pageController = PageController();
+  int? currentPage;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    // pageController!.addListener(() {
+    //   final page = pageController!.page?.round();
+    //   if (page != null && page != currentPage) {
+    //     setState(() {
+    //       currentPage = page;
+    //     });
+    //   }
+    // });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return PageView.builder(
+      controller: pageController,
+      scrollDirection: Axis.vertical,
+      itemCount: widget.publications.length,
+      padEnds: true,
+      onPageChanged: (index) {
+        // setState(() {
+        //   currentPage=index;
+        // });
+        //arret de la vidéo précedente
+      },
+      itemBuilder: (context, index) {
+        return widget.publications.isNotEmpty
+            ? VideoPlayerWidget(
+                videoItem: widget.publications[index],
+                index: index,
+                isCurrentPage: currentPage == index,
+              )
+            : const Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Center(
+                    child: Text("Aucune publication"),
+                  )
+                ],
+              );
+      },
     );
   }
 }

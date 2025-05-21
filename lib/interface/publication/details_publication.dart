@@ -24,7 +24,8 @@ class DetailsPublication extends StatefulWidget {
   State<DetailsPublication> createState() => _DetailsPublicationState();
 }
 
-class _DetailsPublicationState extends State<DetailsPublication> {
+class _DetailsPublicationState extends State<DetailsPublication>
+    with AutomaticKeepAliveClientMixin {
   late Future<String> loadData;
   late Publication pub;
 
@@ -77,7 +78,11 @@ class _DetailsPublicationState extends State<DetailsPublication> {
   }
 
   @override
+  bool get wantKeepAlive => true;
+
+  @override
   Widget build(BuildContext context) {
+    super.build(context);
     return FutureBuilder(
         future: loadData,
         builder: (context, snapshot) {

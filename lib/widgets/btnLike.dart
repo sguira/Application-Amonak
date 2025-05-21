@@ -109,7 +109,7 @@ class _ButtonLikeState extends State<ButtonLike> {
       });
       await PublicationService.addLike(data).then((value) {
         print("Status like ${value.statusCode}\n\n");
-        getNombreLike();
+        // getNombreLike();
         if (value.statusCode != 200) {
           setState(() {
             isLiked = false;
@@ -133,14 +133,15 @@ class _ButtonLikeState extends State<ButtonLike> {
 
   deleteLike() async {
     if (isLiked) {
+      setState(() {
+        isLiked = false;
+        likes -= 1;
+        // getNombreLike();
+      });
       await PublicationService.deleteLike(idLike).then((value) {
         print("SUppression like ${value.statusCode} .. \n\n");
-        setState(() {
-          isLiked = false;
-          likes -= 1;
-          getNombreLike();
-        });
-        if (value.statusCode.toString() != '200') {
+
+        if (value.statusCode != 200) {
           setState(() {
             isLiked = true;
             likes += 1;

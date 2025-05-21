@@ -102,7 +102,7 @@ class _ProfilePageState extends State<ProfilePage> {
               return [
                 SliverAppBar(
                   automaticallyImplyLeading: false,
-                  expandedHeight: 250,
+                  expandedHeight: 280,
                   // pinned: true,
                   floating: true,
                   // pinned: true,

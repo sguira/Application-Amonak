@@ -207,7 +207,7 @@ class _LoginContainerState extends State<LoginContainer> {
                                             setState_(() {
                                               wailLoging = false;
                                               errorMessage =
-                                                  'Un problème est survenue';
+                                                  'Vérifiez vos coordonnées';
                                               showError = true;
                                             });
                                           });
@@ -284,6 +284,7 @@ class _LoginContainerState extends State<LoginContainer> {
               onPressed: () {
                 setState_(() {
                   showError = false;
+                  messageR = "";
                 });
               },
               icon: const Icon(Icons.close, color: Colors.white))

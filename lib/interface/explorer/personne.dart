@@ -6,6 +6,7 @@ import 'package:application_amonak/widgets/list_friend_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:application_amonak/models/user.dart';
+
 class ListePersonnePage extends StatefulWidget {
   // TextEditingController?  controller;
   const ListePersonnePage({super.key});
@@ -14,17 +15,19 @@ class ListePersonnePage extends StatefulWidget {
   State<ListePersonnePage> createState() => _ListePersonnePageState();
 }
 
-class _ListePersonnePageState extends State<ListePersonnePage> {
+class _ListePersonnePageState extends State<ListePersonnePage>
+    with AutomaticKeepAliveClientMixin {
+  int counter = 0;
 
-  List<User> users=[];
+  List<User> users = [];
 
-  List<User> requests=[];
+  List<User> requests = [];
 
-  TextEditingController search=TextEditingController();
+  TextEditingController search = TextEditingController();
 
   //attente des buttons
-  bool waitAcceptBtn=false;
-  bool waitDeclineBtn=false;
+  bool waitAcceptBtn = false;
+  bool waitDeclineBtn = false;
 
   @override
   void initState() {
@@ -41,32 +44,39 @@ class _ListePersonnePageState extends State<ListePersonnePage> {
   }
 
   @override
+  bool get wantKeepAlive => true;
+
+  @override
   Widget build(BuildContext context) {
+    super.build(context);
     return FutureBuilder(
-      future: UserService.getAllUser(param: {}).then((value)=>{
-        print('valeur ret²ourné\n\n'),
-        print(value.statusCode),
-        if(value.statusCode==200){
-            users=[],
-            for(var user in jsonDecode(value.body)as List){
-              users.add(User.fromJson(user))
-            }
-          
-        }
-      }).catchError((e){
-        print(e);
-      }),
-      builder: (context,snashot) {
-        if(snashot.hasError){
-          return Center(
-            child: Text("Veriviez votre Connexion",style: GoogleFonts.roboto(),),
-          );
-        }
-        if(snashot.hasData){
-          return  StatefulBuilder(
-            builder: (context,setState_) {
+        future: UserService.getAllUser(param: {})
+            .then((value) => {
+                  print('valeur ret²ourné\n\n'),
+                  print(value.statusCode),
+                  if (value.statusCode == 200)
+                    {
+                      users = [],
+                      for (var user in jsonDecode(value.body) as List)
+                        {users.add(User.fromJson(user))}
+                    }
+                })
+            .catchError((e) {
+          print(e);
+        }),
+        builder: (context, snashot) {
+          if (snashot.hasError) {
+            return Center(
+              child: Text(
+                "Veriviez votre Connexion",
+                style: GoogleFonts.roboto(),
+              ),
+            );
+          }
+          if (snashot.hasData) {
+            return StatefulBuilder(builder: (context, setState_) {
               return Container(
-                margin:const EdgeInsets.symmetric(horizontal: 18),
+                margin: const EdgeInsets.symmetric(horizontal: 18),
                 child: SingleChildScrollView(
                   child: Column(
                     // alignment: WrapAlignment.spaceAround,
@@ -78,7 +88,7 @@ class _ListePersonnePageState extends State<ListePersonnePage> {
                       //   decoration: BoxDecoration(
                       //     borderRadius: BorderRadius.circular(8),
                       //     border: Border.all(
-                      //       width: 1, 
+                      //       width: 1,
                       //       color: Colors.black12
                       //     )
                       //   ),
@@ -102,7 +112,7 @@ class _ListePersonnePageState extends State<ListePersonnePage> {
                       //                   child: Column(
                       //                     children: [
                       //                       Container(
-                      //                         width: 80, 
+                      //                         width: 80,
                       //                         height: 80,
                       //                         decoration: BoxDecoration(
                       //                           borderRadius: BorderRadius.circular(56)
@@ -159,7 +169,7 @@ class _ListePersonnePageState extends State<ListePersonnePage> {
                       //                                       });
                       //                                     }
                       //                                   }
-                      //                                 } 
+                      //                                 }
                       //                                 else{
                       //                                   errorSnackBar(message: 'Une erreur est survenue', context: context);
                       //                                 }
@@ -186,35 +196,31 @@ class _ListePersonnePageState extends State<ListePersonnePage> {
                   ),
                 ),
               );
-            }
+            });
+          }
+          return const Center(
+            child: CircularProgressIndicator(),
           );
-        }
-        return const Center(
-          child: CircularProgressIndicator(
+        });
+  }
 
-          ),
-        );
-      }
-    );
-  } 
-
-  Future<void> listRequestFriend()async{
+  Future<void> listRequestFriend() async {
     await UserService.getAllUser(param: {
-      "friendRequest":true.toString(), 
-      "user":DataController.user!.id
-    }).then((value){
-      if(value.statusCode==200){
-        requests=[];
-        for(var item in jsonDecode(value.body)){
+      "friendRequest": true.toString(),
+      "user": DataController.user!.id
+    }).then((value) {
+      if (value.statusCode == 200) {
+        requests = [];
+        for (var item in jsonDecode(value.body)) {
           requests.add(User.fromJson(item));
         }
       }
-    }).catchError((e){
+    }).catchError((e) {
       print(e);
     });
   }
 
-   header(dynamic setState_) {
+  header(dynamic setState_) {
     return Container(
       // decoration: BoxDecoration(
       //   color: Colors.red
@@ -223,81 +229,82 @@ class _ListePersonnePageState extends State<ListePersonnePage> {
       // margin: EdgeInsets.only(top: 22),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,  
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Container(
-            margin:const EdgeInsets.symmetric(vertical: 18),
-            child: Text("\" NOUS DEVENONS CE QUE NOUS PENSONS \"",style: GoogleFonts.roboto(fontSize: 12,fontWeight: FontWeight.w700),),
-          ), 
+            margin: const EdgeInsets.symmetric(vertical: 18),
+            child: Text(
+              "\" NOUS DEVENONS CE QUE NOUS PENSONS \"",
+              style:
+                  GoogleFonts.roboto(fontSize: 12, fontWeight: FontWeight.w700),
+            ),
+          ),
           Container(
             width: 280,
             height: 42,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(22)
-            ),
+            decoration: BoxDecoration(borderRadius: BorderRadius.circular(22)),
             child: TextFormField(
               controller: search,
               decoration: InputDecoration(
-                filled: true,
-                fillColor: Colors.black12,
-                hintText: 'Chercher..',
-                hintStyle: GoogleFonts.roboto(fontSize: 12),
-                contentPadding:const EdgeInsets.symmetric(vertical: 4,horizontal: 18),
-                border:const OutlineInputBorder(
-                  borderSide: BorderSide(
-                    width: 0, color: Colors.transparent, 
-                  )
-                ), 
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(36),
-                  borderSide:const BorderSide(
-                    width: 0, color: Colors.transparent, 
-                  )
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(36),
-                  borderSide:const BorderSide(
-                    width: 0, color: Colors.transparent, 
-                  )
-                )
-              ),
-              onChanged: (value){
-                if(value.length>=3){
-                  UserService.searchUser(search.text).then((value){
+                  filled: true,
+                  fillColor: Colors.black12,
+                  hintText: 'Chercher..',
+                  hintStyle: GoogleFonts.roboto(fontSize: 12),
+                  contentPadding:
+                      const EdgeInsets.symmetric(vertical: 4, horizontal: 18),
+                  border: const OutlineInputBorder(
+                      borderSide: BorderSide(
+                    width: 0,
+                    color: Colors.transparent,
+                  )),
+                  focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(36),
+                      borderSide: const BorderSide(
+                        width: 0,
+                        color: Colors.transparent,
+                      )),
+                  enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(36),
+                      borderSide: const BorderSide(
+                        width: 0,
+                        color: Colors.transparent,
+                      ))),
+              onChanged: (value) {
+                if (value.length >= 3) {
+                  UserService.searchUser(search.text).then((value) {
                     print("values status code search:${value.statusCode}");
-                    if(value.statusCode==200){
+                    if (value.statusCode == 200) {
                       setState_(() {
-                          users=[];
-                          for(var item in jsonDecode(value.body) as List){
-                            users.add(User.fromJson(item));
-                          }
-                        });
+                        users = [];
+                        for (var item in jsonDecode(value.body) as List) {
+                          users.add(User.fromJson(item));
+                        }
+                      });
                     }
-                  }).catchError((e){
+                  }).catchError((e) {
                     print("Error $e");
-                    UserService.getAllUser(param: {}).then((value){
-                      if(value.statusCode==200){
+                    UserService.getAllUser(param: {}).then((value) {
+                      if (value.statusCode == 200) {
                         setState_(() {
-                          users=[];
-                          for(var item in jsonDecode(value.body) as List){
+                          users = [];
+                          for (var item in jsonDecode(value.body) as List) {
                             users.add(User.fromJson(item));
                           }
                         });
                       }
                     });
                   });
-                }
-                else{
-                  UserService.getAllUser(param: {}).then((value){
-                      if(value.statusCode==200){
-                        setState_(() {
-                          users=[];
-                          for(var item in jsonDecode(value.body) as List){
-                            users.add(User.fromJson(item));
-                          }
-                        });
-                      }
-                    });
+                } else {
+                  UserService.getAllUser(param: {}).then((value) {
+                    if (value.statusCode == 200) {
+                      setState_(() {
+                        users = [];
+                        for (var item in jsonDecode(value.body) as List) {
+                          users.add(User.fromJson(item));
+                        }
+                      });
+                    }
+                  });
                 }
               },
             ),
@@ -306,7 +313,4 @@ class _ListePersonnePageState extends State<ListePersonnePage> {
       ),
     );
   }
-
-  
 }
-

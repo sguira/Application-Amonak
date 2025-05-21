@@ -14,6 +14,7 @@ import 'package:application_amonak/services/socket/publication.dart';
 import 'package:application_amonak/services/user.dart';
 import 'package:application_amonak/settings/weights.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:provider/provider.dart';
 import 'package:application_amonak/services/socket/commentSocket.dart';
@@ -21,15 +22,9 @@ import 'package:application_amonak/services/socket/notificationSocket.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 void main() {
-  runApp(MultiProvider(
-    providers: [
-      ChangeNotifierProvider(create: (_) => MessageSocket()),
-      ChangeNotifierProvider(create: (_) => PublicationSocket()),
-      ChangeNotifierProvider(create: (_) => Commentsocket()),
-      ChangeNotifierProvider(create: (_) => Notificationsocket())
-    ],
-    child: const MyApp(),
-  ));
+  runApp(
+    const ProviderScope(child: MyApp()),
+  );
 }
 
 class MyApp extends StatefulWidget {
@@ -82,7 +77,16 @@ class _MyAppState extends State<MyApp> {
                   isAuth = false;
                 });
               });
+            } else {
+              setState(() {
+                loading = false;
+                isAuth = false;
+              });
             }
+          } else {
+            setState(() {
+              loading = false;
+            });
           }
         });
       } else {
@@ -139,18 +143,18 @@ class Loading extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: couleurPrincipale.withAlpha(60),
+      backgroundColor: Colors.white,
       body: Center(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Container(
-              child: Image.asset("assets/icons/amonak2.png"),
+              child: Image.asset("assets/icons/amonak.png"),
             ),
             Container(
               child: LoadingAnimationWidget.newtonCradle(
-                color: Colors.white,
+                color: couleurPrincipale,
                 size: 36,
               ),
             ),
