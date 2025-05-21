@@ -91,9 +91,8 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
     });
     print("Video ID ${widget.videoItem.id}\n\n");
 
-    controller = DataController.getVideoControllerById(widget.videoItem.id!) ??
-        VideoPlayerController.networkUrl(
-            Uri.parse(super.widget.videoItem.files[0].url!))
+    controller = VideoPlayerController.networkUrl(
+        Uri.parse(super.widget.videoItem.files[0].url!))
       ..initialize().then((value) {
         controller.setLooping(true);
         controller.play();
@@ -102,6 +101,12 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
         DataController.addVideoToHistory(widget.videoItem.id!, controller);
       });
     // DataController.addVideoToHistory(widget.videoItem.id!, controller);
+  }
+
+  @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
   }
 
   getNombreLike() async {
@@ -200,7 +205,10 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
                             });
                           });
                         },
-                        child: VideoPlayer(controller),
+                        child: AspectRatio(
+                          aspectRatio: controller.value.aspectRatio,
+                          child: VideoPlayer(controller),
+                        ),
                       ),
 
                       if (viewBtn)

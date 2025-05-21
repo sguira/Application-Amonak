@@ -87,7 +87,7 @@ class _PublicationPageState extends State<PublicationPage> {
       });
       // return null;
     }
-    await PublicationService.getPublications(userId: widget.userId, limite: 7)
+    await PublicationService.getPublications(userId: widget.userId, limite: 10)
         .then((value) async {
       print("Status code : ${value.statusCode}");
       print("liste des publication ${value.body}");
