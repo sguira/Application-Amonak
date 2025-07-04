@@ -20,8 +20,7 @@ class BoutiquePage extends StatefulWidget {
   State<BoutiquePage> createState() => _BoutiquePageState();
 }
 
-class _BoutiquePageState extends State<BoutiquePage>
-    with AutomaticKeepAliveClientMixin {
+class _BoutiquePageState extends State<BoutiquePage> {
   // List<Map<String,String>> boutiques=[
   //   {
   //     'nom':'Boutique 1',
@@ -58,12 +57,12 @@ class _BoutiquePageState extends State<BoutiquePage>
   TextEditingController search = TextEditingController();
   int counter = 0;
 
-  @override
-  bool get wantKeepAlive => true;
+  // @override
+  // bool get wantKeepAlive => true;
 
   @override
   Widget build(BuildContext context) {
-    super.build(context);
+    // super.build(context);
     return FutureBuilder(
         future: UserService.getBoutique().then((value) {
           if (value.statusCode.toString() == '200') {

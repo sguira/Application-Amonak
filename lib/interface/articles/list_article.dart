@@ -13,16 +13,11 @@ class Article extends StatefulWidget {
   State<Article> createState() => _ListArticleState();
 }
 
-class _ListArticleState extends State<Article>
-    with AutomaticKeepAliveClientMixin {
+class _ListArticleState extends State<Article> {
   List<ArticleModel> articles = [];
 
   @override
-  bool get wantKeepAlive => true;
-
-  @override
   Widget build(BuildContext context) {
-    super.build(context);
     return Scaffold(
       body: FutureBuilder(
           future: ProductService.getSingleArticle().then((value) {

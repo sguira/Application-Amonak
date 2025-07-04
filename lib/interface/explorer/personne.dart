@@ -15,8 +15,7 @@ class ListePersonnePage extends StatefulWidget {
   State<ListePersonnePage> createState() => _ListePersonnePageState();
 }
 
-class _ListePersonnePageState extends State<ListePersonnePage>
-    with AutomaticKeepAliveClientMixin {
+class _ListePersonnePageState extends State<ListePersonnePage> {
   int counter = 0;
 
   List<User> users = [];
@@ -43,12 +42,12 @@ class _ListePersonnePageState extends State<ListePersonnePage>
     // }
   }
 
-  @override
-  bool get wantKeepAlive => true;
+  // @override
+  // bool get wantKeepAlive => true;
 
   @override
   Widget build(BuildContext context) {
-    super.build(context);
+    // super.build(context);
     return FutureBuilder(
         future: UserService.getAllUser(param: {})
             .then((value) => {

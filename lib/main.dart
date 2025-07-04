@@ -150,7 +150,8 @@ class Loading extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Container(
-              child: Image.asset("assets/icons/amonak.png"),
+              child: Image.asset("assets/icons/amonak.png",
+                  width: 200, height: 100),
             ),
             Container(
               child: LoadingAnimationWidget.newtonCradle(

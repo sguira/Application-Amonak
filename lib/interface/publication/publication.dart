@@ -29,7 +29,6 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:video_player/video_player.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 
-// import 'package:popover/popover.dart';
 class PublicationPage extends StatefulWidget {
   final String? type;
   final String? userId;
@@ -42,8 +41,7 @@ class PublicationPage extends StatefulWidget {
   State<PublicationPage> createState() => _PublicationPageState();
 }
 
-class _PublicationPageState extends State<PublicationPage>
-    with AutomaticKeepAliveClientMixin {
+class _PublicationPageState extends State<PublicationPage> {
   List<Publication> publication = [];
 
   late int nbLike = 0;
@@ -53,96 +51,189 @@ class _PublicationPageState extends State<PublicationPage>
 
   late Future<dynamic> loadDataResult;
 
-  // IO.Socket? socket;
-
+  // Socket pour les publications et notifications
   late PublicationSocket publicationSocket;
   late Notificationsocket notificationsocket;
 
-  // PublicationSocket? publicationSocket;
+  // Variables pour la pagination
+  final ScrollController _scrollController = ScrollController();
+  int _currentLimit = 10; // Limite initiale de 10 publications
+  final int _loadMoreIncrement = 7; // Ajouter 7 publications à chaque fois
+  bool _isLoadingMore = false;
+  bool _hasMoreData = true; // Indique s'il y a plus de données à charger
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
-
     publicationSocket = PublicationSocket();
     notificationsocket = Notificationsocket();
-    print("Type de publication ${widget.type}");
+
     publicationSocket.socket!.on("likePublicationListener", (handler) {
-      print("La publication a été  liké");
+      print("La publication a été liké");
     });
     publicationSocket.socket!.on("newPublicationListener", (handler) {});
-    //recevoir des notification
     notificationsocket.socket!.on("refreshNotificationBoxHandler", (handler) {
       print("Une nouvelle notification < $handler \n\n\n");
     });
-    loadDataResult = loadData();
-    // initSocket();
+
+    // Initial load of data
+    loadDataResult = _loadData();
+
+    // Listener pour le défilement
+    _scrollController.addListener(() {
+      if (_scrollController.position.pixels ==
+              _scrollController.position.maxScrollExtent &&
+          !_isLoadingMore &&
+          _hasMoreData) {
+        _loadMoreData();
+      }
+    });
   }
 
-  loadData() async {
+  // Fonction pour charger les données initiales ou recharger
+  Future<void> _loadData() async {
     if (widget.publications != null) {
-      print("taille des pub ${widget.publications!.length}");
       setState(() {
         publication = widget.publications!;
+        _hasMoreData = publication.length >=
+            _currentLimit; // Ajuster selon la logique d'API
       });
-      // return null;
+      return; // If publications are provided, no need to fetch from service
     }
-    await PublicationService.getPublications(userId: widget.userId, limite: 10)
-        .then((value) async {
-      print("Status code : ${value.statusCode}");
-      print("liste des publication ${value.body}");
-      publication = [];
-      if (value.statusCode.toString() == '200') {
-        for (var item in jsonDecode(value.body) as List) {
-          if (item['type'] != null) {
-            if (widget.type == item['type']) {
-              Publication pub = Publication.fromJson(item);
 
-              publication.add(pub);
-            }
-            if (item['type'] == 'share' && widget.type != 'alerte') {
-              if (item['share'] != null) {
-                await PublicationService.getPublicationById(id: item['share'])
-                    .then((value) {
-                  if (value.statusCode == 200) {
-                    Publication pub =
-                        Publication.fromJson(jsonDecode(value.body));
-                    pub.share = item['share'];
-                    pub.userShare = User.fromJson(item['user']);
-                    pub.shareDate = DateTime.parse(item['createdAt']);
-                    pub.shareMessage = item['shareMessage'];
-                    publication.add(pub);
-                  }
-                }).catchError((e) {});
+    // Réinitialiser la liste pour un nouveau chargement (par exemple, en cas de recherche)
+    // ou si c'est le chargement initial.
+    publication.clear();
+
+    final response = await PublicationService.getPublications(
+        userId: widget.userId, limite: _currentLimit);
+
+    print("Status code : ${response.statusCode}");
+    if (response.statusCode.toString() == '200') {
+      final List<dynamic> fetchedItems = jsonDecode(response.body);
+      final List<Publication> newPublications = [];
+
+      for (var item in fetchedItems) {
+        if (item['type'] != null) {
+          if (widget.type == null || widget.type == item['type']) {
+            Publication pub = Publication.fromJson(item);
+            newPublications.add(pub);
+          }
+          if (item['type'] == 'share' && widget.type != 'alerte') {
+            if (item['share'] != null) {
+              try {
+                final sharedPubResponse =
+                    await PublicationService.getPublicationById(
+                        id: item['share']);
+                if (sharedPubResponse.statusCode == 200) {
+                  Publication pub =
+                      Publication.fromJson(jsonDecode(sharedPubResponse.body));
+                  pub.share = item['share'];
+                  pub.userShare = User.fromJson(item['user']);
+                  pub.shareDate = DateTime.parse(item['createdAt']);
+                  pub.shareMessage = item['shareMessage'];
+                  newPublications.add(pub);
+                }
+              } catch (e) {
+                print("Error fetching shared publication: $e");
               }
             }
           }
         }
       }
-      return "";
-    }).catchError((e) {
-      print("error: $e\n\n");
-    });
+
+      setState(() {
+        publication.addAll(newPublications);
+        _hasMoreData = newPublications.length >=
+            _currentLimit; // Si le nombre d'éléments retournés est inférieur à la limite, c'est la dernière page
+      });
+    } else {
+      print("Erreur lors du chargement des publications: ${response.body}");
+      setState(() {
+        _hasMoreData = false; // Pas plus de données en cas d'erreur
+      });
+    }
   }
 
-  getNombreLike() async {
-    // await PublicationService.getNumberLike(widget., type)
+  // Fonction pour charger plus de données
+  Future<void> _loadMoreData() async {
+    if (_isLoadingMore || !_hasMoreData) return;
+
+    setState(() {
+      _isLoadingMore = true;
+    });
+
+    final int newLimit = _currentLimit + _loadMoreIncrement;
+    final response = await PublicationService.getPublications(
+        userId: widget.userId, limite: newLimit);
+
+    if (response.statusCode.toString() == '200') {
+      final List<dynamic> fetchedItems = jsonDecode(response.body);
+      final List<Publication> newPublications = [];
+
+      // Filtrer les publications déjà présentes
+      final Set<String> existingIds = publication.map((p) => p.id!).toSet();
+
+      for (var item in fetchedItems) {
+        if (item['type'] != null) {
+          if ((widget.type == null || widget.type == item['type']) &&
+              !existingIds.contains(item['_id'])) {
+            Publication pub = Publication.fromJson(item);
+            newPublications.add(pub);
+          }
+          if (item['type'] == 'share' &&
+              widget.type != 'alerte' &&
+              !existingIds.contains(item['_id'])) {
+            if (item['share'] != null) {
+              try {
+                final sharedPubResponse =
+                    await PublicationService.getPublicationById(
+                        id: item['share']);
+                if (sharedPubResponse.statusCode == 200) {
+                  Publication pub =
+                      Publication.fromJson(jsonDecode(sharedPubResponse.body));
+                  pub.share = item['share'];
+                  pub.userShare = User.fromJson(item['user']);
+                  pub.shareDate = DateTime.parse(item['createdAt']);
+                  pub.shareMessage = item['shareMessage'];
+                  newPublications.add(pub);
+                }
+              } catch (e) {
+                print("Error fetching shared publication on load more: $e");
+              }
+            }
+          }
+        }
+      }
+
+      setState(() {
+        publication.addAll(newPublications);
+        _currentLimit = newLimit;
+        _isLoadingMore = false;
+        // Si le nombre d'éléments *réellement ajoutés* est inférieur à l'incrément, c'est la dernière page.
+        // Ou si la taille totale des publications atteint une limite arbitraire que vous définissez.
+        _hasMoreData = fetchedItems.length ==
+            _currentLimit; // assuming API returns exactly `_currentLimit` items if more available.
+      });
+    } else {
+      print(
+          "Erreur lors du chargement de plus de publications: ${response.body}");
+      setState(() {
+        _isLoadingMore = false;
+        _hasMoreData = false;
+      });
+    }
   }
 
   @override
   void dispose() {
     publicationSocket.socket!.close();
-
+    _scrollController.dispose(); // Dispose du contrôleur de défilement
     super.dispose();
   }
 
   @override
-  bool get wantKeepAlive => true;
-
-  @override
   Widget build(BuildContext context) {
-    super.build(context);
     return FutureBuilder(
         future: loadDataResult,
         builder: (context, snapshot) {
@@ -162,48 +253,62 @@ class _PublicationPageState extends State<PublicationPage>
                       Expanded(
                         child: Container(
                           child: ListView.builder(
-                            // alignment: WrapAlignment.center,
-                            itemCount: publication.length,
+                            controller: _scrollController, // Attach controller
+                            itemCount:
+                                publication.length + (_isLoadingMore ? 1 : 0),
                             shrinkWrap: true,
-
-                            scrollDirection: Axis.vertical,
-
                             itemBuilder: (context, index) {
-                              return publication[index].share == null
-                                  ? ItemPublication(
-                                      pub: publication[index],
-                                      type: widget.type,
-                                      publicationSocket: publicationSocket,
-                                    )
-                                  : Container(
-                                      margin: const EdgeInsets.symmetric(
-                                          horizontal: 8),
-                                      decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(8),
-                                      ),
-                                      child: Column(
-                                        children: [
-                                          Container(
-                                              child: HeaderPublication(
-                                                  style: 1,
-                                                  dateCreation:
-                                                      publication[index]
-                                                          .shareDate!,
-                                                  context: context,
-                                                  user: publication[index]
-                                                      .userShare!)),
-                                          TextExpanded(
-                                              texte: publication[index]
-                                                  .shareMessage!),
-                                          Container(
-                                              padding: const EdgeInsets.all(8),
-                                              child: ItemPublication(
-                                                  pub: publication[index],
-                                                  publicationSocket:
-                                                      publicationSocket)),
-                                        ],
-                                      ),
-                                    );
+                              if (index < publication.length) {
+                                return publication[index].share == null
+                                    ? ItemPublication(
+                                        pub: publication[index],
+                                        type: widget.type,
+                                        publicationSocket: publicationSocket,
+                                      )
+                                    : Container(
+                                        margin: const EdgeInsets.symmetric(
+                                            horizontal: 8),
+                                        decoration: BoxDecoration(
+                                          borderRadius:
+                                              BorderRadius.circular(8),
+                                        ),
+                                        child: Column(
+                                          children: [
+                                            Container(
+                                                child: HeaderPublication(
+                                                    style: 1,
+                                                    dateCreation:
+                                                        publication[index]
+                                                            .shareDate!,
+                                                    context: context,
+                                                    user: publication[index]
+                                                        .userShare!)),
+                                            TextExpanded(
+                                                texte: publication[index]
+                                                    .shareMessage!),
+                                            Container(
+                                                padding:
+                                                    const EdgeInsets.all(8),
+                                                child: ItemPublication(
+                                                    pub: publication[index],
+                                                    publicationSocket:
+                                                        publicationSocket)),
+                                          ],
+                                        ),
+                                      );
+                              } else {
+                                // Last item is the loading indicator
+                                return _isLoadingMore
+                                    ? const Padding(
+                                        padding: EdgeInsets.symmetric(
+                                            vertical: 24.0),
+                                        child: Center(
+                                          child: CircularProgressIndicator(),
+                                        ),
+                                      )
+                                    : const SizedBox
+                                        .shrink(); // Hide if not loading
+                              }
                             },
                           ),
                         ),
@@ -216,6 +321,10 @@ class _PublicationPageState extends State<PublicationPage>
                 );
         });
   }
+
+  // Reste de votre code (bodyContainer, textContainer, imageContaint, etc.)
+  // Aucune modification majeure n'est nécessaire pour ces fonctions
+  // sauf si vous voulez animer spécifiquement leur apparition.
 
   bodyContainer(Publication item) {
     return Column(
@@ -248,7 +357,7 @@ class _PublicationPageState extends State<PublicationPage>
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 2, vertical: 12),
       // decoration: BoxDecoration(
-      //   borderRadius: BorderRadius.circular(11),
+      //   borderRadius: BorderRadius.circular(11),
 
       // ),
       child: ClipRRect(
@@ -309,7 +418,7 @@ class _PublicationPageState extends State<PublicationPage>
   header(dynamic setState_) {
     return Container(
       // decoration: BoxDecoration(
-      //   color: Colors.red
+      //   color: Colors.red
       // ),
       // height: 8,
       // margin: EdgeInsets.only(top: 22),
@@ -552,13 +661,45 @@ class _PublicationPageState extends State<PublicationPage>
   }
 
   deleteLocal(String id) {
-    publication = [];
-    for (Publication i in publication) {
-      if (i.id != id) {
-        publication.add(i);
-      }
-    }
+    setState(() {
+      publication.removeWhere((pub) => pub.id == id);
+    });
   }
 
   deletePublication(String id) {}
+}
+
+class AucunElement extends StatelessWidget {
+  final String label;
+  const AucunElement({super.key, required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 16),
+      margin: const EdgeInsets.symmetric(vertical: 18, horizontal: 8),
+      decoration: BoxDecoration(
+          border:
+              Border.all(width: 0.5, color: couleurPrincipale.withAlpha(80)),
+          borderRadius: BorderRadius.circular(12)),
+      child: Column(
+        children: [
+          // SvgPicture.asset(
+          //   "assets/illustration/empty.svg",
+          //   width: 300,
+          //   fit: BoxFit.cover,
+          // ),
+          Container(
+              margin: const EdgeInsets.symmetric(vertical: 16),
+              child: Text(
+                label,
+                style: GoogleFonts.roboto(
+                    color: Colors.black,
+                    fontSize: 22,
+                    fontWeight: FontWeight.w600),
+              )),
+        ],
+      ),
+    );
+  }
 }

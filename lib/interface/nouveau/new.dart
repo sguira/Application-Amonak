@@ -66,20 +66,21 @@ class _NewPageState extends State<NewPage> {
                     )
                   ],
                 ),
-                // if (DataController.user!.accountType != 'seller')
-                Container(
-                    child: Row(
-                  children: [
-                    itemButtonWithIcon(
-                        label: 'Dévenez Vendeur',
-                        function: () {
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => const BecomeSeller()));
-                        }),
-                  ],
-                ))
+                if (DataController.user!.accountType != 'seller')
+                  Container(
+                      child: Row(
+                    children: [
+                      itemButtonWithIcon(
+                          label: 'Dévenez Vendeur',
+                          function: () {
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) =>
+                                        const BecomeSeller()));
+                          }),
+                    ],
+                  ))
               ],
             ),
           ),

@@ -16,7 +16,7 @@ class SellerService {
       if (value != 'ERROR') {
         data['files'] = [value];
         await http
-            .patch(Uri.parse(url),
+            .put(Uri.parse(url),
                 headers: {"Content-type": "application/json"},
                 body: jsonEncode(data))
             .then((value) {

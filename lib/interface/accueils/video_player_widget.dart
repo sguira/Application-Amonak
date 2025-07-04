@@ -19,6 +19,7 @@ import 'package:application_amonak/widgets/buttonComment.dart';
 import 'package:application_amonak/widgets/commentaire.dart';
 import 'package:application_amonak/widgets/imageSkeleton.dart';
 import 'package:application_amonak/widgets/notification_button.dart';
+import 'package:application_amonak/widgets/share_widget.dart';
 import 'package:application_amonak/widgets/wait_widget.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
@@ -492,14 +493,18 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
                           IconButton(
                               onPressed: () {
                                 // onComment();
+                                showCustomModalSheetWidget(
+                                    context: context,
+                                    child:
+                                        ShareWidget(itemPub: widget.videoItem));
                               },
                               icon: const Icon(Icons.repeat,
                                   color: Colors.white)),
-                          Text(
-                            NumberFormat.compact(locale: 'fr').format(0),
-                            style: GoogleFonts.roboto(
-                                fontSize: sizeLike, color: Colors.white),
-                          )
+                          // Text(
+                          //   NumberFormat.compact(locale: 'fr').format(0),
+                          //   style: GoogleFonts.roboto(
+                          //       fontSize: sizeLike, color: Colors.white),
+                          // )
                         ],
                       ),
                     ),
@@ -542,13 +547,13 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
                   ),
                   borderRadius: BorderRadius.circular(86)),
               child: ClipOval(
-                  child: DataController.user!.avatar!.isEmpty
+                  child: widget.videoItem.user!.avatar!.isEmpty
                       ? Image.asset(
                           'assets/medias/profile.jpg',
                           fit: BoxFit.cover,
                         )
                       : Image.network(
-                          DataController.user!.avatar!.first.url!,
+                          widget.videoItem.user!.avatar![0].url!,
                           fit: BoxFit.cover,
                         )),
             ),

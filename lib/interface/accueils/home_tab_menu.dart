@@ -3,7 +3,7 @@ import 'package:application_amonak/data/data_controller.dart';
 import 'package:application_amonak/interface/accueils/home.dart';
 import 'package:application_amonak/interface/accueils/home2.dart';
 import 'package:application_amonak/interface/contact/contact.dart';
-import 'package:application_amonak/interface/contact/contact2.dart';
+// import 'package:application_amonak/interface/contact/.dart';
 import 'package:application_amonak/interface/explorer/explorer.dart';
 import 'package:application_amonak/interface/nouveau/new.dart';
 import 'package:application_amonak/interface/profile/profile.dart';
@@ -23,7 +23,7 @@ class HomePageTab extends StatefulWidget {
 class _HomeState extends State<HomePageTab> {
   int currentIndex = 0;
 
-  double iconSize = 24; // Slightly increased icon size
+  double iconSize = 24;
 
   late Notificationsocket notificationsocket;
 

@@ -96,7 +96,7 @@ class _MessagePageState extends State<MessagePage> {
   }
 
   scrollJump() async {
-    await Future.delayed(Duration(seconds: 3));
+    await Future.delayed(Duration(seconds: 1));
     scrollController.jumpTo(scrollController.position.maxScrollExtent);
     // ou pour un scroll animé :
     // scrollController.animateTo(
@@ -174,6 +174,7 @@ class _MessagePageState extends State<MessagePage> {
                       ? ListView.builder(
                           controller: scrollController,
                           itemCount: listMessage.length,
+                          shrinkWrap: true,
                           itemBuilder: (contxt, index) {
                             return listMessage[index].type != 'alerte'
                                 ? GestureDetector(

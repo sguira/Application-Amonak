@@ -97,20 +97,20 @@ class _ProfilePageState extends State<ProfilePage> {
         ),
         // body: tabBarContainer(),
         body: NestedScrollView(
-            headerSliverBuilder:
-                (BuildContext context, bool innerBoxIsScrolled) {
-              return [
-                SliverAppBar(
-                  automaticallyImplyLeading: false,
-                  expandedHeight: 280,
-                  // pinned: true,
-                  floating: true,
-                  // pinned: true,
-                  flexibleSpace: FlexibleSpaceBar(background: headerProfile()),
-                )
-              ];
-            },
-            body: tabBarContainer()));
+          headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
+            return [
+              SliverAppBar(
+                automaticallyImplyLeading: false,
+                expandedHeight: 280,
+                // pinned: true,
+                floating: true,
+                // pinned: true,
+                flexibleSpace: FlexibleSpaceBar(background: headerProfile()),
+              )
+            ];
+          },
+          body: tabBarContainer(),
+        ));
   }
 
   Container tabBarContainer() {
@@ -128,12 +128,16 @@ class _ProfilePageState extends State<ProfilePage> {
                 appBar: AppBar(
                   automaticallyImplyLeading: false,
                   toolbarHeight: 0,
-                  bottom: TabBar(tabs: [
-                    itemTab('articles', 2000),
-                    itemTab('publications', 2000),
-                    itemTab('alertes', 572454),
-                    itemTab('abonné', 2000)
-                  ]),
+                  bottom: TabBar(
+                    tabs: [
+                      itemTab('articles', 2000),
+                      itemTab('publications', 2000),
+                      itemTab('alertes', 572454),
+                      itemTab('abonné', 2000)
+                    ],
+                    indicatorSize: TabBarIndicatorSize.label,
+                    indicatorColor: couleurPrincipale,
+                  ),
                 ),
                 body: TabBarView(children: [
                   FutureListArticle(userId: DataController.user!.id!),
@@ -175,17 +179,20 @@ class _ProfilePageState extends State<ProfilePage> {
 
   Tab itemTab(String label, int value) {
     return Tab(
-      height: 40,
+      // height: 40,
       child: Column(
         children: [
           Text(
             NumberFormat.compact(locale: 'fr').format(value),
-            style:
-                GoogleFonts.roboto(fontSize: 14, fontWeight: FontWeight.bold),
+            style: GoogleFonts.roboto(
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+              color: couleurPrincipale,
+            ),
           ),
           Text(
             label.toUpperCase(),
-            style: GoogleFonts.roboto(fontSize: 8),
+            style: GoogleFonts.roboto(fontSize: 8, color: couleurPrincipale),
             overflow: TextOverflow.ellipsis,
           )
         ],

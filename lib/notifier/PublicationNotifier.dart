@@ -11,8 +11,7 @@ class PublicationNotifier extends AsyncNotifier<List<Publication>> {
 
   Future<List<Publication>> fetchPublications() async {
     try {
-      final response =
-          await PublicationService.getPublications(); // Await directly
+      final response = await PublicationService.getPublications();
       if (response.statusCode == 200) {
         List<Publication> publications = [];
         for (var pub in jsonDecode(response.body)) {

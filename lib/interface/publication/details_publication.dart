@@ -213,7 +213,8 @@ class _DetailsPublicationState extends State<DetailsPublication>
                     ),
                   ),
                   Container(
-                    margin: const EdgeInsets.only(top: 18, left: 0),
+                    margin: const EdgeInsets.symmetric(
+                        horizontal: 12, vertical: 12),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [

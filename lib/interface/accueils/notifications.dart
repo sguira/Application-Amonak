@@ -102,16 +102,17 @@ class _NotificationsState extends State<Notifications> {
                                             notification[index].from!.userName!,
                                         style: GoogleFonts.roboto(
                                             fontWeight: FontWeight.w500)),
-                                    TextSpan(
-                                      text: notification[index].content ==
-                                              "comment.likeYourComment"
-                                          ? "Vient de liker votre commentaire"
-                                          : notification[index].content ==
-                                                  "comment.commentYourPublication"
-                                              ? "Vient de commenter votre publication"
-                                              : "",
-                                      style: GoogleFonts.roboto(fontSize: 11),
-                                    )
+                                    if (notification[index].content != null)
+                                      TextSpan(
+                                        text: notification[index].content ==
+                                                "comment.likeYourComment"
+                                            ? "Vient de liker votre commentaire"
+                                            : notification[index].content ==
+                                                    "comment.commentYourPublication"
+                                                ? "Vient de commenter votre publication"
+                                                : "",
+                                        style: GoogleFonts.roboto(fontSize: 11),
+                                      )
                                   ])),
                                 )
                             ],
