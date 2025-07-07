@@ -23,6 +23,7 @@ import 'package:application_amonak/widgets/zone_commentaire.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -76,7 +77,6 @@ class _PublicationPageState extends State<PublicationPage> {
       print("Une nouvelle notification < $handler \n\n\n");
     });
 
-    // Initial load of data
     loadDataResult = _loadData();
 
     // Listener pour le défilement
@@ -95,20 +95,17 @@ class _PublicationPageState extends State<PublicationPage> {
     if (widget.publications != null) {
       setState(() {
         publication = widget.publications!;
-        _hasMoreData = publication.length >=
-            _currentLimit; // Ajuster selon la logique d'API
+        _hasMoreData = publication.length >= _currentLimit;
       });
-      return; // If publications are provided, no need to fetch from service
+      return;
     }
 
-    // Réinitialiser la liste pour un nouveau chargement (par exemple, en cas de recherche)
-    // ou si c'est le chargement initial.
     publication.clear();
 
     final response = await PublicationService.getPublications(
         userId: widget.userId, limite: _currentLimit);
 
-    print("Status code : ${response.statusCode}");
+    print("Status code loader pub: ${response.statusCode}");
     if (response.statusCode.toString() == '200') {
       final List<dynamic> fetchedItems = jsonDecode(response.body);
       final List<Publication> newPublications = [];
@@ -117,7 +114,9 @@ class _PublicationPageState extends State<PublicationPage> {
         if (item['type'] != null) {
           if (widget.type == null || widget.type == item['type']) {
             Publication pub = Publication.fromJson(item);
-            newPublications.add(pub);
+            setState(() {
+              newPublications.add(pub);
+            });
           }
           if (item['type'] == 'share' && widget.type != 'alerte') {
             if (item['share'] != null) {

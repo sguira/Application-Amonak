@@ -6,6 +6,7 @@ import 'package:application_amonak/interface/explorer/boutique.dart';
 import 'package:application_amonak/interface/explorer/personne.dart';
 import 'package:application_amonak/interface/publication/publication.dart';
 import 'package:application_amonak/interface/profile/publication_widget.dart';
+import 'package:application_amonak/interface/publication/puclicationNotifierPage.dart';
 import 'package:application_amonak/models/publication.dart';
 import 'package:application_amonak/models/user.dart';
 import 'package:application_amonak/services/publication.dart';
@@ -144,17 +145,17 @@ class _ExplorerPageState extends State<ExplorerPage> {
                                 itemTabBar("Alerte"),
                               ]),
                             ),
-                            body: TabBarView(children: [
-                              const ListePersonnePage(),
-                              const Article(),
-                              const BoutiquePage(),
-                              PublicationPage(
+                            body: const TabBarView(children: [
+                              ListePersonnePage(),
+                              Article(),
+                              BoutiquePage(),
+                              PublicationPage2(
                                 type: 'default',
-                                publications: publications,
+                                // publications: publications,
                               ),
                               PublicationPage(
                                 type: 'alerte',
-                                publications: publications,
+                                // publications: publications,
                               )
                             ]),
                           ),

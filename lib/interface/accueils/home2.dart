@@ -1,4 +1,6 @@
+import 'package:application_amonak/data/data_controller.dart';
 import 'package:application_amonak/interface/accueils/home.dart'; // Assurez-vous que ce chemin est correct
+import 'package:application_amonak/notifier/NotificationNotifier.dart';
 import 'package:application_amonak/notifier/PublicationNotifier.dart'; // Assurez-vous que ce chemin est correct
 import 'package:application_amonak/widgets/wait_widget.dart';
 import 'package:flutter/material.dart'; // Utilisez material.dart pour la plupart des widgets Flutter
@@ -12,7 +14,8 @@ class PublicationList extends ConsumerWidget {
     // 1. Écoutez l'état asynchrone de vos publications
     // ref.watch(publicationProvider) vous donnera un AsyncValue<List<Publication>>
     final asyncPublications = ref.watch(publicationProvider);
-
+    final asyncNatifications = ref.watch(notificationProvider);
+    DataController.notificationCount = asyncNatifications.value?.length ?? 0;
     // 2. Utilisez la méthode .when() d'AsyncValue pour gérer les différents états
     return asyncPublications.when(
       // État de succès : les données sont disponibles
