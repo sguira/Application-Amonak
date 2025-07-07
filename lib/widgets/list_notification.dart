@@ -18,8 +18,7 @@ class ListeNotification extends StatefulWidget {
   State<ListeNotification> createState() => _ListeNotificationState();
 }
 
-class _ListeNotificationState extends State<ListeNotification>
-    with AutomaticKeepAliveClientMixin {
+class _ListeNotificationState extends State<ListeNotification> {
   List<NotificationModel> notifications = [];
 
   late MessageSocket messageSocket;
@@ -47,9 +46,6 @@ class _ListeNotificationState extends State<ListeNotification>
   }
 
   @override
-  bool get wantKeepAlive => true;
-
-  @override
   void initState() {
     // TODO: implement initState
     super.initState();
@@ -67,7 +63,6 @@ class _ListeNotificationState extends State<ListeNotification>
 
   @override
   Widget build(BuildContext context) {
-    super.build(context);
     return Scaffold(
         appBar: AppBar(
           // backgroundColor:const Color(0x1F9F9FF),
