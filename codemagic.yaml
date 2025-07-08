@@ -1,11 +1,25 @@
 workflows:
-  ios-workflow:
-    name: iOS Workflow
-
-    # ....
-
+  ios-build:
+    name: Build iOS App (no publish)
     environment:
-      ios_signing:
-        distribution_type: app_store # or: ad_hoc | development | enterprise
+      flutter: stable
+      xcode: latest
+      cocoapods: default
+      vars:
+        BUNDLE_ID: "com.tonentreprise.tonapp" # ← Remplace par ton identifiant
+      groups:
+        - certificate_credentials # Contient les certificats nécessaires
+    scripts:
+      - name: Install Flutter dependencies
+        script: |
+          flutter pub get
 
-        bundle_identifier: com.example.id
+      - name: Build IPA
+        script: |
+          flutter build ipa --release \
+            --build-name=1.0.0 \
+            --build-number=1
+
+    artifacts:
+      - build/ios/ipa/*.ipa
+      - build/ios/ipa/*.dSYM.zip
