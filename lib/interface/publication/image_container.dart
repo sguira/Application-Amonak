@@ -4,11 +4,13 @@ import 'package:application_amonak/colors/colors.dart';
 import 'package:application_amonak/data/data_controller.dart';
 import 'package:application_amonak/interface/publication/details_publication.dart';
 import 'package:application_amonak/interface/publication/videoPlayerWidget.dart';
+import 'package:application_amonak/models/article.dart';
 import 'package:application_amonak/models/message.dart';
 import 'package:application_amonak/models/publication.dart';
 import 'package:application_amonak/services/commentaire.dart';
 import 'package:application_amonak/services/message.dart';
 import 'package:application_amonak/services/notification.dart';
+import 'package:application_amonak/services/product.dart';
 import 'package:application_amonak/services/publication.dart';
 import 'package:application_amonak/services/socket/notificationSocket.dart';
 import 'package:application_amonak/services/socket/publication.dart';
@@ -348,6 +350,23 @@ class _ImageSectionState extends State<ItemPublication> {
     );
   }
 
+  getPublication() {
+    List<ArticleModel> articles = [];
+    ProductService.getSingleArticle(userId: DataController.user!.id)
+        .then((value) => {
+              if (value.statusCode == 200)
+                {
+                  for (var a in jsonDecode(value.body))
+                    {
+                      setState(() {
+                        articles.add(ArticleModel.fromJson(a)!);
+                      })
+                    }
+                }
+            });
+    return articles;
+  }
+
   widgetResponseAlerte(Publication pub) async {
     TextEditingController messageAlerte = TextEditingController();
     TextEditingController nomArticle = TextEditingController();
@@ -355,6 +374,7 @@ class _ImageSectionState extends State<ItemPublication> {
     TextEditingController livraison = TextEditingController();
     TextEditingController taille = TextEditingController();
     TextEditingController numero = TextEditingController();
+    List<ArticleModel> articles = getPublication();
     InputDecoration decoration({String? hintText, IconData? leading}) =>
         InputDecoration(
             hintText: hintText,
@@ -400,10 +420,11 @@ class _ImageSectionState extends State<ItemPublication> {
                         ),
                         const Spacer(),
                         IconButton(
-                            onPressed: () {
-                              Navigator.pop(context);
-                            },
-                            icon: const Icon(Icons.close, color: Colors.black))
+                          onPressed: () {
+                            Navigator.pop(context);
+                          },
+                          icon: const Icon(Icons.close, color: Colors.black),
+                        )
                       ],
                     ),
                   ),
@@ -502,6 +523,110 @@ class _ImageSectionState extends State<ItemPublication> {
                                 hintText: 'Taille', leading: Icons.smartphone),
                           ),
                         ),
+                        Container(
+                          margin: const EdgeInsets.symmetric(vertical: 12),
+                          child: TextFormField(
+                            decoration: InputDecoration(
+                              hintText: 'Choisir l\'article',
+                              hintStyle: GoogleFonts.roboto(fontSize: 12),
+                              suffixIcon: IconButton(
+                                onPressed: () async {
+                                  await showModalBottomSheet(
+                                    context: context,
+                                    isScrollControlled: true,
+                                    enableDrag: true,
+                                    showDragHandle: true,
+                                    scrollControlDisabledMaxHeightRatio: 0.6,
+                                    shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(6)),
+                                    builder: (context) => Container(
+                                      width: double.maxFinite,
+                                      height:
+                                          MediaQuery.of(context).size.height *
+                                              0.7,
+                                      child: Column(
+                                        children: [
+                                          Container(
+                                            child:
+                                                Text("Choisissez un article"),
+                                          ),
+                                          Expanded(
+                                              child: articles.isNotEmpty
+                                                  ? ListView.builder(
+                                                      itemCount:
+                                                          articles.length,
+                                                      itemBuilder:
+                                                          (context, index) =>
+                                                              Container(
+                                                                margin: const EdgeInsets
+                                                                    .symmetric(
+                                                                    vertical: 6,
+                                                                    horizontal:
+                                                                        12),
+                                                                child: Material(
+                                                                  elevation: 4,
+                                                                  borderRadius:
+                                                                      BorderRadius
+                                                                          .circular(
+                                                                              8),
+                                                                  child:
+                                                                      Container(
+                                                                    margin: const EdgeInsets
+                                                                        .symmetric(
+                                                                        vertical:
+                                                                            8,
+                                                                        horizontal:
+                                                                            8),
+                                                                    decoration:
+                                                                        BoxDecoration(),
+                                                                    child: Row(
+                                                                      children: [
+                                                                        ItemListArticle(
+                                                                            label:
+                                                                                "Nom",
+                                                                            value:
+                                                                                articles[index].name!),
+                                                                        ItemListArticle(
+                                                                            label:
+                                                                                "Prix",
+                                                                            value:
+                                                                                articles[index].price.toString()),
+                                                                        ItemListArticle(
+                                                                            label:
+                                                                                "Disponible",
+                                                                            value:
+                                                                                articles[index].qte.toString()),
+                                                                        Container(
+                                                                          child: TextButton(
+                                                                              onPressed: () {},
+                                                                              child: Text(
+                                                                                "Selectionner",
+                                                                                style: GoogleFonts.roboto(fontSize: 11),
+                                                                              )),
+                                                                        )
+                                                                      ],
+                                                                    ),
+                                                                  ),
+                                                                ),
+                                                              ))
+                                                  : Container(
+                                                      child: Column(
+                                                        children: [
+                                                          Text(
+                                                              "Vous avez publier aucun article en vente jusqu'a present")
+                                                        ],
+                                                      ),
+                                                    ))
+                                        ],
+                                      ),
+                                    ),
+                                  );
+                                },
+                                icon: const Icon(Icons.arrow_drop_down),
+                              ),
+                            ),
+                          ),
+                        ),
                         MultiSelect(
                             reload: setState_,
                             listes: sizes,
@@ -577,6 +702,30 @@ class _ImageSectionState extends State<ItemPublication> {
                 ),
               );
             }));
+  }
+
+  Container ItemListArticle({
+    required String label,
+    required String value,
+  }) {
+    return Container(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 6),
+            child: Text(
+              label,
+              style: GoogleFonts.roboto(fontSize: 11),
+            ),
+          ),
+          Text(
+            value,
+            style: GoogleFonts.roboto(fontSize: 11),
+          )
+        ],
+      ),
+    );
   }
 
   formatSize(List<String> size) {

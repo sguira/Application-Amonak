@@ -57,7 +57,9 @@ class _MyAppState extends State<MyApp> {
             print("La date est ${value}");
             if (DateTime.parse(value).isAfter(DateTime.now())) {
               // loadData();
+              print("Le token est valide");
               LocalStorage.getUserId().then((value) async {
+                print("L'id de l'utilisateur est $value");
                 if (value != null) {
                   UserService.getUser(userId: value).then((value) {
                     if (value.statusCode == 200) {
@@ -69,6 +71,16 @@ class _MyAppState extends State<MyApp> {
                         loading = false;
                       });
                     }
+                    UserService.getAllUser(param: {}).then((value) {
+                      if (value.statusCode == 200) {
+                        DataController.friends = [];
+                        for (var user in jsonDecode(value.body) as List) {
+                          DataController.friends.add(User.fromJson(user));
+                        }
+                      }
+                    }).catchError((e) {
+                      print("Erreur lors du chargement des utilisateurs : $e");
+                    });
                   });
                 }
               }).catchError((e) {

@@ -31,13 +31,11 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:video_player/video_player.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 
-// Changer StatefulWidget en ConsumerStatefulWidget
 class PublicationPage2 extends ConsumerStatefulWidget {
   final String? type;
   final String? userId;
   final bool? hideLabel;
-  final List<Publication>?
-      publications; // Pour les publications initiales si passées
+  final List<Publication>? publications;
 
   const PublicationPage2({
     super.key,
@@ -53,15 +51,8 @@ class PublicationPage2 extends ConsumerStatefulWidget {
 
 // Changer State en ConsumerState
 class _PublicationPageState extends ConsumerState<PublicationPage2> {
-  // Supprimez les variables d'état locales pour les publications et le chargement
-  // List<Publication> publication = [];
-  // late Future<dynamic> loadDataResult;
-  // bool _isLoadingMore = false;
-  // bool _hasMoreData = true;
-
-  late int nbLike =
-      0; // Peut rester si utilisé localement pour un élément spécifique
-  late bool isLiked = false; // Peut rester
+  late int nbLike = 0;
+  late bool isLiked = false;
   TextEditingController search = TextEditingController();
   String type = '';
 
@@ -95,21 +86,24 @@ class _PublicationPageState extends ConsumerState<PublicationPage2> {
     });
     notificationsocket.socket!.on("refreshNotificationBoxHandler", (handler) {
       print("Une nouvelle notification < $handler \n\n\n");
-      // Ici, vous pourriez déclencher un rafraîchissement du compteur de notifications
-      // en utilisant un provider Riverpod pour les notifications.
     });
 
-    // Attacher le listener pour le défilement
     _scrollController.addListener(() {
-      if (_scrollController.position.pixels ==
-          _scrollController.position.maxScrollExtent) {
-        // Demander au notifier de charger plus de données
-        ref
-            .read(publicationsNotifierProvider({
-              'userId': widget.userId,
-              'type': widget.type,
-            }).notifier)
-            .loadMorePublications();
+      if (_scrollController.position.pixels >=
+          _scrollController.position.maxScrollExtent * 0.9) {
+        final publicationsState = ref.read(publicationsNotifierProvider({
+          'userId': widget.userId,
+          'type': widget.type,
+        }));
+
+        if (publicationsState is PublicationsState) {
+          ref
+              .read(publicationsNotifierProvider({
+                'userId': widget.userId,
+                'type': widget.type,
+              }).notifier)
+              .loadMorePublications();
+        }
       }
     });
   }

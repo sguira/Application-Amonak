@@ -142,6 +142,7 @@ class _CreateAccountState extends State<CreateAccount> {
                         hint: 'Choisir'),
                     StatefulBuilder(builder: (context, setState_) {
                       return Container(
+                        width: double.maxFinite,
                         margin: const EdgeInsets.symmetric(
                             horizontal: 12, vertical: 18),
                         child: Column(
@@ -151,24 +152,34 @@ class _CreateAccountState extends State<CreateAccount> {
                               'Choisissez une photo de profil',
                               style: GoogleFonts.roboto(fontSize: 14),
                             ),
-                            TextFormField(
-                              decoration: InputDecoration(
-                                  hintText: 'Accéder aux photos',
-                                  enabledBorder: const UnderlineInputBorder(
-                                      borderSide: BorderSide(width: 2)),
-                                  hintStyle: GoogleFonts.roboto(
-                                      color: Colors.black, fontSize: 13),
-                                  suffixIcon: IconButton(
-                                      onPressed: () {
-                                        choiceImage();
-                                      },
-                                      icon: const Icon(
-                                        Icons.photo,
-                                        size: 18,
-                                      ))),
+                            const SizedBox(
+                              height: 6,
+                            ),
+                            GestureDetector(
                               onTap: () {
                                 choiceImage();
                               },
+                              child: Container(
+                                alignment: Alignment.center,
+                                width: double.maxFinite,
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                    color: Colors.black26,
+                                    borderRadius: BorderRadius.circular(36)),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    const Icon(Icons.photo),
+                                    const SizedBox(
+                                      width: 12,
+                                    ),
+                                    Text(
+                                      "Accéder à vos photos",
+                                      style: GoogleFonts.roboto(),
+                                    ),
+                                  ],
+                                ),
+                              ),
                             ),
                             if (selectedFile != null)
                               Column(
