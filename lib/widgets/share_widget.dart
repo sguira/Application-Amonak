@@ -39,20 +39,21 @@ class _ShareWidgetState extends State<ShareWidget> {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 300,
+      height: 250,
       width: MediaQuery.of(context).size.width,
       child: SingleChildScrollView(
         child: Column(
           children: [
             Container(
-              margin: const EdgeInsets.symmetric(horizontal: 22, vertical: 28),
+              margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
               padding: const EdgeInsets.all(6),
               decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(6),
-                  border: Border.all(
-                    width: 0.2,
-                    color: couleurPrincipale,
-                  )),
+                borderRadius: BorderRadius.circular(6),
+                // border: Border.all(
+                //   width: 0.2,
+                //   color: couleurPrincipale,
+                // )),
+              ),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -100,16 +101,19 @@ class _ShareWidgetState extends State<ShareWidget> {
               margin: const EdgeInsets.symmetric(vertical: 12, horizontal: 18),
               child: TextFormField(
                 controller: message,
-                minLines: 1,
+                minLines: 2,
                 maxLines: 8,
-                decoration: InputDecoration(
-                    contentPadding: const EdgeInsets.all(8),
-                    // filled: true,
-                    // fillColor: Colors.white,
-                    hintText: 'Votre message',
-                    enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(4),
-                        borderSide: const BorderSide(color: Colors.black12))),
+                decoration: const InputDecoration(
+                  contentPadding: EdgeInsets.all(8),
+                  // filled: true,
+                  // fillColor: Colors.white,
+                  hintText: 'Votre message',
+
+                  enabledBorder: UnderlineInputBorder(
+                      // borderRadius: BorderRadius.circular(4),
+                      borderSide:
+                          const BorderSide(color: couleurPrincipale, width: 2)),
+                ),
               ),
             ),
             Row(
@@ -120,7 +124,7 @@ class _ShareWidgetState extends State<ShareWidget> {
                   margin: const EdgeInsets.symmetric(horizontal: 16),
                   decoration: BoxDecoration(
                       color: couleurPrincipale,
-                      borderRadius: BorderRadius.circular(4)),
+                      borderRadius: BorderRadius.circular(36)),
                   child: waitShare == false
                       ? TextButton(
                           onPressed: () {

@@ -55,7 +55,7 @@ footerPublication(dynamic item) {
             onPressed: () {},
             style: TextButton.styleFrom(
                 backgroundColor: const Color.fromRGBO(97, 81, 212, 1),
-                padding: const EdgeInsets.symmetric(horizontal: 12)),
+                padding: const EdgeInsets.symmetric(horizontal: 6)),
             child: Text("S'Abonner",
                 style: GoogleFonts.roboto(fontSize: 10, color: Colors.white)))
       ],
@@ -127,16 +127,16 @@ headerBoutiquecustom(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                user.userName!??"",
+                user.userName! ?? "",
                 style: GoogleFonts.roboto(
                     fontSize: 14, fontWeight: FontWeight.w500),
               ),
-              if(dateCreation!=null)
-              Text(
-                "Publié il y'a ${DataController.FormatDate(date: dateCreation)}",
-                style: GoogleFonts.roboto(
-                    fontSize: 13, fontStyle: FontStyle.italic),
-              ),
+              if (dateCreation != null)
+                Text(
+                  "Publié il y'a ${DataController.FormatDate(date: dateCreation)}",
+                  style: GoogleFonts.roboto(
+                      fontSize: 13, fontStyle: FontStyle.italic),
+                ),
               // style!=1?
               // Text("1",style: GoogleFonts.roboto(fontSize: 11),):Container(),
             ],
@@ -153,11 +153,11 @@ headerBoutiquecustom(
                   Icons.close,
                 )),
           ),
-        if (typeLateralBtn != null && typeLateralBtn == '')
-          Container(
-            child: IconButton(
-                onPressed: () {}, icon: const Icon(Icons.more_horiz)),
-          )
+        // if (typeLateralBtn != null && typeLateralBtn == '')
+        //   Container(
+        //     child: IconButton(
+        //         onPressed: () {}, icon: const Icon(Icons.more_horiz)),
+        //   )
       ],
     ),
   );

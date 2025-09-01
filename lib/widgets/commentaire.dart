@@ -140,7 +140,7 @@ class _CommentaireWidgetState extends State<CommentaireWidget> {
             if (snapshot.hasError) {
               return Container(
                 margin:
-                    const EdgeInsets.symmetric(vertical: 22, horizontal: 18),
+                    const EdgeInsets.symmetric(vertical: 28, horizontal: 22),
                 child: const Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -315,7 +315,10 @@ class _CommentaireWidgetState extends State<CommentaireWidget> {
       if (value.statusCode == 200) {
         // print("donnée ${jsonDecode(value.body)}");
         setState(() {
-          commentaires.insert(1, Commentaire.fromJson(jsonDecode(value.body)));
+          // commentaires.insert(1, Commentaire.fromJson(jsonDecode(value.body)));
+          var com = Commentaire.fromJson(jsonDecode(value.body));
+          com.isLike = false;
+          commentaires = [com, ...commentaires];
         });
         print("Commentaire...");
         socket!.emit("newCommentEvent", {"comment": jsonDecode(value.body)});
@@ -549,107 +552,108 @@ class _ItemCommentaireState extends State<ItemCommentaire> {
                                   fit: BoxFit.cover)),
                     ),
                   ),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      SizedBox(
-                          width: ScreenSize.width * 0.65,
-                          // padding: EdgeInsets.all(8),
+                  Flexible(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        SizedBox(
+                            // width: ScreenSize.width * 0.65,
+                            // padding: EdgeInsets.all(8),
 
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
+                            child: Column(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Container(
+                              width: ScreenSize.width * 0.65,
+                              constraints: const BoxConstraints(
+                                  // maxHeight: 90
+                                  ),
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                  color: Colors.black.withAlpha(20),
+                                  borderRadius: BorderRadius.circular(4)),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    widget.com.user!.userName!,
+                                    style: GoogleFonts.roboto(
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: 12),
+                                  ),
+                                  Text(
+                                    widget.com.content!,
+                                    style: GoogleFonts.roboto(fontSize: 14),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            if (showActions == false)
                               Container(
-                                width: ScreenSize.width * 0.65,
-                                constraints: const BoxConstraints(
-                                    // maxHeight: 90
-                                    ),
-                                padding: const EdgeInsets.all(8),
-                                decoration: BoxDecoration(
-                                    color: Colors.black.withAlpha(20),
-                                    borderRadius: BorderRadius.circular(4)),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.end,
                                   children: [
                                     Text(
-                                      widget.com.user!.userName!,
-                                      style: GoogleFonts.roboto(
-                                          fontWeight: FontWeight.w600,
-                                          fontSize: 12),
+                                      DataController.FormatDate(
+                                          date: widget.com.date!),
+                                      style: GoogleFonts.roboto(fontSize: 9),
                                     ),
-                                    Text(
-                                      widget.com.content!,
-                                      style: GoogleFonts.roboto(fontSize: 14),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              if (showActions == false)
-                                Container(
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.end,
-                                    children: [
-                                      Text(
-                                        DataController.FormatDate(
-                                            date: widget.com.date!),
-                                        style: GoogleFonts.roboto(fontSize: 9),
-                                      ),
-                                      const Spacer(),
-                                      Container(
-                                          child: Row(
+                                    const Spacer(),
+                                    Container(
+                                        child: Row(
+                                      children: [
+                                        Container(
+                                            margin: const EdgeInsets.all(6),
+                                            child: GestureDetector(
+                                                onTap: () {
+                                                  // likeCommentaire(com);
+                                                },
+                                                child: const Row(
+                                                  children: [
+                                                    // Text("J'aime",style: GoogleFonts.roboto(fontSize: 9,fontWeight:FontWeight.w500,color: isLiked(com, DataController.user!.id!)?Colors.blue:Colors.black)),
+                                                  ],
+                                                ))),
+                                        // buttonReatComment('Repondre',(){}),
+                                      ],
+                                    )),
+                                    const Spacer(),
+                                    Container(
+                                      child: Row(
                                         children: [
                                           Container(
-                                              margin: const EdgeInsets.all(6),
-                                              child: GestureDetector(
-                                                  onTap: () {
-                                                    // likeCommentaire(com);
-                                                  },
-                                                  child: const Row(
-                                                    children: [
-                                                      // Text("J'aime",style: GoogleFonts.roboto(fontSize: 9,fontWeight:FontWeight.w500,color: isLiked(com, DataController.user!.id!)?Colors.blue:Colors.black)),
-                                                    ],
-                                                  ))),
-                                          // buttonReatComment('Repondre',(){}),
+                                            child: Row(
+                                              children: [
+                                                Text(
+                                                  NumberFormat.compact().format(
+                                                      widget.com.nbLikes),
+                                                  style: GoogleFonts.roboto(
+                                                      fontSize: 10,
+                                                      fontWeight:
+                                                          FontWeight.w600),
+                                                ),
+                                                const SizedBox(
+                                                  width: 2,
+                                                ),
+                                                Text(
+                                                  'Likes',
+                                                  style: GoogleFonts.roboto(
+                                                      fontSize: 9),
+                                                ),
+                                              ],
+                                            ),
+                                          )
                                         ],
-                                      )),
-                                      const Spacer(),
-                                      Container(
-                                        child: Row(
-                                          children: [
-                                            Container(
-                                              child: Row(
-                                                children: [
-                                                  Text(
-                                                    NumberFormat.compact()
-                                                        .format(
-                                                            widget.com.nbLikes),
-                                                    style: GoogleFonts.roboto(
-                                                        fontSize: 10,
-                                                        fontWeight:
-                                                            FontWeight.w600),
-                                                  ),
-                                                  const SizedBox(
-                                                    width: 2,
-                                                  ),
-                                                  Text(
-                                                    'Likes',
-                                                    style: GoogleFonts.roboto(
-                                                        fontSize: 9),
-                                                  ),
-                                                ],
-                                              ),
-                                            )
-                                          ],
-                                        ),
-                                      )
-                                    ],
-                                  ),
-                                )
-                            ],
-                          )),
-                    ],
+                                      ),
+                                    )
+                                  ],
+                                ),
+                              )
+                          ],
+                        )),
+                      ],
+                    ),
                   ),
                   Column(
                     mainAxisAlignment: MainAxisAlignment.end,

@@ -417,14 +417,7 @@ class _MessagePageState extends State<MessagePage> {
                                           minLines: 1,
                                           keyboardType: TextInputType.text,
                                           decoration: InputDecoration(
-                                            // suffix:
-                                            // contentPadding:const EdgeInsets.only(top: 44,left: 18,right: 12),
-                                            // contentPadding:const EdgeInsets.symmetric(vertical: 8,horizontal: 16),
                                             hintText: 'Ecrire ...',
-
-                                            // filled: true,
-                                            // fillColor: Colors.black12,
-
                                             hintStyle: GoogleFonts.roboto(
                                                 fontSize: 13),
                                             border: UnderlineInputBorder(
@@ -678,17 +671,11 @@ class _MessagePageState extends State<MessagePage> {
                   builder: (context) => DetailsUser(user: widget.user)));
         },
         child: Container(
-          margin: const EdgeInsets.symmetric(vertical: 12),
-          // decoration: BoxDecoration(
-          //   border: Border.all(
-          //     width: 1,
-          //     color: couleurPrincipale.
-          //   )
-          // ),
+          margin: const EdgeInsets.symmetric(vertical: 0),
           child: Row(
             children: [
               Container(
-                margin: const EdgeInsets.symmetric(vertical: 12),
+                margin: const EdgeInsets.symmetric(vertical: 0),
                 width: 50,
                 height: 50,
                 child: Container(
@@ -696,11 +683,17 @@ class _MessagePageState extends State<MessagePage> {
                       border: Border.all(width: 2, color: couleurPrincipale),
                       borderRadius: BorderRadius.circular(36)),
                   child: ClipOval(
-                      child: Image.asset(
-                    "assets/medias/profile.jpg",
-                    width: 40,
-                    fit: BoxFit.cover,
-                  )),
+                      child: widget.user.avatar!.isEmpty
+                          ? Image.asset(
+                              "assets/medias/profile.jpg",
+                              width: 40,
+                              fit: BoxFit.cover,
+                            )
+                          : Image.network(
+                              widget.user.avatar!.first.url!,
+                              width: 40,
+                              fit: BoxFit.cover,
+                            )),
                 ),
               ),
               Container(

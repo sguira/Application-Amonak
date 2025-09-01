@@ -12,9 +12,11 @@ import 'package:application_amonak/interface/profile/list_abonne.dart';
 import 'package:application_amonak/interface/profile/list_achat.dart';
 import 'package:application_amonak/interface/profile/publication_widget.dart';
 import 'package:application_amonak/models/article.dart';
+import 'package:application_amonak/models/publication.dart';
 import 'package:application_amonak/models/user.dart';
 import 'package:application_amonak/services/product.dart';
 import 'package:application_amonak/services/profil.dart';
+import 'package:application_amonak/services/publication.dart';
 import 'package:application_amonak/services/user.dart';
 import 'package:application_amonak/settings/weights.dart';
 import 'package:application_amonak/widgets/list_friend_widget.dart';
@@ -38,6 +40,83 @@ class _ProfilePageState extends State<ProfilePage> {
   File? selectedFile;
   final _picker = ImagePicker();
   List<User> users = [];
+  List<ArticleModel> articles = [];
+  List<Publication> publications = [];
+  List<Publication> alertes = [];
+
+  Future<void>? initData;
+
+  //tailles
+  int nbArticles = 0;
+  int nbPublications = 0;
+  int nbAlertes = 0;
+  int nbAbonnes = 0;
+
+  Future<void> getPublications() async {
+    await PublicationService.getPublications(userId: DataController.user!.id!)
+        .then((value) {
+      if (value.statusCode == 200) {
+        publications = [];
+        for (var item in jsonDecode(value.body)) {
+          publications.add(Publication.fromJson(item));
+        }
+        setState(() {
+          nbPublications = publications.length;
+        });
+      }
+    }).catchError((e) {
+      print("une erreeeeur est survenue \n\n ${e.toString()} ");
+    });
+  }
+
+  Future<void> getAlertes() async {
+    await PublicationService.getPublications(
+            userId: DataController.user!.id!, type: 'alerte')
+        .then((value) {
+      if (value.statusCode == 200) {
+        alertes = [];
+        for (var item in jsonDecode(value.body)) {
+          alertes.add(Publication.fromJson(item));
+        }
+        setState(() {
+          nbAlertes = alertes.length;
+        });
+      }
+    }).catchError((e) {
+      print("une erreeeeur est survenue \n\n ${e.toString()} ");
+    });
+  }
+
+  //liste des articles
+  Future<void> getArticles() async {
+    await ProductService.getSingleArticle(userId: DataController.user!.id!)
+        .then((value) {
+      if (value.statusCode == 200) {
+        articles = [];
+        for (var item in jsonDecode(value.body)) {
+          try {
+            articles.add(ArticleModel.fromJson(item)!);
+          } catch (e) {
+            print(e);
+          }
+        }
+        setState(() {
+          nbArticles = articles.length;
+        });
+      }
+    }).catchError((e) {
+      print("une erreeeeur est survenue \n\n ${e.toString()} ");
+    });
+  }
+
+  Future<void> getData() async {
+    await [
+      getArticles(),
+      getAlertes(),
+      getPublications(),
+      listRequestFriend(),
+    ];
+  }
 
   Future<void> listRequestFriend() async {
     await UserService.getAllUser(param: {
@@ -56,6 +135,12 @@ class _ProfilePageState extends State<ProfilePage> {
     }).catchError((e) {
       print("une erreeeeur est survenue \n\n ${e.toString()} ");
     });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    initData = getData();
   }
 
   @override
@@ -113,68 +198,86 @@ class _ProfilePageState extends State<ProfilePage> {
         ));
   }
 
-  Container tabBarContainer() {
-    return Container(
-      child: Column(
-        children: [
-          // headerProfile(),
-          const SizedBox(
-            height: 16,
-          ),
-          Expanded(
-            child: DefaultTabController(
-              length: 4,
-              child: Scaffold(
-                appBar: AppBar(
-                  automaticallyImplyLeading: false,
-                  toolbarHeight: 0,
-                  bottom: TabBar(
-                    tabs: [
-                      itemTab('articles', 2000),
-                      itemTab('publications', 2000),
-                      itemTab('alertes', 572454),
-                      itemTab('abonné', 2000)
-                    ],
-                    indicatorSize: TabBarIndicatorSize.label,
-                    indicatorColor: couleurPrincipale,
-                  ),
-                ),
-                body: TabBarView(children: [
-                  FutureListArticle(userId: DataController.user!.id!),
-                  PublicationPage(
-                    type: 'default',
-                    userId: DataController.user!.id,
-                    hideLabel: true,
-                  ),
-                  PublicationPage(
-                    type: 'alerte',
-                    userId: DataController.user!.id,
-                    hideLabel: true,
-                  ),
-                  FutureBuilder(
-                      future: listRequestFriend(),
-                      builder: (context, snapshot) {
-                        if (snapshot.connectionState ==
-                            ConnectionState.waiting) {
-                          return const Center(
-                              child: CircularProgressIndicator());
-                        }
-
-                        return Container(
-                            alignment: Alignment.center,
-                            child: Column(
-                              children: [
-                                ContainerFollowerWidget(users: users),
-                              ],
-                            ));
-                      })
-                ]),
+  Widget tabBarContainer() {
+    return FutureBuilder(
+        future: initData,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const WaitWidget();
+          }
+          if (snapshot.hasError) {
+            return Center(
+              child: Text(
+                "Une erreur est survenue",
+                style: GoogleFonts.roboto(fontSize: 16, color: Colors.red),
               ),
+            );
+          }
+
+          return Container(
+            child: Column(
+              children: [
+                // headerProfile(),
+                const SizedBox(
+                  height: 16,
+                ),
+                Expanded(
+                  child: DefaultTabController(
+                    length: 4,
+                    child: Scaffold(
+                      appBar: AppBar(
+                        automaticallyImplyLeading: false,
+                        toolbarHeight: 0,
+                        bottom: TabBar(
+                          tabs: [
+                            itemTab('articles', nbArticles),
+                            itemTab('publications', nbPublications),
+                            itemTab('alertes', nbAlertes),
+                            itemTab('abonnés', users.length),
+                          ],
+                          indicatorSize: TabBarIndicatorSize.label,
+                          indicatorColor: couleurPrincipale,
+                        ),
+                      ),
+                      body: TabBarView(clipBehavior: Clip.hardEdge, children: [
+                        FutureListArticle(userId: DataController.user!.id!),
+                        PublicationPage(
+                          type: 'default',
+                          userId: DataController.user!.id,
+                          hideLabel: true,
+                        ),
+                        PublicationPage(
+                          type: 'alerte',
+                          userId: DataController.user!.id,
+                          hideLabel: true,
+                        ),
+                        FutureBuilder(
+                            future: listRequestFriend(),
+                            builder: (context, snapshot) {
+                              if (snapshot.connectionState ==
+                                  ConnectionState.waiting) {
+                                return const Center(
+                                    child: CircularProgressIndicator());
+                              }
+
+                              return Container(
+                                  alignment: Alignment.center,
+                                  child: Column(
+                                    children: [
+                                      SingleChildScrollView(
+                                          child: ContainerFollowerWidget(
+                                              users: users)),
+                                    ],
+                                  ));
+                            })
+                      ]),
+                    ),
+                  ),
+                )
+              ],
             ),
-          )
-        ],
-      ),
-    );
+          );
+        });
   }
 
   Tab itemTab(String label, int value) {
@@ -429,33 +532,31 @@ class _ProfilePageState extends State<ProfilePage> {
 
   viewPicture() {
     Navigator.pop(context);
-    return showDialog(
+    return showModalBottomSheet(
         context: context,
-        builder: (context) => AlertDialog(
-              elevation: 0,
-              scrollable: true,
-              backgroundColor: Colors.transparent,
-              content: SizedBox(
-                height: ScreenSize.height * 0.7,
-                width: ScreenSize.width * 0.98,
-                child: DataController.user!.avatar!.isEmpty
-                    ? Image.asset(
-                        "assets/medias/user.jpg",
-                        fit: BoxFit.cover,
-                      )
-                    : Image.network(
-                        DataController.user!.avatar!.first.url!,
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) {
-                          return Image.asset(
-                            "assets/medias/profile.jpg",
-                            fit: BoxFit.cover,
-                            width: 48,
-                            height: 48,
-                          );
-                        },
-                      ),
-              ),
+        isScrollControlled: true,
+        enableDrag: true,
+        isDismissible: true,
+        showDragHandle: true,
+        useSafeArea: false,
+        builder: (context) => Container(
+              child: DataController.user!.avatar!.isEmpty
+                  ? Image.asset(
+                      "assets/medias/user.jpg",
+                      fit: BoxFit.cover,
+                    )
+                  : Image.network(
+                      DataController.user!.avatar!.first.url!,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) {
+                        return Image.asset(
+                          "assets/medias/profile.jpg",
+                          fit: BoxFit.cover,
+                          width: 48,
+                          height: 48,
+                        );
+                      },
+                    ),
             ));
   }
 

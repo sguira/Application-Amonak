@@ -8,7 +8,6 @@ import 'package:application_amonak/local_storage.dart';
 import 'package:application_amonak/models/notifications.dart';
 import 'package:application_amonak/services/notification.dart';
 import 'package:application_amonak/widgets/item_notification.dart';
-import 'package:application_amonak/widgets/list_notification.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';

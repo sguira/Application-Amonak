@@ -19,8 +19,7 @@ class _ContainerFollowerWidgetState extends State<ContainerFollowerWidget> {
       alignment: WrapAlignment.start,
       children: [
         for (var item in widget.users)
-          if (DataController.user!.id != item.id!)
-            FollowUserWidget(context, item)
+          if (DataController.user!.id != item.id!) FollowUserWidget(user: item)
       ],
     );
   }

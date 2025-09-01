@@ -13,6 +13,7 @@ Container multilineTexteForm(
         return null;
       },
       maxLines: 12,
+      minLines: 6,
       style: GoogleFonts.roboto(fontSize: 15),
       autofocus: true,
       decoration: InputDecoration(

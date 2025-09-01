@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:application_amonak/colors/colors.dart';
 import 'package:application_amonak/data/data_controller.dart';
 import 'package:application_amonak/interface/accueils/home.dart';
@@ -7,25 +9,33 @@ import 'package:application_amonak/interface/contact/contact.dart';
 import 'package:application_amonak/interface/explorer/explorer.dart';
 import 'package:application_amonak/interface/nouveau/new.dart';
 import 'package:application_amonak/interface/profile/profile.dart';
+import 'package:application_amonak/models/article.dart';
+import 'package:application_amonak/models/publication.dart';
+import 'package:application_amonak/notifier/ArticleNotifier.dart';
+import 'package:application_amonak/notifier/NotificationNotifier.dart';
+import 'package:application_amonak/notifier/PublicationNotifierFianl.dart';
 import 'package:application_amonak/services/socket/notificationSocket.dart';
+import 'package:application_amonak/services/socket/publication.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-class HomePageTab extends StatefulWidget {
+class HomePageTab extends ConsumerStatefulWidget {
   const HomePageTab({super.key});
 
   @override
-  State<HomePageTab> createState() => _HomeState();
+  ConsumerState<HomePageTab> createState() => _HomeState();
 }
 
-class _HomeState extends State<HomePageTab> {
+class _HomeState extends ConsumerState<HomePageTab> {
   int currentIndex = 0;
 
   double iconSize = 24;
 
   late Notificationsocket notificationsocket;
+  late PublicationSocket publicationSocket;
 
   dynamic widgets = [
     const PublicationList(),
@@ -40,10 +50,33 @@ class _HomeState extends State<HomePageTab> {
     super.initState();
 
     notificationsocket = Notificationsocket();
+    publicationSocket = PublicationSocket();
 
+    //reception des notifications
     notificationsocket.socket!.on("refreshNotificationBoxHandler", (handler) {
       if (handler['to'] == DataController.user!.id) {}
     });
+
+    //reception de nouvelle publications
+    publicationSocket.socket!.on('newPublicationListener', (handler) {
+      print("Socket de nouvelle publication déclenché\n\n\n:${handler}");
+
+      print("Socket de nouvelle publication déclenché\n\n\n:${handler}");
+
+      if (handler['type'] == 'default' ||
+          handler['type'] == null ||
+          handler['type'] == 'publication') {
+        Publication pub = Publication.fromJson(handler);
+        ref.read(publicationProvider22.notifier).addPublication(pub);
+      }
+      if (handler['typer'] == 'seller') {
+        ArticleModel? articleModel = ArticleModel.fromJson(handler);
+        ref.read(articleProvider.notifier).addArticle(articleModel!);
+      }
+    });
+
+    Future.microtask(
+        () => ref.read(notificationProdider.notifier).loadNotification());
   }
 
   @override

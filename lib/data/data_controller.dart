@@ -107,32 +107,8 @@ class DataController {
   static String searchQuery = "";
 
   static List<NotificationModel> notifications = [];
+  static int notificationCount = 0;
   static List<User> friends = [];
-
-  static List<Map<String, String>> personnes = [
-    {'profil': 'assets/medias/user.jpg', 'name': 'Guira'},
-    {'profil': 'assets/medias/user.jpg', 'name': 'Guira'},
-    {'profil': 'assets/medias/user.jpg', 'name': 'Guira'},
-    {'profil': 'assets/medias/user.jpg', 'name': 'Guira'},
-    {'profil': 'assets/medias/user.jpg', 'name': 'Guira'},
-    {'profil': 'assets/medias/user.jpg', 'name': 'Guira'},
-    {'profil': 'assets/medias/user.jpg', 'name': 'Guira'},
-    {'profil': 'assets/medias/user.jpg', 'name': 'Guira'},
-    {'profil': 'assets/medias/user.jpg', 'name': 'Guira'},
-    {'profil': 'assets/medias/user.jpg', 'name': 'Guira'},
-    {'profil': 'assets/medias/user.jpg', 'name': 'Guira'},
-    {'profil': 'assets/medias/user.jpg', 'name': 'Guira'},
-    {'profil': 'assets/medias/user.jpg', 'name': 'Guira'},
-    {'profil': 'assets/medias/user.jpg', 'name': 'Guira'},
-    {'profil': 'assets/medias/user.jpg', 'name': 'Guira'},
-    {'profil': 'assets/medias/user.jpg', 'name': 'Guira'},
-    {'profil': 'assets/medias/user.jpg', 'name': 'Guira'},
-    {'profil': 'assets/medias/user.jpg', 'name': 'Guira'},
-    {'profil': 'assets/medias/user.jpg', 'name': 'Guira'},
-    {'profil': 'assets/medias/user.jpg', 'name': 'Guira'},
-    {'profil': 'assets/medias/user.jpg', 'name': 'Guira'},
-    {'profil': 'assets/medias/user.jpg', 'name': 'Guira'}
-  ];
 
   static checVideoExist(String id) {
     if (videoControllerHistory.isNotEmpty) {

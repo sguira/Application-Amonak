@@ -34,7 +34,7 @@ class PublicationSocket extends ChangeNotifier {
             .build());
 
     socket!.onConnect((_) {
-      print("des publications connectés");
+      print(" socket des publications connectés");
 
       notifyListeners();
     });

@@ -6,8 +6,11 @@ import 'package:application_amonak/data/data_controller.dart';
 import 'package:application_amonak/interface/accueils/home.dart';
 import 'package:application_amonak/interface/accueils/home_tab_menu.dart';
 import 'package:application_amonak/interface/contact/message.dart';
+import 'package:application_amonak/models/publication.dart';
+import 'package:application_amonak/notifier/PublicationNotifierFianl.dart';
 import 'package:application_amonak/prod.dart';
 import 'package:application_amonak/services/publication.dart';
+import 'package:application_amonak/services/socket/publication.dart';
 import 'package:application_amonak/widgets/bottom_sheet_header.dart';
 import 'package:application_amonak/widgets/button_importer_fichier.dart';
 import 'package:application_amonak/widgets/gradient_button.dart';
@@ -15,18 +18,19 @@ import 'package:application_amonak/widgets/multiline_form.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 
-class CreatePublication extends StatefulWidget {
+class CreatePublication extends ConsumerStatefulWidget {
   const CreatePublication({super.key});
 
   @override
-  State<CreatePublication> createState() => _CreatePublicationState();
+  ConsumerState<CreatePublication> createState() => _CreatePublicationState();
 }
 
-class _CreatePublicationState extends State<CreatePublication> {
+class _CreatePublicationState extends ConsumerState<CreatePublication> {
   TextEditingController texte = TextEditingController();
 
   File? selectedFile;
@@ -36,42 +40,20 @@ class _CreatePublicationState extends State<CreatePublication> {
   String? code;
   String type = '';
   final formKey = GlobalKey<FormState>();
-  IO.Socket? socket;
 
-  initSocket() {
-    socket = IO.io(
-        "$apiLink/publication",
-        IO.OptionBuilder()
-            .setPath("/amonak-api")
-            .setTransports(["websocket"]).setExtraHeaders({
-          "Authorization": "Bearer $tokenValue",
-          "userId": DataController.user!.id
-        }).build());
-    // print("Sock");
-    socket!.onConnect((_) {
-      print("Socket connecté.");
-    });
-
-    socket!.onError((_) {
-      print("Socket erreur");
-    });
-
-    socket!.onDisconnect((_) {
-      print("Socket déconnecté");
-    });
-  }
+  late PublicationSocket publicationSocket;
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
     // print("Publication");
-    initSocket();
+    publicationSocket = PublicationSocket();
   }
 
   @override
   void dispose() {
-    socket!.close();
+    publicationSocket.socket!.dispose();
     super.dispose();
   }
 
@@ -304,9 +286,15 @@ class _CreatePublicationState extends State<CreatePublication> {
           waitPublication = false;
         });
         code = value['code'];
+
         if (code == 'OK') {
-          socket!.emit("newPublicationEvent",
-              {"type": "mobile", "data": jsonDecode(value['data'])});
+          print(value);
+          // ref.watch(publicationProvider22.notifier).addPublication(
+          //       Publication.fromJson(value['data']),
+          //     );
+
+          publicationSocket.socket!.emit(
+              "newPublicationEvent", {"type": "mobile", "data": value['data']});
           setState(() {
             messageAlerte = 'Publication réussie';
           });

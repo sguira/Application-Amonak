@@ -105,8 +105,8 @@ class _ImageSectionState extends State<DetailsItemPubliction> {
   Widget build(BuildContext context) {
     return Container(
       // width: ScreenSize.width*0.9,
-      margin: const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
-      padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 12),
+      margin: const EdgeInsets.symmetric(horizontal: 0, vertical: 0),
+      padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 4),
       decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(4),
           border: Border.all(width: 0.2, color: Colors.black12)),
@@ -143,7 +143,7 @@ class _ImageSectionState extends State<DetailsItemPubliction> {
   textContainer(String texte) {
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 12),
-      width: ScreenSize.width * 0.8,
+      width: ScreenSize.width * 0.9,
       // height: 80,
       constraints: const BoxConstraints(maxHeight: 80),
       child: Text(

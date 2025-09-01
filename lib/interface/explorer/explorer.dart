@@ -2,10 +2,14 @@ import 'dart:convert';
 
 import 'package:application_amonak/data/data_controller.dart';
 import 'package:application_amonak/interface/articles/list_article.dart';
+import 'package:application_amonak/interface/explorer/article2.dart';
 import 'package:application_amonak/interface/explorer/boutique.dart';
+import 'package:application_amonak/interface/explorer/boutique2.dart';
 import 'package:application_amonak/interface/explorer/personne.dart';
+import 'package:application_amonak/interface/publication/AlertePageRiverPod.dart';
 import 'package:application_amonak/interface/publication/publication.dart';
 import 'package:application_amonak/interface/profile/publication_widget.dart';
+import 'package:application_amonak/interface/publication/publicationPageRiverPod.dart';
 import 'package:application_amonak/models/publication.dart';
 import 'package:application_amonak/models/user.dart';
 import 'package:application_amonak/services/publication.dart';
@@ -26,10 +30,10 @@ class ExplorerPage extends StatefulWidget {
 
 class _ExplorerPageState extends State<ExplorerPage> {
   List<User> users = [];
-  List<Publication> publications = [];
+  List<Publication> publications_ = [];
 
   fetchAllData() async {
-    await [loadUser(), loadPublication()];
+    await [loadUser()];
   }
 
   loadUser() async {
@@ -55,13 +59,13 @@ class _ExplorerPageState extends State<ExplorerPage> {
         .then((value) async {
       print("Status code : ${value.statusCode}");
       print("liste des publication ${value.body}");
-      publications = [];
+      publications_ = [];
       if (value.statusCode.toString() == '200') {
         for (var item in jsonDecode(value.body) as List) {
           if (item['type'] != null) {
             if (item['type'] != null) {
               Publication pub = Publication.fromJson(item);
-              publications.add(pub);
+              publications_.add(pub);
             }
             if (item['type'] == 'share') {
               if (item['share'] != null) {
@@ -74,7 +78,7 @@ class _ExplorerPageState extends State<ExplorerPage> {
                     pub.userShare = User.fromJson(item['user']);
                     pub.shareDate = DateTime.parse(item['createdAt']);
                     pub.shareMessage = item['shareMessage'];
-                    publications.add(pub);
+                    publications_.add(pub);
                   }
                 }).catchError((e) {
                   print("Unnnnnnnnnnnnnnnnne erreur $e");
@@ -144,17 +148,14 @@ class _ExplorerPageState extends State<ExplorerPage> {
                                 itemTabBar("Alerte"),
                               ]),
                             ),
-                            body: TabBarView(children: [
-                              const ListePersonnePage(),
-                              const Article(),
-                              const BoutiquePage(),
-                              PublicationPage(
-                                type: 'default',
-                                publications: publications,
-                              ),
-                              PublicationPage(
+                            body: const TabBarView(children: [
+                              ListePersonnePage(),
+                              ArticlePage2(),
+                              BoutiquePage2(),
+                              PublicationPageRiverPod(),
+                              AlertePageRiverPod(
                                 type: 'alerte',
-                                publications: publications,
+                                // publications: publications,
                               )
                             ]),
                           ),

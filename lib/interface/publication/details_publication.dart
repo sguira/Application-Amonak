@@ -112,7 +112,7 @@ class _DetailsPublicationState extends State<DetailsPublication>
                 bottom: MediaQuery.of(context).viewInsets.bottom),
             child: Container(
               // margin: EdgeInsets.symmetric(horizontal: 12,vertical: 8),
-              height: MediaQuery.of(context).size.height * 0.95,
+              height: MediaQuery.of(context).size.height * 0.90,
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(11),
@@ -125,7 +125,7 @@ class _DetailsPublicationState extends State<DetailsPublication>
                   ),
                   SingleChildScrollView(
                     child: Container(
-                      margin: const EdgeInsets.symmetric(horizontal: 12),
+                      margin: const EdgeInsets.symmetric(horizontal: 4),
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -213,8 +213,7 @@ class _DetailsPublicationState extends State<DetailsPublication>
                     ),
                   ),
                   Container(
-                    margin: const EdgeInsets.symmetric(
-                        horizontal: 12, vertical: 12),
+                    margin: const EdgeInsets.only(left: 12, right: 12, top: 18),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class AmonakDashboardScreen extends StatefulWidget {
   const AmonakDashboardScreen({super.key});
@@ -21,9 +22,9 @@ class _AmonakDashboardScreenState extends State<AmonakDashboardScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Header Text
-              const Text(
+              Text(
                 'Ces statistiques vous aide à mieux connaitre votre impact et\naméliorer votre stratégie de croissance sur Amonak.',
-                style: TextStyle(
+                style: GoogleFonts.roboto(
                   fontSize: 14,
                   color: Colors.black,
                   height: 1.5,
@@ -51,7 +52,7 @@ class _AmonakDashboardScreenState extends State<AmonakDashboardScreen> {
       elevation: 0,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Padding(
-        padding: const EdgeInsets.all(20.0),
+        padding: const EdgeInsets.all(12.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -192,7 +193,7 @@ class _AmonakDashboardScreenState extends State<AmonakDashboardScreen> {
                   },
                   child: Container(
                     padding:
-                        const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                     decoration: BoxDecoration(
                       color: isSelected
                           ? const Color(0xFF5A6BE3)
@@ -201,7 +202,8 @@ class _AmonakDashboardScreenState extends State<AmonakDashboardScreen> {
                     ),
                     child: Text(
                       months[index],
-                      style: TextStyle(
+                      style: GoogleFonts.roboto(
+                        fontSize: 13,
                         color: isSelected ? Colors.white : Colors.grey.shade600,
                         fontWeight:
                             isSelected ? FontWeight.bold : FontWeight.normal,

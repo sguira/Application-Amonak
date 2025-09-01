@@ -4,11 +4,13 @@ import 'package:application_amonak/colors/colors.dart';
 import 'package:application_amonak/data/data_controller.dart';
 import 'package:application_amonak/interface/publication/details_publication.dart';
 import 'package:application_amonak/interface/publication/videoPlayerWidget.dart';
+import 'package:application_amonak/models/article.dart';
 import 'package:application_amonak/models/message.dart';
 import 'package:application_amonak/models/publication.dart';
 import 'package:application_amonak/services/commentaire.dart';
 import 'package:application_amonak/services/message.dart';
 import 'package:application_amonak/services/notification.dart';
+import 'package:application_amonak/services/product.dart';
 import 'package:application_amonak/services/publication.dart';
 import 'package:application_amonak/services/socket/notificationSocket.dart';
 import 'package:application_amonak/services/socket/publication.dart';
@@ -30,12 +32,10 @@ import 'package:socket_io_client/socket_io_client.dart';
 class ItemPublication extends StatefulWidget {
   final Publication pub;
   final String? type;
-  final PublicationSocket publicationSocket;
+  final PublicationSocket? publicationSocket;
+
   const ItemPublication(
-      {super.key,
-      required this.pub,
-      required this.publicationSocket,
-      this.type});
+      {super.key, required this.pub, this.publicationSocket, this.type});
 
   @override
   State<ItemPublication> createState() => _ImageSectionState();
@@ -53,6 +53,7 @@ class _ImageSectionState extends State<ItemPublication> {
   bool wantedShare = false;
   String currentPubToShare = "";
   TextEditingController shareMessage = TextEditingController();
+  List<ArticleModel> articles = [];
   final responseAlerteKey = GlobalKey<FormState>();
   getNumberComment() {
     CommentaireService.getCommentByPublication(pubId: widget.pub.id!)
@@ -94,7 +95,7 @@ class _ImageSectionState extends State<ItemPublication> {
     super.initState();
     getLike();
     getNumberComment();
-
+    articles = getPublication();
     publicationSocket = PublicationSocket();
 
     notificationsocket = Notificationsocket();
@@ -329,11 +330,15 @@ class _ImageSectionState extends State<ItemPublication> {
                         widgetResponseAlerte(widget.pub);
                       },
                       style: TextButton.styleFrom(
-                          backgroundColor: couleurPrincipale),
+                          backgroundColor: couleurPrincipale,
+                          padding:
+                              EdgeInsets.symmetric(vertical: 1, horizontal: 1)),
                       child: Text(
                         'Répondre',
                         style: GoogleFonts.roboto(
-                            fontSize: 12, color: Colors.white),
+                            fontSize: 11,
+                            color: Colors.white,
+                            fontWeight: FontWeight.w300),
                       )),
                 )
             ],
@@ -343,6 +348,23 @@ class _ImageSectionState extends State<ItemPublication> {
     );
   }
 
+  getPublication() {
+    List<ArticleModel> articles = [];
+    ProductService.getSingleArticle(userId: DataController.user!.id)
+        .then((value) => {
+              if (value.statusCode == 200)
+                {
+                  for (var a in jsonDecode(value.body))
+                    {
+                      setState(() {
+                        articles.add(ArticleModel.fromJson(a)!);
+                      })
+                    }
+                }
+            });
+    return articles;
+  }
+
   widgetResponseAlerte(Publication pub) async {
     TextEditingController messageAlerte = TextEditingController();
     TextEditingController nomArticle = TextEditingController();
@@ -350,6 +372,8 @@ class _ImageSectionState extends State<ItemPublication> {
     TextEditingController livraison = TextEditingController();
     TextEditingController taille = TextEditingController();
     TextEditingController numero = TextEditingController();
+    TextEditingController articleId = TextEditingController();
+    Map<String, String> articleChoiceId = {"id": "", "value": ""};
     InputDecoration decoration({String? hintText, IconData? leading}) =>
         InputDecoration(
             hintText: hintText,
@@ -395,10 +419,11 @@ class _ImageSectionState extends State<ItemPublication> {
                         ),
                         const Spacer(),
                         IconButton(
-                            onPressed: () {
-                              Navigator.pop(context);
-                            },
-                            icon: const Icon(Icons.close, color: Colors.black))
+                          onPressed: () {
+                            Navigator.pop(context);
+                          },
+                          icon: const Icon(Icons.close, color: Colors.black),
+                        )
                       ],
                     ),
                   ),
@@ -497,6 +522,36 @@ class _ImageSectionState extends State<ItemPublication> {
                                 hintText: 'Taille', leading: Icons.smartphone),
                           ),
                         ),
+                        StatefulBuilder(builder: (context, S) {
+                          return Container(
+                            margin: const EdgeInsets.symmetric(vertical: 12),
+                            child: TextFormField(
+                              controller: articleId,
+                              initialValue: articleChoiceId["id"] != ""
+                                  ? articleChoiceId["value"]
+                                  : null,
+                              onTap: () async {
+                                await choiceArticleContainer(
+                                    context, articleChoiceId, S, articleId);
+                              },
+                              decoration: InputDecoration(
+                                hintText: 'Choisir l\'article',
+                                hintStyle: GoogleFonts.roboto(fontSize: 12),
+                                suffixIcon: IconButton(
+                                  onPressed: () async {
+                                    await choiceArticleContainer(
+                                        context, articleChoiceId, S, articleId);
+                                  },
+                                  icon: const Icon(Icons.arrow_drop_down),
+                                ),
+                              ),
+                            ),
+                          );
+                        }),
+                        if (articleChoiceId["id"] != "")
+                          Container(
+                            child: Text("articleChoiceId[]!"),
+                          ),
                         MultiSelect(
                             reload: setState_,
                             listes: sizes,
@@ -572,6 +627,184 @@ class _ImageSectionState extends State<ItemPublication> {
                 ),
               );
             }));
+  }
+
+  Future<dynamic> choiceArticleContainer(
+      BuildContext context,
+      Map<String, String> articleChoiceId,
+      StateSetter S,
+      TextEditingController articleId) {
+    return showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      enableDrag: true,
+      showDragHandle: true,
+      scrollControlDisabledMaxHeightRatio: 0.6,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+      builder: (context) => StatefulBuilder(builder: (context, setState_) {
+        return Container(
+          width: double.maxFinite,
+          height: MediaQuery.of(context).size.height * 0.7,
+          child: Column(
+            children: [
+              Container(
+                child: const Text("Choisissez un article"),
+              ),
+              Expanded(
+                child: articles.isNotEmpty
+                    ? ListView.builder(
+                        itemCount: articles.length,
+                        itemBuilder: (context, index) => Container(
+                              margin: const EdgeInsets.symmetric(
+                                  vertical: 6, horizontal: 6),
+                              child: Material(
+                                elevation: 4,
+                                borderRadius: BorderRadius.circular(8),
+                                child: Container(
+                                  margin: const EdgeInsets.symmetric(
+                                      vertical: 8, horizontal: 4),
+                                  decoration: const BoxDecoration(),
+                                  child: Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Expanded(
+                                        child: Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            ItemListArticle(
+                                                label: "Nom",
+                                                value: articles[index].name!),
+                                            ItemListArticle(
+                                                label: "Prix",
+                                                value: articles[index]
+                                                    .price
+                                                    .toString()),
+                                            ItemListArticle(
+                                                label: "Disponible",
+                                                value: articles[index]
+                                                    .qte
+                                                    .toString()),
+                                          ],
+                                        ),
+                                      ),
+                                      Container(
+                                        margin: const EdgeInsets.only(left: 12),
+                                        child: Column(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            // const Spacer(),
+                                            const SizedBox(
+                                              height: 26,
+                                            ),
+                                            Container(
+                                              height: 24,
+                                              decoration: BoxDecoration(
+                                                color: articleChoiceId["id"] !=
+                                                        articles[index].id!
+                                                    ? couleurPrincipale
+                                                    : Colors.black12,
+                                                borderRadius:
+                                                    BorderRadius.circular(26),
+                                              ),
+                                              child: TextButton(
+                                                  onPressed: () {
+                                                    setState(() {
+                                                      S(() {
+                                                        setState_(() {
+                                                          articleChoiceId[
+                                                                  'id'] =
+                                                              articles[index]
+                                                                  .id!;
+                                                          articleChoiceId[
+                                                                  "value"] =
+                                                              articles[index]
+                                                                  .name!;
+                                                          articleId.text =
+                                                              articleChoiceId[
+                                                                  "id"]!;
+                                                        });
+                                                      });
+                                                    });
+                                                    Navigator.pop(context);
+                                                  },
+                                                  style: const ButtonStyle(
+                                                      // backgroundColor: Colors.red,
+                                                      ),
+                                                  child: Text(
+                                                    "Choisir",
+                                                    style: GoogleFonts.roboto(
+                                                        fontSize: 11,
+                                                        color: articleChoiceId[
+                                                                    "id"] !=
+                                                                articles[index]
+                                                                    .id
+                                                            ? Colors.white
+                                                            : Colors.black),
+                                                  )),
+                                            ),
+                                          ],
+                                        ),
+                                      )
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ))
+                    : Container(
+                        child: Column(
+                          children: [
+                            Text(
+                                "Vous avez publier aucun article en vente jusqu'a present")
+                          ],
+                        ),
+                      ),
+              )
+            ],
+          ),
+        );
+      }),
+    );
+  }
+
+  Container ItemListArticle({
+    required String label,
+    required String value,
+  }) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 4),
+      decoration: const BoxDecoration(
+          // color: Colors.red,
+          ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 6),
+            child: Text(
+              label,
+              style: GoogleFonts.roboto(
+                  fontSize: 10,
+                  fontWeight: FontWeight.w700,
+                  color: couleurPrincipale),
+            ),
+          ),
+          Container(
+            constraints: const BoxConstraints(maxWidth: 100),
+            child: Text(
+              value,
+              style: GoogleFonts.roboto(
+                fontSize: 11,
+                color: couleurPrincipale.withAlpha(180),
+              ),
+              overflow: TextOverflow.clip,
+            ),
+          )
+        ],
+      ),
+    );
   }
 
   formatSize(List<String> size) {

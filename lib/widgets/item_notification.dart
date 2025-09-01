@@ -11,11 +11,12 @@ import 'package:google_fonts/google_fonts.dart';
 
 class ItemNotification extends StatefulWidget {
   final NotificationModel notification;
-  final Function reloadNotificationData;
-  const ItemNotification(
-      {super.key,
-      required this.notification,
-      required this.reloadNotificationData});
+  // final Function reloadNotificationData;
+  const ItemNotification({
+    super.key,
+    required this.notification,
+    // required this.reloadNotificationData
+  });
 
   @override
   State<ItemNotification> createState() => _ItemNotificationState();
@@ -34,10 +35,11 @@ class _ItemNotificationState extends State<ItemNotification> {
       onTap: () {
         if (widget.notification.action == "users") {
           Navigator.push(
-              context,
-              MaterialPageRoute(
-                  builder: (context) =>
-                      DetailsUser(user: widget.notification.data)));
+            context,
+            MaterialPageRoute(
+              builder: (context) => DetailsUser(user: widget.notification.data),
+            ),
+          );
         }
         if (widget.notification.action == "details_publication" &&
             widget.notification.idPub != null) {
@@ -65,7 +67,7 @@ class _ItemNotificationState extends State<ItemNotification> {
       child: Container(
         decoration: BoxDecoration(
             color: const Color(0x0f5f5f51),
-            borderRadius: BorderRadius.circular(7)),
+            borderRadius: BorderRadius.circular(16)),
         margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
         padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
         child: Column(
@@ -81,7 +83,7 @@ class _ItemNotificationState extends State<ItemNotification> {
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
                         color: couleurPrincipale.withAlpha(40),
-                        borderRadius: BorderRadius.circular(4)),
+                        borderRadius: BorderRadius.circular(48)),
                     child: Center(
                         child: Text(
                       widget.notification.from!.userName![0],
@@ -96,7 +98,7 @@ class _ItemNotificationState extends State<ItemNotification> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Container(
-                        width: 220,
+                        // width: 220,
                         decoration: const BoxDecoration(
                             // color: Colors.red
                             ),
@@ -194,9 +196,9 @@ class _ItemNotificationState extends State<ItemNotification> {
         .then((value) {
       if (value.statusCode == 200) {
         successSnackBar(message: 'Notification effacée', context: context);
-        setState(() {
-          widget.reloadNotificationData();
-        });
+        // setState(() {
+        //   widget.reloadNotificationData();
+        // });
       } else {
         errorSnackBar(
             message: 'Erreur lors de la suppression de la notification',

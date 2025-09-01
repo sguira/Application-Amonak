@@ -4,7 +4,9 @@ import 'package:application_amonak/data/data_controller.dart';
 import 'package:application_amonak/interface/accueils/home.dart';
 import 'package:application_amonak/interface/accueils/home_tab_menu.dart';
 import 'package:application_amonak/interface/contact/message.dart';
+import 'package:application_amonak/notifier/PublicationNotifierFianl.dart';
 import 'package:application_amonak/services/publication.dart';
+import 'package:application_amonak/services/socket/publication.dart';
 import 'package:application_amonak/settings/weights.dart';
 import 'package:application_amonak/widgets/bottom_sheet_header.dart';
 import 'package:application_amonak/widgets/button_importer_fichier.dart';
@@ -14,19 +16,33 @@ import 'package:application_amonak/widgets/multiline_form.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:select_form_field/select_form_field.dart';
 
-class VendreArticle extends StatefulWidget {
+class VendreArticle extends ConsumerStatefulWidget {
   const VendreArticle({super.key});
 
   @override
-  State<VendreArticle> createState() => _VendreArticleState();
+  ConsumerState<VendreArticle> createState() => _VendreArticleState();
 }
 
-class _VendreArticleState extends State<VendreArticle> {
+class _VendreArticleState extends ConsumerState<VendreArticle> {
+  PublicationSocket? publicationSocket;
+  @override
+  void initState() {
+    super.initState();
+    publicationSocket = PublicationSocket();
+  }
+
+  @override
+  void dispose() {
+    publicationSocket!.dispose();
+    super.dispose();
+  }
+
   TextEditingController texte = TextEditingController();
   TextEditingController nomArticle = TextEditingController();
   TextEditingController prix = TextEditingController();
@@ -47,18 +63,24 @@ class _VendreArticleState extends State<VendreArticle> {
     return Container(
       height: ScreenSize.height * 0.8,
       margin: const EdgeInsets.symmetric(horizontal: 0),
-      child: ListView(
+      child: Column(
         children: [
           headerBottomSheet(context, "Vendre un article"),
-          Container(
-            margin: const EdgeInsets.symmetric(horizontal: 0),
-            child: Text(
-              "En mettant en vente votre article, vous le rendez accessible partout. Paiement en ligne et à la livraison sont autorisé. Chaque article vendu a une garantie de 24h.",
-              style: GoogleFonts.roboto(fontSize: 12),
-              textAlign: TextAlign.start,
+          Expanded(
+            child: ListView(
+              children: [
+                Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 0),
+                  child: Text(
+                    "En mettant en vente votre article, vous le rendez accessible partout. Paiement en ligne et à la livraison sont autorisé. Chaque article vendu a une garantie de 24h.",
+                    style: GoogleFonts.roboto(fontSize: 12),
+                    textAlign: TextAlign.start,
+                  ),
+                ),
+                itemFormContainer()
+              ],
             ),
           ),
-          itemFormContainer()
         ],
       ),
     );
@@ -269,7 +291,7 @@ class _VendreArticleState extends State<VendreArticle> {
       children: [
         Container(
             // height: 38,
-            margin: const EdgeInsets.symmetric(vertical: 8),
+            margin: const EdgeInsets.symmetric(vertical: 4),
             child: SizedBox(
               // height: 45,
               child: TextFormField(
@@ -285,7 +307,7 @@ class _VendreArticleState extends State<VendreArticle> {
                 keyboardType: type != 'number'
                     ? TextInputType.text
                     : TextInputType.number,
-                style: GoogleFonts.roboto(fontSize: 12),
+                style: GoogleFonts.roboto(fontSize: 11),
                 decoration: InputDecoration(
                     label: Text(
                       label,
@@ -355,6 +377,9 @@ class _VendreArticleState extends State<VendreArticle> {
           qte.text = '';
           devise.text = '';
         });
+        publicationSocket!.socket!
+            .emit('', {"type": "mobile", "data": value.body});
+        ref.read(publicationProvider22.notifier).loadArticles(refresh: true);
         Future.delayed(const Duration(milliseconds: 800), () {
           Navigator.push(context,
               MaterialPageRoute(builder: (context) => const HomePageTab()));

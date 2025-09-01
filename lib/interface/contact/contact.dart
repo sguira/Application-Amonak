@@ -256,24 +256,27 @@ class _ContactState extends State<Contact> {
                                                       Row(
                                                         children: [
                                                           // Icon(FontAwesomeIcons.checkDouble,size: 16,),
-                                                          Container(
-                                                              constraints:
-                                                                  const BoxConstraints(
-                                                                      maxWidth:
-                                                                          200,
-                                                                      maxHeight:
-                                                                          58),
-                                                              child: Text(
-                                                                  item.content,
-                                                                  softWrap:
-                                                                      true,
-                                                                  overflow:
-                                                                      TextOverflow
-                                                                          .ellipsis,
-                                                                  style: GoogleFonts
-                                                                      .roboto(
-                                                                          fontSize:
-                                                                              12))),
+                                                          Flexible(
+                                                            child: Container(
+                                                                constraints:
+                                                                    const BoxConstraints(
+                                                                  // maxWidth:
+                                                                  //     200,
+                                                                  maxHeight: 58,
+                                                                  maxWidth: 300,
+                                                                ),
+                                                                child: Text(
+                                                                    item
+                                                                        .content,
+                                                                    softWrap:
+                                                                        true,
+                                                                    overflow:
+                                                                        TextOverflow
+                                                                            .ellipsis,
+                                                                    style: GoogleFonts.roboto(
+                                                                        fontSize:
+                                                                            12))),
+                                                          ),
                                                         ],
                                                       )
                                                     ],

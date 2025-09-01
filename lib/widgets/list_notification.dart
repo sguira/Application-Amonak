@@ -107,8 +107,8 @@ class _ListeNotificationState extends State<ListeNotification>
                           itemCount: notifications.length,
                           itemBuilder: (context, index) {
                             return ItemNotification(
-                                notification: notifications[index],
-                                reloadNotificationData: initNotification);
+                              notification: notifications[index],
+                            );
                           },
                         ),
                       )

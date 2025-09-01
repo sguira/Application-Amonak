@@ -14,9 +14,10 @@ class _PortefeuilleState extends State<Portefeuille> {
   Widget build(BuildContext context) {
     return Scaffold(
         body: Container(
-      margin: EdgeInsets.symmetric(horizontal: 28, vertical: 12),
+      margin: EdgeInsets.symmetric(horizontal: 12, vertical: 12),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
         // mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Container(
@@ -25,9 +26,6 @@ class _PortefeuilleState extends State<Portefeuille> {
               "La valeur acuelle de votre portefeuille est de:",
               style: GoogleFonts.roboto(fontSize: 14, color: Colors.black),
             ),
-          ),
-          const SizedBox(
-            height: 36,
           ),
           Container(
             alignment: Alignment.center,
@@ -56,7 +54,6 @@ class _PortefeuilleState extends State<Portefeuille> {
             ),
           ),
           Container(
-            margin: const EdgeInsets.symmetric(vertical: 36),
             child: Column(
               children: [
                 Text("0.00 XOF",

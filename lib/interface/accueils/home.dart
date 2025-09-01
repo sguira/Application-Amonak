@@ -1,210 +1,150 @@
-import 'dart:convert';
-
 import 'package:application_amonak/colors/colors.dart';
-import 'package:application_amonak/data/data_controller.dart';
 import 'package:application_amonak/interface/accueils/video_player_widget.dart';
-import 'package:application_amonak/models/publication.dart';
-import 'package:application_amonak/services/publication.dart';
-import 'package:application_amonak/services/socket/notificationSocket.dart';
+import 'package:application_amonak/notifier/NotificationNotifier.dart';
+import 'package:application_amonak/notifier/PublicationNotifierFianl.dart';
 import 'package:flutter/material.dart';
-// import 'package:tiktoklikescroller/tiktoklikescroller.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:video_player/video_player.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:application_amonak/models/publication.dart';
 
-class HomePage extends StatefulWidget {
+import 'package:application_amonak/widgets/wait_widget.dart';
+import 'package:google_fonts/google_fonts.dart';
+
+class HomePage extends ConsumerStatefulWidget {
   const HomePage({super.key});
 
   @override
-  State<HomePage> createState() => _HomePageState();
+  ConsumerState<HomePage> createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage>
-    with AutomaticKeepAliveClientMixin {
-  List<Color> colors = [Colors.red, Colors.blue, Colors.yellow, Colors.green];
-
-  late Future<void> _initializeVideoPlayerFuture;
-
-  late VideoPlayerController videoPlayerController;
-
-  int videoIndex = 0;
-
-  int currentPage = 0;
-
-  Notificationsocket? notificationsocket;
-  final PageController pageController = PageController(
-      // viewportFraction: 0.1,
-
-      );
-
-  // loadVideoTenVideoController() {
-  //   for (int i = 0; i < DataController.videos.length && i < 10;) {
-  //     if (DataController.videos[i].files.first.type == 'video') {
-  //       videoPlayerController = VideoPlayerController.networkUrl(
-  //           Uri.parse(DataController.videos[i].files[0].url!))
-  //         ..initialize().then((value) {
-  //           videoPlayerController.setLooping(true);
-  //           videoPlayerController.pause();
-  //           setState(() {});
-  //           Map video = {
-  //             'id': DataController.videos[i].id,
-  //             'controller': videoPlayerController
-  //           };
-  //           DataController.addVideoToHistory(
-  //               DataController.videos[0].id!, videoPlayerController);
-  //         });
-  //       DataController.addVideoToHistory(
-  //           DataController.videos[i].id!, videoPlayerController);
-  //       i++;
-  //     }
-  //   }
-  // }
-
-  @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-    notificationsocket = Notificationsocket();
-    _initializeVideoPlayerFuture = DataController.videos.length == 0
-        ? loadVideos()
-        : Future.delayed(Duration(milliseconds: 100), () {});
-  }
-
-  @override
-  void dispose() {
-    // TODO: implement dispose
-    super.dispose();
-    // videoPlayerController.dispose();
-  }
-
-  Future<void> loadVideos() async {
-    await PublicationService.getPublications().then((value) {
-      try {
-        print("value ss ${value.body}\n\n\n");
-        if (value.statusCode.toString() == '200') {
-          DataController.videos = [];
-          for (var item in jsonDecode(value.body) as List) {
-            if (item['type'] != 'share') {
-              Publication pub = Publication.fromJson(item);
-              print("content- ${pub.content} ${pub.files[0].type}");
-              print("typesss ${pub.files[0].type} ");
-              if (pub.files[0].type == 'video' ||
-                  pub.files.first.type == 'image') {
-                DataController.videos.add(pub);
-              }
-            }
-          }
-          // loadVideoTenVideoController();
-        }
-      } catch (e) {
-        print(e);
-      }
-    }).catchError((e) {
-      print("ERROR $e\n\n\n");
-    });
-  }
-
-  @override
-  bool get wantKeepAlive => true;
-
-  @override
-  Widget build(BuildContext context) {
-    super.build(context);
-    return Scaffold(
-        body: FutureBuilder(
-            future: _initializeVideoPlayerFuture,
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Center(
-                      child: CircularProgressIndicator(
-                        color: couleurPrincipale,
-                      ),
-                    ),
-                    Text("chargement des vidéos")
-                  ],
-                );
-              }
-              if (snapshot.hasError) {
-                return const Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Center(child: Text("Error")),
-                  ],
-                );
-              }
-              return DataController.videos.isNotEmpty
-                  ? VideoScrollWidget(
-                      publications: DataController.videos,
-                    )
-                  : Container(
-                      child: const Text("Aucune publication"),
-                    );
-            }));
-  }
-}
-
-class VideoScrollWidget extends StatefulWidget {
-  const VideoScrollWidget({
-    super.key,
-    required this.publications,
-  });
-
-  final List<Publication> publications;
-
-  @override
-  State<VideoScrollWidget> createState() => _VideoScrollWidgetState();
-}
-
-class _VideoScrollWidgetState extends State<VideoScrollWidget> {
-  PageController pageController = PageController();
+class _HomePageState extends ConsumerState<HomePage> {
+  final PageController pageController = PageController();
   int? currentPage;
 
   @override
   void initState() {
-    // TODO: implement initState
-    // pageController!.addListener(() {
-    //   final page = pageController!.page?.round();
-    //   if (page != null && page != currentPage) {
-    //     setState(() {
-    //       currentPage = page;
-    //     });
-    //   }
-    // });
+    super.initState();
+    // Charger les publications via Riverpod
+    // Future.microtask(
+    //     () => ref.read(publicationProvider22.notifier).loadArticles());
+    // Future.microtask(
+    //     () => ref.read(notificationProdider.notifier).loadNotification());
   }
 
   @override
   Widget build(BuildContext context) {
+    final state = ref.watch(publicationProvider22);
+
+    if (state.loading && state.publication.isEmpty) {
+      return const WaitWidget();
+    }
+
+    if (state.error != null && state.publication.isEmpty) {
+      return Center(child: Text(state.error!));
+    }
+
+    return state.publication.isNotEmpty
+        ? VideoScrollWidget(publications: state.publication)
+        : const Center(child: Text("Aucune publication"));
+  }
+}
+
+class VideoScrollWidget extends ConsumerStatefulWidget {
+  final List<Publication>? publications;
+  const VideoScrollWidget({super.key, this.publications});
+
+  @override
+  ConsumerState<VideoScrollWidget> createState() => _VideoScrollWidgetState();
+}
+
+class _VideoScrollWidgetState extends ConsumerState<VideoScrollWidget> {
+  PageController pageController = PageController();
+  int? currentPage;
+
+  @override
+  Widget build(BuildContext context) {
+    final state = ref.watch(publicationProvider22);
+
     return PageView.builder(
       controller: pageController,
       scrollDirection: Axis.vertical,
-      itemCount: widget.publications.length,
-      padEnds: true,
+      itemCount: widget.publications!.length,
       onPageChanged: (index) {
-        // setState(() {
-        //   currentPage=index;
-        // });
-        //arret de la vidéo précedente
+        setState(() {
+          currentPage = index;
+        });
       },
       itemBuilder: (context, index) {
-        return widget.publications.isNotEmpty
-            ? VideoPlayerWidget(
-                videoItem: widget.publications[index],
-                index: index,
-                isCurrentPage: currentPage == index,
-              )
-            : const Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Center(
-                    child: Text("Aucune publication"),
-                  )
-                ],
-              );
+        final pub = widget.publications![index];
+        return Scaffold(
+          body: VideoPlayerWidget(
+            videoItem: pub,
+            index: index,
+            isCurrentPage: currentPage == index,
+          ),
+          floatingActionButtonLocation:
+              FloatingActionButtonLocation.centerFloat,
+          floatingActionButton: state.newPubEvent
+              ? FloatingActionButton.extended(
+                  elevation: 0,
+                  backgroundColor: Colors.transparent,
+                  // isExtended: true,
+
+                  onPressed: () {
+                    ref.read(publicationProvider22.notifier).state =
+                        state.copyWith(newPubEvent: false);
+                    currentPage = 0;
+                    ref
+                        .read(publicationProvider22.notifier)
+                        .loadArticles(refresh: true);
+                    pageController.animateToPage(0,
+                        duration: const Duration(milliseconds: 500),
+                        curve: Curves.easeInOut);
+                  },
+                  label: Container(
+                    padding: const EdgeInsets.all(6),
+                    decoration: BoxDecoration(
+                        color: couleurPrincipale.withAlpha(180),
+                        borderRadius: BorderRadius.circular(26)),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.check, color: Colors.white),
+                        Text(
+                          "Nouvelle publication",
+                          style: GoogleFonts.roboto(
+                            color: Colors.white,
+                            fontSize: 13,
+                          ),
+                        )
+                      ],
+                    ),
+                  ))
+              : null,
+        );
       },
+    );
+  }
+
+  Widget ButtonNewPubEvent(BuildContext context, PublicationState state) {
+    return Container(
+      // height: 42,
+      width: double.maxFinite,
+      decoration: BoxDecoration(
+        color: couleurPrincipale.withAlpha(120),
+        borderRadius: BorderRadius.circular(38),
+      ),
+      padding: const EdgeInsets.all(12),
+      alignment: Alignment.center,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          const Icon(Icons.check, color: Colors.white, size: 16),
+          const SizedBox(width: 6),
+          Text(
+            "Nouvelle publication",
+            style: GoogleFonts.roboto(color: Colors.white, fontSize: 12),
+          ),
+        ],
+      ),
     );
   }
 }
