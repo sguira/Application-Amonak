@@ -339,10 +339,9 @@ class _ImageSectionState extends State<DetailsItemPubliction> {
           NotificationService.addNotification(notification);
           Map data = jsonDecode(value.body);
           print("publication $data");
-          publicationSocket.socket!
-              .emit("likePublicationEvent", {"type": "like", "data": data});
-          notificationsocket.socket!.emit("refreshNotificationBox",
-              {"from": DataController.user!.id, "to": widget.pub.user!.id});
+
+          notificationsocket.socket!
+              .emit("refreshNotificationBox", notification);
         }
       }).catchError((e) {
         print("Error like ${e.toString()}");

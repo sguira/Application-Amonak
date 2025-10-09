@@ -9,3 +9,5 @@ Map<String, String> authHeader = {
   'Content-type': 'application/json',
   'Authorization': "Bearer $tokenValue"
 };
+
+const newElementNoticeLimit = 5;

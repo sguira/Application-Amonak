@@ -3,44 +3,32 @@ import 'package:application_amonak/prod.dart';
 import 'package:flutter/material.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 import 'package:flutter/foundation.dart';
-class Commentsocket extends ChangeNotifier {
 
+class Commentsocket extends ChangeNotifier {
   IO.Socket? socket;
 
-  Commentsocket(){
-    socket=IO.io(
-      "$apiLink/comment",
-      
-      IO.OptionBuilder()
-      .setTransports(["websocket"])
-      // .disableAutoConnect()
-      // .enableMultiplex()
-      .setPath("/amonak-api")
-      .setExtraHeaders({
-        "Authorization":"Bearer $tokenValue",
-        "userId": DataController.user!.id
-      })
-      .build()
-    );
+  Commentsocket() {
+    socket = IO.io(
+        "$apiLink/comment",
+        IO.OptionBuilder()
+            .setTransports(["websocket"])
+            // .disableAutoConnect()
+            // .enableMultiplex()
+            .setPath("/amonak-api")
+            .setExtraHeaders({
+              "Authorization": "Bearer $tokenValue",
+              "userId": DataController.user!.id
+            })
+            .build());
 
-    socket!.onConnect((handler){
+    socket!.onConnect((handler) {
       print("Commentaire socket connecté");
-    });
-
-    socket!.on("newCommentEventListener", (data){
-      print("Nouveau Commentaire détecté !!!");
-      notifyListeners();
     });
   }
 
-  void emitEvent({
-    required String event, 
-    required dynamic data
-  }){
-
+  void emitEvent({required String event, required dynamic data}) {
     print("Emition");
-    socket!.emit("newCommentEvent",{"comment":data});
-    
+    socket!.emit("newCommentEvent", {"comment": data});
   }
 
   @override
@@ -48,5 +36,4 @@ class Commentsocket extends ChangeNotifier {
     socket!.close();
     // super.dispose();
   }
-
 }

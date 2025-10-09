@@ -1,5 +1,5 @@
 name: application_amonak
-description: "A new Flutter project."
+description: "Un réseau social de vente en ligne permettant de créer leurs boutique et de mettre en avant des vidéos captivant de leur produit "
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
@@ -35,7 +35,7 @@ dependencies:
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.6
-  get: ^4.6.6
+ 
   # persistent_bottom_nav_bar: ^6.2.1
   # tiktoklikescroller: ^0.2.8
   http: ^1.2.0
@@ -66,7 +66,10 @@ dependencies:
   loading_animation_widget: ^1.3.0
   flutter_riverpod: ^2.6.1
   fl_chart: ^0.71.0
-  scanbot_sdk: ^7.0.0
+  fc_native_video_thumbnail: ^0.17.2
+  flutter_local_notifications: ^19.4.2
+  permission_handler: ^11.3.1
+  uuid: ^4.5.1
   # video_compress: ^3.1.0
   # video_thumbnail: ^0.5.3
   # flutter_google_places_hoc081098: ^2.0.0-beta.1

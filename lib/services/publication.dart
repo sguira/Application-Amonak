@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:application_amonak/data/data_controller.dart';
 import 'package:application_amonak/prod.dart';
+import 'package:application_amonak/services/ThumbnailsService.dart';
 import 'package:mime/mime.dart';
 import 'package:dio/dio.dart';
 import 'package:path/path.dart';
@@ -99,10 +100,24 @@ class PublicationService {
 
   static Future<http.Response?> addVente(File file, Map data) async {
     http.Response? response;
+    var thmbnailsResponse = null;
+    var valueThumb = null;
+    final thumb = await GenerateThumbnailsService.generate(file: file);
+
+    if (thumb != null) {
+      valueThumb = await saveFile(thumb);
+      thmbnailsResponse = getTrushPath(valueThumb);
+    }
     await saveFile(file).then((value) async {
       if (obtainTrushUrl(value)) {
-        data['files'] = getTrushPath(value);
-        print(data);
+        if (obtainTrushUrl(valueThumb)) {
+          print("WOLLLLAYYYYYYYYY Thumbnails envoyé \n\n\n\n");
+          data['files'] = [...getTrushPath(value), ...thmbnailsResponse];
+        } else {
+          data['files'] = [...getTrushPath(value)];
+        }
+        print(
+            "Mes donnée envoyée ${data}\n\n\n\n Taille des fichiers ${data.length}");
         await http
             .post(Uri.parse('$apiLink/publications'),
                 headers: {'Content-type': 'application/json'},
@@ -164,7 +179,7 @@ class PublicationService {
                   Options(headers: {'Content-type': 'multipart/form-data'}))
           .then((value) {
         print("Status code: ${value.statusCode}");
-        // print(value.data);
+        print("Vidéo envoyé ${value.data}");
         if (value.statusCode.toString() == '200') {
           for (var item in value.data as List) {
             print("type de la publication ${item['type']}\n\n ");

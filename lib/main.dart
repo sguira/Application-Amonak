@@ -9,21 +9,24 @@ import 'package:application_amonak/local_storage.dart';
 import 'package:application_amonak/models/user.dart';
 import 'package:application_amonak/prod.dart';
 import 'package:application_amonak/services/auths.dart';
+import 'package:application_amonak/services/notificationService.dart';
 import 'package:application_amonak/services/socket/chatProvider.dart';
 import 'package:application_amonak/services/socket/publication.dart';
 import 'package:application_amonak/services/user.dart';
 import 'package:application_amonak/settings/weights.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:get/get.dart';
-import 'package:get/route_manager.dart';
+
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:provider/provider.dart';
 import 'package:application_amonak/services/socket/commentSocket.dart';
 import 'package:application_amonak/services/socket/notificationSocket.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await NotificationLocalService.initialize();
+
   runApp(
     const ProviderScope(child: MyApp()),
   );
@@ -136,6 +139,7 @@ class _MyAppState extends State<MyApp> {
     ScreenSize.width = MediaQuery.of(context).size.width;
     ScreenSize.height = MediaQuery.of(context).size.height;
     return MaterialApp(
+        navigatorKey: NotificationLocalService.navigatorKey,
         title: 'Flutter Demo',
         debugShowCheckedModeBanner: false,
         routes: {'/home': (context) => const HomePageTab()},

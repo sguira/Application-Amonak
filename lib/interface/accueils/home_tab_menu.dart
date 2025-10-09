@@ -5,15 +5,20 @@ import 'package:application_amonak/data/data_controller.dart';
 import 'package:application_amonak/interface/accueils/home.dart';
 import 'package:application_amonak/interface/accueils/home2.dart';
 import 'package:application_amonak/interface/contact/contact.dart';
-// import 'package:application_amonak/interface/contact/.dart';
+import 'package:application_amonak/interface/contact/contactWithNotifier.dart';
 import 'package:application_amonak/interface/explorer/explorer.dart';
 import 'package:application_amonak/interface/nouveau/new.dart';
 import 'package:application_amonak/interface/profile/profile.dart';
 import 'package:application_amonak/models/article.dart';
+import 'package:application_amonak/models/notifications.dart';
 import 'package:application_amonak/models/publication.dart';
+import 'package:application_amonak/notifier/AlertNotifier.dart';
 import 'package:application_amonak/notifier/ArticleNotifier.dart';
 import 'package:application_amonak/notifier/NotificationNotifier.dart';
 import 'package:application_amonak/notifier/PublicationNotifierFianl.dart';
+import 'package:application_amonak/services/notificationService.dart';
+import 'package:application_amonak/services/socket/chatProvider.dart';
+import 'package:application_amonak/services/socket/commentSocket.dart';
 import 'package:application_amonak/services/socket/notificationSocket.dart';
 import 'package:application_amonak/services/socket/publication.dart';
 import 'package:flutter/cupertino.dart';
@@ -36,7 +41,7 @@ class _HomeState extends ConsumerState<HomePageTab> {
 
   late Notificationsocket notificationsocket;
   late PublicationSocket publicationSocket;
-
+  late Commentsocket commentSocket;
   dynamic widgets = [
     const PublicationList(),
     const ExplorerPage(),
@@ -51,27 +56,70 @@ class _HomeState extends ConsumerState<HomePageTab> {
 
     notificationsocket = Notificationsocket();
     publicationSocket = PublicationSocket();
-
+    commentSocket = Commentsocket();
+    MessageSocket messageSocket = MessageSocket();
     //reception des notifications
     notificationsocket.socket!.on("refreshNotificationBoxHandler", (handler) {
-      if (handler['to'] == DataController.user!.id) {}
+      print("notification recu $handler \n\\n\n");
+      if (handler['to'] == DataController.user!.id) {
+        NotificationModel notif = NotificationModel.fromJson(handler);
+        ref.read(notificationProdider.notifier).addNotification(notif);
+        ref.read(notificationProdider.notifier).loadNotification();
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(notif.content!),
+          duration: const Duration(seconds: 2),
+          action: SnackBarAction(
+            label: 'Voir',
+            onPressed: () {},
+          ),
+        ));
+      }
     });
 
     //reception de nouvelle publications
     publicationSocket.socket!.on('newPublicationListener', (handler) {
-      print("Socket de nouvelle publication déclenché\n\n\n:${handler}");
-
-      print("Socket de nouvelle publication déclenché\n\n\n:${handler}");
+      print("Socket de nouvelle publication déclenché :$handler ok");
 
       if (handler['type'] == 'default' ||
           handler['type'] == null ||
           handler['type'] == 'publication') {
         Publication pub = Publication.fromJson(handler);
         ref.read(publicationProvider22.notifier).addPublication(pub);
+
+        if (DataController.friends
+            .where((x) => x.id == handler['user']['id'])
+            .isNotEmpty) {
+          NotificationLocalService.showNotification(
+              title: "Vient de publier un article", body: handler['content']);
+        }
       }
-      if (handler['typer'] == 'seller') {
+      if (handler['type'] == 'seller') {
         ArticleModel? articleModel = ArticleModel.fromJson(handler);
         ref.read(articleProvider.notifier).addArticle(articleModel!);
+      }
+      if (handler['type'] == 'alerte') {
+        Publication pub = Publication.fromJson(handler);
+        ref.read(alerteNotifier.notifier).addAlerte(pub);
+      }
+    });
+
+    // Socket des commentaires
+    commentSocket.socket!.on("newCommentEventListener", (data) {
+      print("Nouveau Commentaire détecté !!! $data");
+      if (data['user']['_id'] == DataController.user!.id) {
+        NotificationLocalService.showNotification(
+            title: "Commentaire",
+            body: "Votre publication vient de recevoir un nouveau commentaire");
+      }
+    });
+
+    // MessageSocket
+    messageSocket.socket!.on("refreshMessageBoxHandler", (handler) {
+      if (handler['to'] == DataController.user!.id) {
+        NotificationLocalService.showNotification(
+            title: "Message",
+            body: "Vous avez réçu un message",
+            payload: jsonEncode({"route": "message", "id": handler['from']}));
       }
     });
 
@@ -127,6 +175,9 @@ class _HomeState extends ConsumerState<HomePageTab> {
         setState(() {
           currentIndex = index;
         });
+
+        Future.microtask(
+            () => ref.read(publicationProvider22.notifier).setMemory(false));
       },
       child: Column(
         mainAxisSize: MainAxisSize.min,

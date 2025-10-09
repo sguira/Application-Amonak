@@ -12,6 +12,7 @@ class ArticleModel {
   String? content;
   String? name;
   List<Files> files = [];
+  Files? thumbnails;
   int? qte;
   double? price;
   double? frais = 0;
@@ -47,6 +48,9 @@ class ArticleModel {
       }
       for (var item in data['files'] as List) {
         articleModel.files.add(Files.fromJson(item));
+      }
+      if (articleModel.files.length > 1) {
+        articleModel.thumbnails = articleModel.files[1];
       }
       articleModel.content = data['content'];
       articleModel.status = data['status'];

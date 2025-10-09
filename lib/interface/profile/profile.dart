@@ -290,7 +290,7 @@ class _ProfilePageState extends State<ProfilePage> {
             style: GoogleFonts.roboto(
               fontSize: 14,
               fontWeight: FontWeight.bold,
-              color: couleurPrincipale,
+              color: Colors.black,
             ),
           ),
           Text(

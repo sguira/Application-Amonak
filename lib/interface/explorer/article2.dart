@@ -74,6 +74,7 @@ class _ArticlePageState extends ConsumerState<ArticlePage2> {
                 ),
               ),
               onPressed: () {
+                ref.read(articleProvider.notifier).fusionArticle();
                 ref.read(articleProvider.notifier).loadArticles(refresh: true);
                 _scrollController.animateTo(0,
                     duration: Durations.medium1, curve: Curves.decelerate);

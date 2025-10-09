@@ -1,5 +1,7 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:application_amonak/models/article.dart';
+import 'package:application_amonak/prod.dart';
 import 'package:application_amonak/services/product.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -10,12 +12,14 @@ class ArticleState {
   final int page;
   final bool hasMore;
   final bool isNewArticleEvent;
+  final List<ArticleModel> newArticle;
   ArticleState(
       {required this.loading,
       required this.articles,
       this.error,
       this.page = 1,
       this.hasMore = true,
+      this.newArticle = const [],
       this.isNewArticleEvent = false});
 
   ArticleState copyWith(
@@ -24,6 +28,7 @@ class ArticleState {
       String? error,
       int? page,
       bool? hasMore,
+      List<ArticleModel>? newArticle,
       bool? isNewArticleEvent}) {
     return ArticleState(
         loading: loading ?? this.loading,
@@ -31,7 +36,8 @@ class ArticleState {
         error: error,
         page: page ?? this.page,
         hasMore: hasMore ?? this.hasMore,
-        isNewArticleEvent: isNewArticleEvent ?? this.isNewArticleEvent);
+        isNewArticleEvent: isNewArticleEvent ?? this.isNewArticleEvent,
+        newArticle: newArticle ?? this.newArticle);
   }
 }
 
@@ -72,8 +78,22 @@ class ArticleNotifier extends StateNotifier<ArticleState> {
   }
 
   void addArticle(ArticleModel article) {
+    var condition =
+        state.articles.map((toElement) => toElement.id == article.id).isEmpty;
+    if (condition) {
+      state = state.copyWith(
+          newArticle: [article, ...state.newArticle],
+          isNewArticleEvent:
+              state.newArticle.length > newElementNoticeLimit ? true : false);
+    }
+  }
+
+  void fusionArticle() {
+    if (state.newArticle.isEmpty) return;
     state = state.copyWith(
-        isNewArticleEvent: true, articles: [article, ...state.articles]);
+        articles: [...state.newArticle, ...state.articles],
+        newArticle: [],
+        isNewArticleEvent: false);
   }
 }
 

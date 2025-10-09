@@ -4,15 +4,21 @@ import 'dart:io';
 
 import 'package:application_amonak/colors/colors.dart';
 import 'package:application_amonak/data/data_controller.dart';
+import 'package:application_amonak/interface/articles/details_article.dart';
 import 'package:application_amonak/interface/explorer/details_user.dart';
+import 'package:application_amonak/interface/vendre/vendre.dart';
+import 'package:application_amonak/models/article.dart';
 import 'package:application_amonak/models/message.dart';
 import 'package:application_amonak/models/user.dart';
 import 'package:application_amonak/prod.dart';
 import 'package:application_amonak/services/message.dart';
+import 'package:application_amonak/services/product.dart';
+import 'package:application_amonak/services/publication.dart';
 import 'package:application_amonak/services/socket/chatProvider.dart';
 import 'package:application_amonak/services/user.dart';
 import 'package:application_amonak/settings/weights.dart';
 import 'package:application_amonak/widgets/buildModalSheet.dart';
+import 'package:application_amonak/widgets/circular_progressor.dart';
 import 'package:application_amonak/widgets/wait_widget.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -36,6 +42,9 @@ class MessagePage extends StatefulWidget {
 class _MessagePageState extends State<MessagePage> {
   TextEditingController message = TextEditingController();
 
+  bool newMessage = false;
+  bool wait = false;
+
   bool waitingSend = false;
   List<MessageModel> listMessage = [];
   User? from;
@@ -51,7 +60,7 @@ class _MessagePageState extends State<MessagePage> {
   File? fileSelected;
   ScrollController scrollController = ScrollController();
   late MessageSocket messageSocket;
-
+  int countNewMessage = 0;
   String room = "";
 
   @override
@@ -71,39 +80,52 @@ class _MessagePageState extends State<MessagePage> {
       room = handler;
     });
 
-    /*
-      Apporter une correction au server faire en sorte que le socket renvoie également le message
-      au lieux d'envoyé juste le from
-    */
     messageSocket.socket!.on("refreshMessageBoxHandler", (handler) {
       print("message recu $handler ");
       if (handler['to'] == DataController.user!.id) {
         setState(() {
           loadMessage();
+          newMessage = true;
+        });
+      }
+      setState(() {
+        countNewMessage += 1;
+        newMessage = true;
+      });
+    });
+    loadMessage();
+
+    scrollController.addListener(() {
+      if (scrollController.position.pixels ==
+          scrollController.position.maxScrollExtent) {
+        setState(() {
+          newMessage = false;
+          countNewMessage = 0;
+        });
+      } else {
+        setState(() {
+          newMessage = true;
         });
       }
     });
-    loadMessage();
-    // scrollController=ScrollController(
-    //   initialScrollOffset: scrollController.position.maxScrollExtent??200
-    // );
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      Future.delayed(
-        Duration(seconds: 5),
-      );
-      scrollJump();
-    });
   }
 
-  scrollJump() async {
-    await Future.delayed(Duration(seconds: 1));
-    scrollController.jumpTo(scrollController.position.maxScrollExtent);
-    // ou pour un scroll animé :
-    // scrollController.animateTo(
-    //   scrollController.position.maxScrollExtent,
-    //   duration: Duration(milliseconds: 300),
-    //   curve: Curves.easeOut,
-    // );
+  void scrollJump() {
+    if (scrollController.hasClients) {
+      scrollController.jumpTo(
+        scrollController.position.maxScrollExtent,
+      );
+      // si tu veux un scroll animé, utilise animateTo :
+      scrollController.animateTo(
+        scrollController.position.maxScrollExtent,
+        duration: const Duration(milliseconds: 400),
+        curve: Curves.easeOut,
+      );
+      setState(() {
+        newMessage = false;
+        countNewMessage = 0;
+      });
+    }
   }
 
   @override
@@ -132,6 +154,7 @@ class _MessagePageState extends State<MessagePage> {
         for (var item in jsonDecode(value.body) as List) {
           if (item['to'] != null && item['from'] != null) {
             // print(item);
+            print("Mon messsssssssssssage ${item}");
             try {
               setState(() {
                 listMessage.add(MessageModel.fromJson(item));
@@ -147,314 +170,487 @@ class _MessagePageState extends State<MessagePage> {
       setState(() {
         showListen = false;
       });
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        scrollJump();
+      });
     });
+  }
+
+  isBottom() {
+    if (scrollController.offset >= scrollController.position.maxScrollExtent) {
+      print("is bottom");
+      return true;
+    } else {
+      // print("is bottom _");
+      return false;
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      // appBar: AppBar(
-      //   automaticallyImplyLeading: false,
-      //   toolbarHeight: 70,
-      //   titleSpacing: 12,
-      //   title:
-      // ),
-      body: GestureDetector(
-        onTap: () {
-          setState(() {
-            showAction = false;
-          });
-        },
-        child: Container(
-          child: Column(
-            children: [
-              headerMessage(),
-              Expanded(
-                  child: showListen == false
-                      ? ListView.builder(
-                          controller: scrollController,
-                          itemCount: listMessage.length,
-                          shrinkWrap: true,
-                          itemBuilder: (contxt, index) {
-                            return listMessage[index].type != 'alerte'
-                                ? GestureDetector(
-                                    onTap: () {
-                                      if (listMessage[index].iSend) {
-                                        setState(() {
-                                          showAction = !showAction;
-                                          currentsate = index;
-                                        });
-                                      }
-                                    },
-                                    child: Row(
-                                      mainAxisAlignment:
-                                          listMessage[index].iSend
-                                              ? MainAxisAlignment.end
-                                              : MainAxisAlignment.start,
-                                      children: [
-                                        Row(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.center,
-                                          children: [
-                                            Container(
-                                              margin: const EdgeInsets.only(
-                                                  top: 16, right: 8, left: 22),
-                                              child: Column(
+    return SafeArea(
+      child: Scaffold(
+        // appBar: AppBar(
+        //   automaticallyImplyLeading: false,
+        //   toolbarHeight: 70,
+        //   titleSpacing: 12,
+        //   title:
+        // ),
+
+        body: GestureDetector(
+          onTap: () {
+            setState(() {
+              showAction = false;
+            });
+          },
+          child: Container(
+            child: Column(
+              children: [
+                headerMessage(),
+                Expanded(
+                    child: showListen == false
+                        ? Stack(
+                            children: [
+                              ListView.builder(
+                                controller: scrollController,
+                                itemCount: listMessage.length,
+                                shrinkWrap: true,
+                                itemBuilder: (contxt, index) {
+                                  isBottom();
+                                  return listMessage[index].type != 'alerte'
+                                      ? GestureDetector(
+                                          onTap: () {
+                                            if (listMessage[index].iSend) {
+                                              setState(() {
+                                                showAction = !showAction;
+                                                currentsate = index;
+                                              });
+                                            }
+                                          },
+                                          child: Row(
+                                            mainAxisAlignment:
+                                                listMessage[index].iSend
+                                                    ? MainAxisAlignment.end
+                                                    : MainAxisAlignment.start,
+                                            children: [
+                                              Row(
                                                 crossAxisAlignment:
-                                                    CrossAxisAlignment.end,
+                                                    CrossAxisAlignment.center,
                                                 children: [
                                                   Container(
-                                                    padding: const EdgeInsets
-                                                        .symmetric(
-                                                        horizontal: 18,
-                                                        vertical: 18),
-                                                    decoration: BoxDecoration(
-                                                        color: !listMessage[index].iSend
-                                                            ? couleurPrincipale
-                                                                .withAlpha(40)
-                                                            : const Color.fromARGB(255, 88, 77, 77)
-                                                                .withAlpha(20),
-                                                        // border:Border.all(color: couleurPrincipale.withAlpha(100),width: 0.5),
-                                                        borderRadius: listMessage[index].iSend
-                                                            ? const BorderRadius.only(
-                                                                topLeft: Radius.circular(
-                                                                    26),
-                                                                topRight:
-                                                                    Radius.circular(
-                                                                        5),
-                                                                bottomLeft:
-                                                                    Radius.circular(
-                                                                        5),
-                                                                bottomRight:
-                                                                    Radius.circular(
-                                                                        5))
-                                                            : const BorderRadius.only(
-                                                                topRight: Radius.circular(26),
-                                                                bottomLeft: Radius.circular(5),
-                                                                bottomRight: Radius.circular(5),
-                                                                topLeft: Radius.circular(5))),
-                                                    child: Container(
-                                                      constraints:
-                                                          const BoxConstraints(
-                                                              maxWidth: 200),
-                                                      child: Column(
-                                                        crossAxisAlignment:
-                                                            CrossAxisAlignment
-                                                                .start,
-                                                        children: [
-                                                          Text(
-                                                            listMessage[index]
-                                                                    .iSend
-                                                                ? DataController
-                                                                    .user!
-                                                                    .userName!
-                                                                : from!
-                                                                    .userName!,
-                                                            style: GoogleFonts
-                                                                .roboto(
-                                                                    fontWeight:
-                                                                        FontWeight
-                                                                            .bold),
+                                                    margin:
+                                                        const EdgeInsets.only(
+                                                            top: 16,
+                                                            right: 8,
+                                                            left: 22),
+                                                    child: Column(
+                                                      crossAxisAlignment:
+                                                          CrossAxisAlignment
+                                                              .end,
+                                                      children: [
+                                                        Container(
+                                                          padding:
+                                                              const EdgeInsets
+                                                                  .symmetric(
+                                                                  horizontal:
+                                                                      18,
+                                                                  vertical: 18),
+                                                          decoration:
+                                                              BoxDecoration(
+                                                                  color: !listMessage[index]
+                                                                          .iSend
+                                                                      ? couleurPrincipale.withAlpha(
+                                                                          40)
+                                                                      : const Color.fromARGB(255, 88, 77, 77).withAlpha(
+                                                                          20),
+                                                                  // border:Border.all(color: couleurPrincipale.withAlpha(100),width: 0.5),
+                                                                  borderRadius: listMessage[index]
+                                                                          .iSend
+                                                                      ? const BorderRadius.only(
+                                                                          topLeft: Radius.circular(
+                                                                              26),
+                                                                          topRight: Radius.circular(
+                                                                              5),
+                                                                          bottomLeft: Radius.circular(
+                                                                              5),
+                                                                          bottomRight: Radius.circular(
+                                                                              5))
+                                                                      : const BorderRadius.only(
+                                                                          topRight: Radius.circular(26),
+                                                                          bottomLeft: Radius.circular(5),
+                                                                          bottomRight: Radius.circular(5),
+                                                                          topLeft: Radius.circular(5))),
+                                                          child: Container(
+                                                            constraints:
+                                                                const BoxConstraints(
+                                                                    maxWidth:
+                                                                        200),
+                                                            child: Column(
+                                                              crossAxisAlignment:
+                                                                  CrossAxisAlignment
+                                                                      .start,
+                                                              children: [
+                                                                Text(
+                                                                  listMessage[
+                                                                              index]
+                                                                          .iSend
+                                                                      ? DataController
+                                                                          .user!
+                                                                          .userName!
+                                                                      : from!
+                                                                          .userName!,
+                                                                  style: GoogleFonts.roboto(
+                                                                      fontWeight:
+                                                                          FontWeight
+                                                                              .bold),
+                                                                ),
+                                                                Text(
+                                                                  listMessage[
+                                                                          index]
+                                                                      .content,
+                                                                  style: GoogleFonts
+                                                                      .roboto(),
+                                                                ),
+                                                                const SizedBox(
+                                                                  height: 12,
+                                                                ),
+                                                                if (listMessage[
+                                                                        index]
+                                                                    .content
+                                                                    .toString()
+                                                                    .contains(
+                                                                        "\$"))
+                                                                  Container(
+                                                                    padding:
+                                                                        const EdgeInsets
+                                                                            .all(
+                                                                            12),
+                                                                    width: double
+                                                                        .maxFinite,
+                                                                    decoration: BoxDecoration(
+                                                                        color: couleurPrincipale.withAlpha(
+                                                                            24),
+                                                                        borderRadius:
+                                                                            BorderRadius.circular(12)),
+                                                                    child:
+                                                                        Column(
+                                                                      crossAxisAlignment:
+                                                                          CrossAxisAlignment
+                                                                              .center,
+                                                                      children: [
+                                                                        Container(
+                                                                          child:
+                                                                              Text(
+                                                                            "Cet article pourrais vous ?",
+                                                                            style:
+                                                                                GoogleFonts.roboto(color: couleurPrincipale),
+                                                                          ),
+                                                                        ),
+                                                                        const SizedBox(
+                                                                          height:
+                                                                              2,
+                                                                        ),
+                                                                        StatefulBuilder(builder:
+                                                                            (context,
+                                                                                S) {
+                                                                          return Container(
+                                                                            width:
+                                                                                double.maxFinite,
+                                                                            child: TextButton(
+                                                                                style: TextButton.styleFrom(backgroundColor: couleurPrincipale.withAlpha(200), foregroundColor: Colors.white, padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6))),
+                                                                                onPressed: wait == true
+                                                                                    ? null
+                                                                                    : () {
+                                                                                        ArticleModel? articleModel;
+                                                                                        // S(() {
+                                                                                        //   wait = true;
+                                                                                        // });
+                                                                                        // print("Article Id ${listMessage[index].content.toString().split("\$*")[1]}");
+
+                                                                                        String articleId = listMessage[index].content.toString().split("\$*")[1];
+                                                                                        print("article id $articleId");
+                                                                                        Navigator.push(context, MaterialPageRoute(builder: (context) => VendrePage(articleId: articleId.replaceAll(" ", ""))));
+                                                                                      },
+                                                                                child: wait == false
+                                                                                    ? Text(
+                                                                                        "Intéresser",
+                                                                                        style: GoogleFonts.roboto(color: Colors.white),
+                                                                                      )
+                                                                                    : circularProgression(color: Colors.white)),
+                                                                          );
+                                                                        }),
+                                                                        const SizedBox(
+                                                                          height:
+                                                                              8,
+                                                                        ),
+                                                                        Container(
+                                                                          width:
+                                                                              double.maxFinite,
+                                                                          child: TextButton(
+                                                                              style: TextButton.styleFrom(backgroundColor: couleurPrincipale.withAlpha(200), foregroundColor: Colors.white, padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6))),
+                                                                              onPressed: () {},
+                                                                              child: Text(
+                                                                                "Pas Intéresser",
+                                                                                style: GoogleFonts.roboto(color: Colors.white),
+                                                                              )),
+                                                                        )
+                                                                      ],
+                                                                    ),
+                                                                  )
+                                                              ],
+                                                            ),
                                                           ),
-                                                          Text(
-                                                            listMessage[index]
-                                                                .content,
-                                                            style: GoogleFonts
-                                                                .roboto(),
-                                                          )
-                                                        ],
-                                                      ),
+                                                        ),
+                                                        if (listMessage[index]
+                                                            .files
+                                                            .isNotEmpty)
+                                                          Container(
+                                                            // height: 120,
+                                                            // width: 80,
+                                                            margin:
+                                                                const EdgeInsets
+                                                                    .symmetric(
+                                                                    vertical:
+                                                                        8),
+                                                            decoration: BoxDecoration(
+                                                                borderRadius:
+                                                                    BorderRadius
+                                                                        .circular(
+                                                                            8)),
+                                                            constraints:
+                                                                BoxConstraints(
+                                                                    maxWidth:
+                                                                        ScreenSize.width *
+                                                                            0.4),
+                                                            // color: Colors.black12,
+                                                            child: ClipRRect(
+                                                                borderRadius:
+                                                                    BorderRadius
+                                                                        .circular(
+                                                                            11),
+                                                                child: Image
+                                                                    .network(
+                                                                  listMessage[
+                                                                          index]
+                                                                      .files
+                                                                      .first
+                                                                      .url!,
+                                                                  errorBuilder:
+                                                                      (context,
+                                                                          error,
+                                                                          stackTrace) {
+                                                                    return Image
+                                                                        .asset(
+                                                                      "assets/medias/profile.jpg",
+                                                                      fit: BoxFit
+                                                                          .cover,
+                                                                      width: 48,
+                                                                      height:
+                                                                          48,
+                                                                    );
+                                                                  },
+                                                                )),
+                                                          ),
+                                                      ],
                                                     ),
                                                   ),
-                                                  if (listMessage[index]
-                                                      .files
-                                                      .isNotEmpty)
-                                                    Container(
-                                                      // height: 120,
-                                                      // width: 80,
-                                                      margin: const EdgeInsets
-                                                          .symmetric(
-                                                          vertical: 8),
-                                                      decoration: BoxDecoration(
-                                                          borderRadius:
-                                                              BorderRadius
-                                                                  .circular(8)),
-                                                      constraints: BoxConstraints(
-                                                          maxWidth:
-                                                              ScreenSize.width *
-                                                                  0.4),
-                                                      // color: Colors.black12,
-                                                      child: ClipRRect(
-                                                          borderRadius:
-                                                              BorderRadius
-                                                                  .circular(11),
-                                                          child: Image.network(
-                                                            listMessage[index]
-                                                                .files
-                                                                .first
-                                                                .url!,
-                                                            errorBuilder:
-                                                                (context, error,
-                                                                    stackTrace) {
-                                                              return Image
-                                                                  .asset(
-                                                                "assets/medias/profile.jpg",
-                                                                fit: BoxFit
-                                                                    .cover,
-                                                                width: 48,
-                                                                height: 48,
-                                                              );
-                                                            },
-                                                          )),
+                                                  if (currentsate == index &&
+                                                      showAction &&
+                                                      listMessage[index].iSend)
+                                                    Animate(
+                                                      effects: const [
+                                                        SlideEffect(
+                                                            begin: Offset(1, 0),
+                                                            end: Offset(0, 0),
+                                                            duration: Duration(
+                                                                milliseconds:
+                                                                    100))
+                                                      ],
+                                                      child: Container(
+                                                        margin: const EdgeInsets
+                                                            .only(right: 8),
+                                                        child: Row(
+                                                          children: [
+                                                            IconButton(
+                                                                onPressed: () {
+                                                                  dialogEdit(
+                                                                      index);
+                                                                },
+                                                                icon: const Icon(
+                                                                    Icons.edit,
+                                                                    size: 18)),
+                                                            IconButton(
+                                                                onPressed: () {
+                                                                  dialogDeleteMessage(
+                                                                      index);
+                                                                },
+                                                                icon: const Icon(
+                                                                    Icons
+                                                                        .delete,
+                                                                    size: 18)),
+                                                          ],
+                                                        ),
+                                                      ),
                                                     ),
                                                 ],
                                               ),
-                                            ),
-                                            if (currentsate == index &&
-                                                showAction &&
-                                                listMessage[index].iSend)
-                                              Animate(
-                                                effects: const [
-                                                  SlideEffect(
-                                                      begin: Offset(1, 0),
-                                                      end: Offset(0, 0),
-                                                      duration: Duration(
-                                                          milliseconds: 100))
-                                                ],
+                                            ],
+                                          ),
+                                        )
+                                      : Container(
+                                          child: Text("Guira"),
+                                        );
+                                },
+                              ),
+                              newMessage
+                                  ? Positioned(
+                                      bottom: 1,
+                                      right: 10,
+                                      child: newMessage == true
+                                          ? Positioned(
+                                              bottom: 10,
+                                              right: 16,
+                                              child: FloatingActionButton(
+                                                onPressed: () {
+                                                  scrollJump();
+                                                },
+                                                elevation: 0,
+                                                backgroundColor:
+                                                    Colors.transparent,
                                                 child: Container(
-                                                  margin: const EdgeInsets.only(
-                                                      right: 8),
-                                                  child: Row(
-                                                    children: [
-                                                      IconButton(
-                                                          onPressed: () {
-                                                            dialogEdit(index);
-                                                          },
-                                                          icon: const Icon(
-                                                              Icons.edit,
-                                                              size: 18)),
-                                                      IconButton(
-                                                          onPressed: () {
-                                                            dialogDeleteMessage(
-                                                                index);
-                                                          },
-                                                          icon: const Icon(
-                                                              Icons.delete,
-                                                              size: 18)),
-                                                    ],
+                                                  child: Icon(
+                                                    Icons.keyboard_arrow_down,
+                                                    color: couleurPrincipale,
                                                   ),
                                                 ),
                                               ),
-                                          ],
-                                        ),
-                                      ],
-                                    ),
-                                  )
-                                : Container(
-                                    child: Text("Guira"),
-                                  );
-                          },
-                        )
-                      : const SpinKitWaveSpinner(
-                          color: couleurPrincipale,
-                        )),
-              StatefulBuilder(builder: (context, setState_) {
-                return Container(
-                  // height: 70,
-                  margin: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      if (fileSelected != null)
-                        FileSelectedViewer(
-                          file: fileSelected!,
-                          onClose: onCloseFile,
-                        ),
-                      Container(
-                        // margin: EdgeInsets.symmetric(vertical: 12),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Expanded(
-                              child: Container(
-                                // height: 58,
-                                // padding: EdgeInsets.all(8),
-                                margin: const EdgeInsets.symmetric(vertical: 8),
-                                decoration: BoxDecoration(
-                                    color: Colors.black12,
-                                    borderRadius: BorderRadius.circular(8)),
-                                // alignment: Alignment.center,
-                                child: Row(
-                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                            )
+                                          : const SizedBox(),
+                                    )
+                                  : const SizedBox(),
+                            ],
+                          )
+                        : const SpinKitWaveSpinner(
+                            color: couleurPrincipale,
+                          )),
+                StatefulBuilder(builder: (context, setState_) {
+                  return Container(
+                    // height: 70,
+                    margin: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        if (fileSelected != null)
+                          FileSelectedViewer(
+                            file: fileSelected!,
+                            onClose: onCloseFile,
+                          ),
+                        Container(
+                          // margin: EdgeInsets.symmetric(vertical: 12),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Expanded(
+                                child: Stack(
                                   children: [
-                                    GestureDetector(
-                                      onTap: () {
-                                        pickeImage();
-                                      },
-                                      child: Container(
-                                        margin: const EdgeInsets.only(left: 12),
-                                        // color: Colors.black,
-                                        // margin:const EdgeInsets.only(top: 36,right: 12),
-                                        child: const Icon(
-                                          Icons.attach_file,
-                                          color: Colors.black,
-                                        ),
-                                      ),
-                                    ),
-                                    Expanded(
-                                      child: Container(
-                                        // margin:const EdgeInsets.only(top: 8,left: 12),
-                                        margin: const EdgeInsets.only(
-                                            left: 8, bottom: 8, top: 6),
-                                        child: TextFormField(
-                                          controller: message,
-                                          // maxLines: 5,
-                                          style:
-                                              GoogleFonts.roboto(fontSize: 14),
-
-                                          autofocus: true,
-                                          maxLines: 5,
-                                          minLines: 1,
-                                          keyboardType: TextInputType.text,
-                                          decoration: InputDecoration(
-                                            hintText: 'Ecrire ...',
-                                            hintStyle: GoogleFonts.roboto(
-                                                fontSize: 13),
-                                            border: UnderlineInputBorder(
-                                                borderRadius:
-                                                    BorderRadius.circular(36),
-                                                borderSide: const BorderSide(
-                                                    color: Colors.transparent,
-                                                    width: 2)),
-                                            enabledBorder: UnderlineInputBorder(
-                                                borderRadius:
-                                                    BorderRadius.circular(36),
-                                                borderSide: const BorderSide(
-                                                    color: Colors.transparent,
-                                                    width: 2)),
-                                            focusedBorder: UnderlineInputBorder(
-                                                borderRadius:
-                                                    BorderRadius.circular(36),
-                                                borderSide: const BorderSide(
-                                                    color: Colors.transparent,
-                                                    width: 2)),
+                                    Container(
+                                      // height: 58,
+                                      // padding: EdgeInsets.all(8),
+                                      margin: const EdgeInsets.symmetric(
+                                          vertical: 8),
+                                      decoration: BoxDecoration(
+                                          color: Colors.black12,
+                                          borderRadius:
+                                              BorderRadius.circular(8)),
+                                      // alignment: Alignment.center,
+                                      child: Row(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.center,
+                                        children: [
+                                          GestureDetector(
+                                            onTap: () {
+                                              pickeImage();
+                                            },
+                                            child: Container(
+                                              margin: const EdgeInsets.only(
+                                                  left: 12),
+                                              // color: Colors.black,
+                                              // margin:const EdgeInsets.only(top: 36,right: 12),
+                                              child: const Icon(
+                                                Icons.attach_file,
+                                                color: Colors.black,
+                                              ),
+                                            ),
                                           ),
-                                        ),
+                                          Expanded(
+                                            child: Container(
+                                              // margin:const EdgeInsets.only(top: 8,left: 12),
+                                              margin: const EdgeInsets.only(
+                                                  left: 8, bottom: 8, top: 6),
+                                              child: TextFormField(
+                                                controller: message,
+                                                // maxLines: 5,
+                                                style: GoogleFonts.roboto(
+                                                    fontSize: 14),
+
+                                                autofocus: true,
+                                                maxLines: 5,
+                                                minLines: 1,
+                                                keyboardType:
+                                                    TextInputType.text,
+                                                decoration: InputDecoration(
+                                                  hintText: 'Ecrire ...',
+                                                  hintStyle: GoogleFonts.roboto(
+                                                      fontSize: 13),
+                                                  border: UnderlineInputBorder(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              36),
+                                                      borderSide:
+                                                          const BorderSide(
+                                                              color: Colors
+                                                                  .transparent,
+                                                              width: 2)),
+                                                  enabledBorder:
+                                                      UnderlineInputBorder(
+                                                          borderRadius:
+                                                              BorderRadius
+                                                                  .circular(36),
+                                                          borderSide:
+                                                              const BorderSide(
+                                                                  color: Colors
+                                                                      .transparent,
+                                                                  width: 2)),
+                                                  focusedBorder:
+                                                      UnderlineInputBorder(
+                                                          borderRadius:
+                                                              BorderRadius
+                                                                  .circular(36),
+                                                          borderSide:
+                                                              const BorderSide(
+                                                                  color: Colors
+                                                                      .transparent,
+                                                                  width: 2)),
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                          buttonSend(setState_),
+                                        ],
                                       ),
                                     ),
-                                    buttonSend(setState_),
                                   ],
                                 ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
-                );
-              })
-            ],
+                      ],
+                    ),
+                  );
+                })
+              ],
+            ),
           ),
         ),
       ),
@@ -646,6 +842,9 @@ class _MessagePageState extends State<MessagePage> {
           });
           setState(() {
             listMessage.add(MessageModel.fromJson(jsonDecode(value.body)));
+          });
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            scrollJump();
           });
         }
       }).catchError((e) {

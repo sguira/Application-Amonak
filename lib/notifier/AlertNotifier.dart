@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:application_amonak/models/article.dart';
 import 'package:application_amonak/models/publication.dart';
+import 'package:application_amonak/prod.dart';
 import 'package:application_amonak/services/product.dart';
 import 'package:application_amonak/services/publication.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -12,6 +13,7 @@ class PublicationState {
   final int page;
   final bool hasMore;
   final bool newPubEvent;
+  final List<Publication> newPub;
   PublicationState({
     required this.loading,
     required this.alerte,
@@ -19,6 +21,7 @@ class PublicationState {
     this.page = 1,
     this.hasMore = true,
     this.newPubEvent = false,
+    this.newPub = const [],
   });
 
   PublicationState copyWith({
@@ -28,6 +31,7 @@ class PublicationState {
     int? page,
     bool? hasMore,
     bool? newPubEvent,
+    List<Publication>? newPub,
   }) {
     return PublicationState(
       loading: loading ?? this.loading,
@@ -36,6 +40,7 @@ class PublicationState {
       page: page ?? this.page,
       hasMore: hasMore ?? this.hasMore,
       newPubEvent: newPubEvent ?? this.newPubEvent,
+      newPub: newPub ?? this.newPub,
     );
   }
 }
@@ -56,16 +61,17 @@ class PublicationNotifier extends StateNotifier<PublicationState> {
           type: 'alerte', userId: userId);
 
       if (response.statusCode == 200) {
-        final List<Publication> fetched = (jsonDecode(response.body) as List)
-            .map((e) => Publication.fromJson(e))
-            .toList();
+        final List<Publication> fetched = [];
 
-        final List<Publication> publications =
-            refresh ? fetched : [...state.alerte, ...fetched];
-
+        for (var item in jsonDecode(response.body)) {
+          Publication pub = Publication.fromJson(item);
+          if (pub.user != null) {
+            fetched.add(pub);
+          }
+        }
         state = state.copyWith(
           loading: false,
-          alerte: publications,
+          alerte: fetched,
           page: nextPage + 1,
           hasMore: fetched.isNotEmpty,
         );
@@ -78,9 +84,19 @@ class PublicationNotifier extends StateNotifier<PublicationState> {
     }
   }
 
-  addPublication(Publication newPublication) {
-    state = state
-        .copyWith(alerte: [newPublication, ...state.alerte], newPubEvent: true);
+  addAlerte(Publication newPublication) {
+    var condition = state.alerte.map((e) => e.id == newPublication.id).isEmpty;
+    if (condition) {
+      state = state.copyWith(
+          newPub: [newPublication, ...state.alerte],
+          newPubEvent: state.alerte.length > newElementNoticeLimit);
+    }
+  }
+
+  fusionAlerte() {
+    if (state.newPub.isNotEmpty) {
+      state = state.copyWith(alerte: [...state.newPub, ...state.alerte]);
+    }
   }
 
   Future<void> searchPublication({
@@ -93,9 +109,14 @@ class PublicationNotifier extends StateNotifier<PublicationState> {
 
     try {
       if (response.statusCode == 200) {
-        final List<Publication> fetched = (jsonDecode(response.body) as List)
-            .map((e) => Publication.fromJson(e))
-            .toList();
+        final List<Publication> fetched = [];
+
+        for (var item in jsonDecode(response.body)) {
+          Publication pub = Publication.fromJson(item);
+          if (pub.user != null) {
+            fetched.add(pub);
+          }
+        }
 
         state = state.copyWith(
           loading: false,

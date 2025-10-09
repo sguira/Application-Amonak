@@ -35,7 +35,6 @@ import 'package:flutter/widgets.dart';
 // import 'package:tiktoklikescroller/tiktoklikescroller.dart';
 import 'package:video_player/video_player.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:get/get.dart';
 import 'package:select_form_field/select_form_field.dart';
 
 // import 'package:application_amonak/services/login.dart';

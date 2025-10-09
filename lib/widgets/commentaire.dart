@@ -321,16 +321,19 @@ class _CommentaireWidgetState extends State<CommentaireWidget> {
           commentaires = [com, ...commentaires];
         });
         print("Commentaire...");
-        socket!.emit("newCommentEvent", {"comment": jsonDecode(value.body)});
+        socket!.emit("newCommentEvent", {
+          "from": jsonEncode(DataController.user),
+          "comment": jsonDecode(value.body)
+        });
         notificationData['commentaire'] = jsonDecode(value.body)['_id'];
         NotificationService.addNotification(notificationData);
         content.clear();
-        notificationsocket.emitNotificationEvent(
-            event: "refreshNotificationBox",
-            data: {
-              "from": DataController.user!.id,
-              "to": jsonDecode(value.body)['user']['_id']
-            });
+        // notificationsocket.emitNotificationEvent(
+        //     event: "refreshNotificationBox",
+        //     data: {
+        //       "from": DataController.user!.id,
+        //       "to": jsonDecode(value.body)['user']['_id']
+        //     });
       }
       setState(() {
         waitComment = false;

@@ -25,12 +25,13 @@ class NotificationService {
           .get(
               Uri.parse("$apiLink/notifications").replace(queryParameters: {
                 'user': userId,
+                'to': userId,
                 'status': true.toString(),
                 'limit': 202.toString()
               }),
               headers: authHeader)
           .then((value) {
-        print("Appel notification");
+        print("Appel notification; ${value.body} \n\n\n\n");
         print(value.statusCode);
 
         return value;

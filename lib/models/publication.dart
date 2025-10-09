@@ -13,6 +13,7 @@ class Publication {
   String? share;
   String? shareMessage;
   double? price;
+  Files? thumbnails;
   double frais = 1000;
   DateTime? dateCreation;
   // double
@@ -54,6 +55,10 @@ class Publication {
                 : 'image';
         publication.files.add(file);
       }
+      // if (publication.files.length > 1) {
+      //   publication.thumbnails = publication.files[-1];
+      //   print("Thumbnails chargé !!!!!\n\n\n");
+      // }
       publication.type = publication.files[0].type;
 
       // publication.type=data['type']?data['type']: file.url!.contains("mp4")?'video':'image';

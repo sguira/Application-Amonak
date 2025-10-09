@@ -218,6 +218,8 @@ class _DetailArticleState extends State<DetailArticle> {
             height: 12,
           ),
           Container(
+            margin: EdgeInsets.only(left: 12),
+            alignment: Alignment.centerLeft,
             child: Text(
               NumberFormat.currency(
                       locale: 'fr',
@@ -229,9 +231,12 @@ class _DetailArticleState extends State<DetailArticle> {
             ),
           ),
           Container(
-            margin: const EdgeInsets.symmetric(vertical: 6),
-            child: Text(widget.article.name!,
-                style: GoogleFonts.roboto(fontWeight: FontWeight.w500)),
+            margin: EdgeInsets.only(left: 12),
+            child: Container(
+              margin: const EdgeInsets.symmetric(vertical: 6),
+              child: Text(widget.article.name!,
+                  style: GoogleFonts.roboto(fontWeight: FontWeight.w500)),
+            ),
           ),
           if (widget.article.content != null)
             TextExpanded(texte: widget.article.content!)

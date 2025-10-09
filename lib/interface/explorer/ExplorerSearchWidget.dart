@@ -18,7 +18,7 @@ class _ExplorerSearchWidgetState extends State<ExplorerSearchWidget> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(8),
       child: TextFormField(
         controller: widget.searchController,
         decoration: InputDecoration(

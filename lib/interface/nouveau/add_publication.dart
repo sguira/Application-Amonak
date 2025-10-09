@@ -141,9 +141,9 @@ class _CreatePublicationState extends ConsumerState<CreatePublication> {
                                             ),
                                           ))),
                           ),
-                          code != null
-                              ? alerteMessagePublication(messageAlerte, code!)
-                              : const Center()
+                          // code != null
+                          //     ? alerteMessagePublication(messageAlerte, code!)
+                          //     : const Center()
                         ],
                       ),
                     ),
@@ -289,26 +289,38 @@ class _CreatePublicationState extends ConsumerState<CreatePublication> {
 
         if (code == 'OK') {
           print(value);
-          // ref.watch(publicationProvider22.notifier).addPublication(
-          //       Publication.fromJson(value['data']),
-          //     );
 
           publicationSocket.socket!.emit(
               "newPublicationEvent", {"type": "mobile", "data": value['data']});
-          setState(() {
-            messageAlerte = 'Publication réussie';
-          });
+
+          if (!mounted) return; // ✅ sécurité avant d'utiliser context
+
+          // ScaffoldMessenger.of(context).showSnackBar(
+          //   SnackBar(
+          //     content: Text(
+          //       'Publication réussie',
+          //       style: GoogleFonts.roboto(),
+          //     ),
+          //     duration: const Duration(seconds: 1),
+          //   ),
+          // );
+
           Future.delayed(const Duration(milliseconds: 800), () {
-            Navigator.push(context,
-                MaterialPageRoute(builder: (context) => const HomePageTab()));
+            if (!mounted) return; // ✅ vérifie encore avant de naviguer
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const HomePageTab()),
+            );
           });
         } else {
-          setState(() {
-            messageAlerte = 'Erreur de publication';
-          });
+          if (mounted) {
+            setState(() {
+              messageAlerte = 'Erreur de publication';
+            });
+          }
         }
-      }).catchError((e) {
-        print("ERROR $e\n\n");
+
+        print(value);
       });
     }
   }

@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:application_amonak/local_storage.dart';
 import 'package:application_amonak/models/notifications.dart';
 import 'package:application_amonak/services/notification.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -48,7 +49,7 @@ class NotificationNotifier extends StateNotifier<NotificationState> {
 
   Future<void> loadNotification({bool refresh = false}) async {
     if (state.isFirstLoad == false) return;
-
+    state = state.copyWith(notifications: []);
     try {
       state = state.copyWith(
         loading: true,
@@ -61,6 +62,14 @@ class NotificationNotifier extends StateNotifier<NotificationState> {
             (jsonDecode(response.body) as List)
                 .map((e) => NotificationModel.fromJson(e))
                 .toList();
+
+        // List<NotificationModel> fetched = [];
+
+        // for (var item in jsonDecode(response.body)) {
+        //   // if (item['to'] == LocalStorage.getUserId()) {
+        //   fetched.add(NotificationModel.fromJson(item));
+        //   // }
+        // }
 
         final List<NotificationModel> articles =
             refresh ? fetched : [...state.notifications, ...fetched];

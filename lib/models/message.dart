@@ -1,8 +1,13 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:application_amonak/data/data_controller.dart';
+import 'package:application_amonak/models/article.dart';
 import 'package:application_amonak/models/file.dart';
+import 'package:application_amonak/models/publication.dart';
 import 'package:application_amonak/models/user.dart';
+import 'package:application_amonak/services/product.dart';
+import 'package:application_amonak/services/publication.dart';
 
 class MessageModel {
   late String id;
@@ -10,11 +15,12 @@ class MessageModel {
   late dynamic from;
   late String content;
   late String date;
-  late String publication;
   late String type;
   late String status;
   late String deleters;
   late bool iSend = false;
+  ArticleModel? publication;
+  String? articleId;
   late List<Files> files = [];
   // MessageModel({
   //   required this.from,
@@ -24,7 +30,13 @@ class MessageModel {
   // });
 
   toJson() {
-    return {'to': to, 'from': from, 'content': content, 'files': files};
+    return {
+      'to': to,
+      'from': from,
+      'content': content,
+      'files': files,
+      'product': publication == null ? null : {"id": publication!.id}
+    };
   }
 
   static loadFile(List<Map<String, dynamic>> files) {
@@ -38,7 +50,7 @@ class MessageModel {
   static MessageModel fromJson(Map data) {
     MessageModel messageModel = MessageModel();
     messageModel.id = data['_id'];
-
+    messageModel.articleId = data['product'] ?? "";
     // print("nom ${data['from']['userName']}\n\n\n");
     try {
       messageModel.to = User.fromJson(data['to']);
@@ -57,7 +69,6 @@ class MessageModel {
     }
 
     messageModel.content = data['content'];
-    messageModel.type = data['type'];
     // messageModel.deleters=data['deleters'];
     messageModel.type = data['type'];
     if (data['files'].isNotEmpty) {
@@ -65,8 +76,18 @@ class MessageModel {
         messageModel.files.add(Files.fromJson(item));
       }
     }
-    // messageModel.status=data['status'];
-    // messageModel.publication=data['publication'];
+
+    // if (messageModel.articleId != "") {
+    //   final pub = ProductService.getSingleArticle(id: messageModel.articleId)
+    //       .then((value) {
+    //     if (value.statusCode == 200) {
+    //       messageModel.publication =
+    //           Publication.fromJson(jsonDecode(value.body));
+    //     }
+    //   });
+    // }
+
+    print("Message content: ${messageModel.content} \n\n\n");
 
     return messageModel;
   }

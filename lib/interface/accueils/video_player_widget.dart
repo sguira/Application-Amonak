@@ -9,10 +9,12 @@ import 'package:application_amonak/interface/explorer/details_user.dart';
 import 'package:application_amonak/interface/vendre/vendre.dart';
 import 'package:application_amonak/models/article.dart';
 import 'package:application_amonak/models/publication.dart';
+import 'package:application_amonak/notifier/PublicationNotifierFianl.dart';
 import 'package:application_amonak/services/commentaire.dart';
 import 'package:application_amonak/services/product.dart';
 import 'package:application_amonak/services/publication.dart';
 import 'package:application_amonak/settings/weights.dart';
+import 'package:application_amonak/widgets/ResponseAlerteWidget.dart';
 import 'package:application_amonak/widgets/btnLike.dart';
 import 'package:application_amonak/widgets/buildModalSheet.dart';
 import 'package:application_amonak/widgets/buttonComment.dart';
@@ -25,6 +27,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:video_player/video_player.dart';
 import 'package:intl/intl.dart';
@@ -32,21 +35,23 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter/foundation.dart'; // Import for kDebugMode
 
-class VideoPlayerWidget extends StatefulWidget {
+class VideoPlayerWidget extends ConsumerStatefulWidget {
   final Publication videoItem;
   final int index;
   final bool isCurrentPage;
-  const VideoPlayerWidget(
-      {super.key,
-      required this.videoItem,
-      required this.index,
-      required this.isCurrentPage});
+
+  const VideoPlayerWidget({
+    super.key,
+    required this.videoItem,
+    required this.index,
+    required this.isCurrentPage,
+  });
 
   @override
-  State<VideoPlayerWidget> createState() => _VideoPlayerWidgetState();
+  ConsumerState<VideoPlayerWidget> createState() => _VideoPlayerWidgetState();
 }
 
-class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
+class _VideoPlayerWidgetState extends ConsumerState<VideoPlayerWidget> {
   VideoPlayerController? controller;
   final VideoControllerCache _videoCache =
       VideoControllerCache(); // Get the cache instance
@@ -100,6 +105,7 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
   @override
   void didUpdateWidget(covariant VideoPlayerWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
+
     if (type == 'video' &&
         controller != null &&
         controller!.value.isInitialized) {
@@ -126,6 +132,8 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
       getNombreLike();
       nombreComment();
     });
+    Future.microtask(
+        () => ref.read(publicationProvider22.notifier).setMemory(true));
 
     if (widget.videoItem.files.first.type == 'video') {
       // Try to get controller from cache
@@ -144,15 +152,6 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
           // Add the newly initialized controller to the cache
           _videoCache.addController(widget.videoItem.id!, controller!);
 
-          // if (widget.isCurrentPage) {
-          //   setState(() {
-          //     controller!.play();
-          //   });
-          // } else {
-          //   setState(() {
-          //     controller!.pause();
-          //   });
-          // }
           setState(() {
             controller!.play();
           });
@@ -182,15 +181,11 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
 
   @override
   void dispose() {
-    // We no longer dispose the controller directly here.
-    // The cache will manage the disposal based on its LRU policy or explicit calls.
-    // If you want to explicitly dispose of controllers when they are removed
-    // from the widget tree (e.g., if you navigate away from the page entirely),
-    // you might want to call _videoCache.disposeController(widget.videoItem.id!);
-    // However, for a TikTok-like feed, keeping them in cache for quick re-use is often desired.
     if (type == 'video' && controller != null) {
       // Pause the video when the widget is disposed to prevent background audio
-      controller!.pause();
+      setState(() {
+        controller!.pause();
+      });
       // Optional: You could choose to dispose here if you don't want to cache controllers
       // controller!.dispose();
     }
@@ -262,113 +257,147 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: const BoxDecoration(color: Colors.black),
-      child: Stack(
-        children: [
-          Center(
-            child: GestureDetector(
-              onDoubleTap: () {
-                setState(() {
-                  showFavourite = true;
-                });
-                Future.delayed(const Duration(milliseconds: 1200), () {
+    Future.microtask(() {
+      if (ref.watch(publicationProvider22).isMemory == false) {
+        if (controller != null) {
+          controller!.pause();
+        }
+      }
+    });
+
+    return Scaffold(
+      body: Container(
+        decoration: const BoxDecoration(color: Colors.black),
+        child: Stack(
+          children: [
+            Center(
+              child: GestureDetector(
+                onDoubleTap: () {
                   setState(() {
-                    showFavourite = false;
+                    showFavourite = true;
                   });
-                });
-                if (isLike == false) {
-                  likePublication();
-                } else {
-                  deleteLike();
-                }
-              },
-              onTapUp: (details) {
-                if (kDebugMode) {
-                  print("on tap Up");
-                }
-              },
-              child: Stack(
-                alignment: Alignment.center,
-                children: [
-                  GestureDetector(
-                    onTap: () {
-                      setState(() {
-                        viewBtn = !viewBtn;
-                      });
-                      Future.delayed(const Duration(milliseconds: 4000), () {
+                  Future.delayed(const Duration(milliseconds: 1200), () {
+                    setState(() {
+                      showFavourite = false;
+                    });
+                  });
+                  if (isLike == false) {
+                    likePublication();
+                  } else {
+                    deleteLike();
+                  }
+                },
+                onTapUp: (details) {
+                  if (kDebugMode) {
+                    print("on tap Up");
+                  }
+                },
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    GestureDetector(
+                      onTap: () {
                         setState(() {
-                          viewBtn = false;
+                          viewBtn = !viewBtn;
                         });
-                      });
-                    },
-                    child: Container(
-                        child: widget.videoItem.files.first.type == 'video'
-                            ? (controller != null &&
-                                    controller!.value.isInitialized
-                                ? AspectRatio(
-                                    aspectRatio: controller!.value.aspectRatio,
-                                    child: VideoPlayer(controller!))
-                                : const WaitWidget())
-                            : Center(
-                                child: LoadImage(
-                                imageUrl: widget.videoItem.files.first.url,
-                                fit: BoxFit.cover,
-                              ))),
-                  ),
-                  if (viewBtn)
-                    if (type == 'video')
-                      GestureDetector(
-                        child: Container(
-                          width: 150,
-                          height: 150,
-                          color: Colors.transparent,
+                        Future.delayed(const Duration(milliseconds: 4000), () {
+                          setState(() {
+                            viewBtn = false;
+                          });
+                        });
+                      },
+                      child: Container(
+                          child: widget.videoItem.files.first.type == 'video'
+                              ? (controller != null &&
+                                      controller!.value.isInitialized
+                                  ? AspectRatio(
+                                      aspectRatio:
+                                          controller!.value.aspectRatio,
+                                      child: VideoPlayer(controller!))
+                                  : const WaitWidget())
+                              : Center(
+                                  child: LoadImage(
+                                  imageUrl: widget.videoItem.files.first.url,
+                                  fit: BoxFit.cover,
+                                ))),
+                    ),
+                    if (viewBtn)
+                      if (type == 'video')
+                        GestureDetector(
                           child: Container(
-                              padding: const EdgeInsets.all(18),
-                              decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(58),
-                                  color: Colors.black.withAlpha(80)),
-                              child: IconButton(
-                                  onPressed: () {
-                                    setState(() {
-                                      if (controller!.value.isPlaying) {
-                                        controller!.pause();
-                                      } else {
-                                        controller!.play();
-                                      }
-                                    });
-                                  },
-                                  icon: Icon(
-                                    controller!.value.isPlaying
-                                        ? Icons
-                                            .pause // Changed to pause when playing
-                                        : Icons
-                                            .play_arrow, // Changed to play when paused
-                                    color: couleurPrincipale,
-                                    size: 56,
-                                  ))),
+                            width: 150,
+                            height: 150,
+                            color: Colors.transparent,
+                            child: Container(
+                                padding: const EdgeInsets.all(18),
+                                decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(58),
+                                    color: Colors.black.withAlpha(40)),
+                                child: IconButton(
+                                    onPressed: () {
+                                      setState(() {
+                                        if (controller!.value.isPlaying) {
+                                          controller!.pause();
+                                        } else {
+                                          controller!.play();
+                                        }
+                                      });
+                                    },
+                                    icon: Icon(
+                                      controller!.value.isPlaying
+                                          ? Icons
+                                              .pause // Changed to pause when playing
+                                          : Icons
+                                              .play_arrow, // Changed to play when paused
+                                      color: Colors.black.withAlpha(100),
+                                      size: 56,
+                                    ))),
+                          ),
                         ),
-                      ),
-                ],
+                  ],
+                ),
               ),
             ),
-          ),
-          header(),
-          if (showFavourite == true)
-            Animate(
-                effects: const [
-                  ScaleEffect(duration: Duration(milliseconds: 500)),
-                  ShakeEffect(duration: Duration(milliseconds: 500))
-                ],
-                child: const Center(
-                    child: Icon(
-                  Icons.favorite,
-                  color: Colors.red,
-                  size: 90,
-                ))),
-          containerButton(),
-          containerDescription()
-        ],
+            header(),
+            if (widget.videoItem.typePub == 'alerte' && false)
+              Positioned(
+                // bottom: MediaQuery.of(context).size.height * 0.5,
+                // left: MediaQuery.of(context).size.width * 0.5 - 80,
+                child: Center(
+                  child: FloatingActionButton.extended(
+                    elevation: 8,
+                    backgroundColor: Colors.transparent,
+                    onPressed: () {
+                      showDialog(
+                          context: context,
+                          builder: (context) => ResponseAlerteWidget(
+                              publication: widget.videoItem));
+                    },
+                    label: Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                            color: couleurPrincipale,
+                            borderRadius: BorderRadius.circular(38)),
+                        child: Text("Répondre")),
+                  ),
+                ),
+              ),
+            if (showFavourite == true)
+              Animate(
+                  effects: const [
+                    ScaleEffect(duration: Duration(milliseconds: 500)),
+                    ShakeEffect(duration: Duration(milliseconds: 500))
+                  ],
+                  child: const Center(
+                      child: Icon(
+                    Icons.favorite,
+                    color: Colors.red,
+                    size: 90,
+                  ))),
+            containerButton(),
+            containerDescription()
+          ],
+        ),
       ),
     );
   }
@@ -511,7 +540,8 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
                   ],
                 ),
               ),
-              if (widget.videoItem.typePub == 'sale')
+              if (widget.videoItem.typePub == 'sale' ||
+                  widget.videoItem.typePub == "alerte")
                 itemButtonStyleBackground()
             ],
           ),
@@ -587,18 +617,30 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
                 border: Border.all(color: couleurPrincipale, width: 2)),
             child: IconButton(
                 onPressed: () {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => VendrePage(
-                              articleId: widget.videoItem.productId,
-                              article: null)));
+                  if (widget.videoItem.typePub != "alerte") {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => VendrePage(
+                                articleId: widget.videoItem.productId,
+                                article: null)));
+                  } else {
+                    showDialog(
+                        context: context,
+                        builder: (context) => ResponseAlerteWidget(
+                            publication: widget.videoItem));
+                  }
                 },
-                icon: const Icon(Icons.shopping_cart)),
+                icon: Icon(widget.videoItem.typePub != "alerte"
+                    ? Icons.shopping_cart
+                    : Icons.message)),
           ),
           Text(
-            NumberFormat.compact().format(10000),
-            style: GoogleFonts.roboto(fontSize: 11, color: Colors.white),
+            widget.videoItem.typePub != "alerte"
+                ? NumberFormat.compact().format(10000)
+                : "Répondre",
+            style: GoogleFonts.roboto(
+                fontSize: 11, color: Colors.white, fontWeight: FontWeight.w300),
           )
         ],
       ),

@@ -3,7 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 Container headerBottomSheet(BuildContext context, String texte) {
   return Container(
-    margin: const EdgeInsets.symmetric(vertical: 0, horizontal: 0),
+    margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 12),
     child: Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [

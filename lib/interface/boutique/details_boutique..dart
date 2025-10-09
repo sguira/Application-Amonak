@@ -107,7 +107,8 @@ class ListArticle extends StatelessWidget {
       child: articleModel.isNotEmpty
           ? GridView.builder(
               // <-- Modifié ici
-
+              physics: const NeverScrollableScrollPhysics(),
+              // padding: const EdgeInsets.symmetric(horizontal: 8),
               shrinkWrap: true,
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 2, // 2 articles par ligne
@@ -159,11 +160,11 @@ class ItemPublicationWidget extends StatelessWidget {
               decoration: BoxDecoration(borderRadius: BorderRadius.circular(1)),
               child: ClipRRect(
                   borderRadius: BorderRadius.circular(1),
-                  child: item.thumbail == null
+                  child: item.thumbnails == null || false
                       ? Image.asset("assets/medias/articles/article2.jpg",
                           fit: BoxFit.fitHeight)
-                      : Image.memory(
-                          item.thumbail!,
+                      : Image.network(
+                          item.thumbnails!.url!,
                           fit: BoxFit
                               .cover, // Utilisez BoxFit.cover pour remplir l'espace
                         )),
@@ -197,11 +198,11 @@ class ItemPublicationWidget extends StatelessWidget {
                                 decimalDigits: 0)
                             .format(item.price),
                         style: GoogleFonts.roboto(
-                            fontSize: 16, fontWeight: FontWeight.w800),
+                            fontSize: 16, fontWeight: FontWeight.w400),
                       ),
                       Text(item.name!,
                           style: GoogleFonts.roboto(
-                              fontSize: 14, fontWeight: FontWeight.w600)),
+                              fontSize: 14, fontWeight: FontWeight.w400)),
                       Text(
                           "${item.buys} achats effectués / Reste: ${item.qte} en Stock",
                           style: GoogleFonts.roboto(

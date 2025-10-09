@@ -384,12 +384,6 @@ class _VendreArticleState extends ConsumerState<VendreArticle> {
           Navigator.push(context,
               MaterialPageRoute(builder: (context) => const HomePageTab()));
         });
-        Future.delayed(const Duration(seconds: 2), () {
-          setState(() {
-            responseShow = false;
-          });
-          Navigator.pop(context);
-        });
       } else {
         setState(() {
           responseShow = true;

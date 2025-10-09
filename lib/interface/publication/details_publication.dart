@@ -12,7 +12,6 @@ import 'package:application_amonak/services/socket/publication.dart';
 import 'package:application_amonak/widgets/commentaire.dart';
 import 'package:application_amonak/widgets/wait_widget.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
@@ -168,7 +167,7 @@ class _DetailsPublicationState extends State<DetailsPublication>
                                         color:
                                             couleurPrincipale.withAlpha(60))),
                                 child: commentText.text.isNotEmpty &&
-                                        commentText.text.isBlank == false
+                                        commentText.text.isEmpty == false
                                     ? IconButton(
                                         onPressed: () {
                                           Commentaire com = Commentaire();

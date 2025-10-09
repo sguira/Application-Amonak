@@ -54,6 +54,7 @@ class _ImageSectionState extends State<ItemPublication> {
   String currentPubToShare = "";
   TextEditingController shareMessage = TextEditingController();
   List<ArticleModel> articles = [];
+  ArticleModel? articleSelected = null;
   final responseAlerteKey = GlobalKey<FormState>();
   getNumberComment() {
     CommentaireService.getCommentByPublication(pubId: widget.pub.id!)
@@ -327,6 +328,7 @@ class _ImageSectionState extends State<ItemPublication> {
                 Container(
                   child: TextButton(
                       onPressed: () {
+                        articleSelected = null;
                         widgetResponseAlerte(widget.pub);
                       },
                       style: TextButton.styleFrom(
@@ -433,35 +435,48 @@ class _ImageSectionState extends State<ItemPublication> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
-                        // Container(
-                        //   margin: const EdgeInsets.symmetric(vertical: 4),
-                        //   child: TextFormField(
-                        //     controller: messageAlerte,
-                        //     validator: (value) {
-                        //       if (value!.isEmpty) {
-                        //         return 'Ecrivez un message';
-                        //       }
-                        //       return null;
-                        //     },
-                        //     minLines: 3,
-                        //     maxLines: 7,
-                        //     decoration: InputDecoration(
-                        //         focusColor: couleurPrincipale,
-                        //         hintText: 'Ecrivez votre message ici.',
-                        //         hintStyle: GoogleFonts.roboto(
-                        //             fontSize: 13, letterSpacing: 1.5),
-                        //         enabledBorder: OutlineInputBorder(
-                        //             borderSide: BorderSide(
-                        //                 width: 1,
-                        //                 color:
-                        //                     couleurPrincipale.withAlpha(40))),
-                        //         focusedBorder: OutlineInputBorder(
-                        //             borderSide: BorderSide(
-                        //                 width: 1,
-                        //                 color:
-                        //                     couleurPrincipale.withAlpha(40)))),
-                        //   ),
-                        // ),
+                        StatefulBuilder(builder: (context, S) {
+                          return Container(
+                            margin: const EdgeInsets.symmetric(vertical: 12),
+                            child: TextFormField(
+                              controller: articleId,
+                              onTap: () async {
+                                await choiceArticleContainer(
+                                    context, articleChoiceId, S, articleId);
+                                setState_(() {
+                                  articleSelected =
+                                      getArticleById(articleId.text);
+                                });
+                                if (articleSelected != null) {
+                                  setState_(() {
+                                    articleSelected =
+                                        getArticleById(articleId.text);
+                                    nomArticle.text = articleSelected!.name!;
+                                    montant.text =
+                                        articleSelected!.price.toString();
+                                    numero.text = articleSelected!.user!.phone!;
+                                    livraison.text = NumberFormat.currency(
+                                            locale: 'fr',
+                                            symbol: articleSelected!.currency ??
+                                                'CFA')
+                                        .format(articleSelected!.livraison);
+                                  });
+                                }
+                              },
+                              decoration: InputDecoration(
+                                hintText: 'Choisir l\'article',
+                                hintStyle: GoogleFonts.roboto(fontSize: 12),
+                                suffixIcon: IconButton(
+                                  onPressed: () async {
+                                    await choiceArticleContainer(
+                                        context, articleChoiceId, S, articleId);
+                                  },
+                                  icon: const Icon(Icons.arrow_drop_down),
+                                ),
+                              ),
+                            ),
+                          );
+                        }),
                         Container(
                           margin: EdgeInsets.symmetric(vertical: 6),
                           child: TextFormField(
@@ -519,39 +534,10 @@ class _ImageSectionState extends State<ItemPublication> {
                               return null;
                             },
                             decoration: decoration(
-                                hintText: 'Taille', leading: Icons.smartphone),
+                                hintText: 'Téléphone',
+                                leading: Icons.smartphone),
                           ),
                         ),
-                        StatefulBuilder(builder: (context, S) {
-                          return Container(
-                            margin: const EdgeInsets.symmetric(vertical: 12),
-                            child: TextFormField(
-                              controller: articleId,
-                              initialValue: articleChoiceId["id"] != ""
-                                  ? articleChoiceId["value"]
-                                  : null,
-                              onTap: () async {
-                                await choiceArticleContainer(
-                                    context, articleChoiceId, S, articleId);
-                              },
-                              decoration: InputDecoration(
-                                hintText: 'Choisir l\'article',
-                                hintStyle: GoogleFonts.roboto(fontSize: 12),
-                                suffixIcon: IconButton(
-                                  onPressed: () async {
-                                    await choiceArticleContainer(
-                                        context, articleChoiceId, S, articleId);
-                                  },
-                                  icon: const Icon(Icons.arrow_drop_down),
-                                ),
-                              ),
-                            ),
-                          );
-                        }),
-                        if (articleChoiceId["id"] != "")
-                          Container(
-                            child: Text("articleChoiceId[]!"),
-                          ),
                         MultiSelect(
                             reload: setState_,
                             listes: sizes,
@@ -571,44 +557,53 @@ class _ImageSectionState extends State<ItemPublication> {
                             children: [
                               TextButton(
                                   style: TextButton.styleFrom(
-                                      backgroundColor: couleurPrincipale),
-                                  onPressed: () {
-                                    if (responseAlerteKey.currentState!
-                                        .validate()) {
-                                      setState_(() {
-                                        loading = true;
-                                      });
-                                      MessageModel messageModel =
-                                          MessageModel();
-                                      String content =
-                                          """J'ai cet article ${nomArticle.text} disponible En taille ${formatSize(sizeSlect)} avec les couleurs ${formatSize(colorSeledted)} au prix de ${NumberFormat.currency(locale: 'fr', symbol: '', decimalDigits: 0).format(double.parse(montant.text ?? '0'))} vous pouvez me contacter au numéro ${numero.text} pour plus d'information.""";
-                                      messageModel.content = content;
-                                      messageModel.to = pub.user!.id;
-                                      messageModel.type = "alerte";
-                                      messageModel.from =
-                                          DataController.user!.id;
+                                      backgroundColor: articleSelected != null
+                                          ? couleurPrincipale
+                                          : Colors.grey),
+                                  onPressed: articleSelected == null
+                                      ? null
+                                      : () {
+                                          if (responseAlerteKey.currentState!
+                                              .validate()) {
+                                            setState_(() {
+                                              loading = true;
+                                            });
+                                            MessageModel messageModel =
+                                                MessageModel();
+                                            String content =
+                                                """J'ai cet article ${nomArticle.text} disponible En taille ${formatSize(sizeSlect)} avec les couleurs ${formatSize(colorSeledted)} au prix de ${NumberFormat.currency(locale: 'fr', symbol: '', decimalDigits: 0).format(double.parse(montant.text ?? '0'))} vous pouvez me contacter au numéro ${numero.text} pour plus d'information. \$*${articleSelected!.id} """;
+                                            messageModel.content = content;
+                                            messageModel.articleId =
+                                                articleChoiceId["id"];
+                                            messageModel.to = pub.user!.id;
+                                            messageModel.publication =
+                                                articleSelected;
+                                            messageModel.type = "alerte";
+                                            messageModel.from =
+                                                DataController.user!.id;
 
-                                      MessageService.sendMessage(
-                                              message: messageModel)
-                                          .then((value) {
-                                        setState_(() {
-                                          loading = false;
-                                        });
-                                        if (value.statusCode == 200) {
-                                          Navigator.pop(context);
-                                          setState_(() {
-                                            loading = false;
-                                          });
-                                          successSnackBar(
-                                              message: 'Réponse envoyée',
-                                              context: context);
-                                        }
-                                        setState_(() {
-                                          loading = false;
-                                        });
-                                      });
-                                    }
-                                  },
+                                            MessageService.sendMessage(
+                                                    message: messageModel)
+                                                .then((value) {
+                                              setState_(() {
+                                                loading = false;
+                                              });
+                                              if (value.statusCode == 200) {
+                                                Navigator.pop(context);
+                                                setState_(() {
+                                                  loading = false;
+                                                });
+                                                print("Response ${value.body}");
+                                                successSnackBar(
+                                                    message: 'Réponse envoyée',
+                                                    context: context);
+                                              }
+                                              setState_(() {
+                                                loading = false;
+                                              });
+                                            });
+                                          }
+                                        },
                                   child: loading == false
                                       ? Text(
                                           'Répondre',
@@ -627,6 +622,16 @@ class _ImageSectionState extends State<ItemPublication> {
                 ),
               );
             }));
+  }
+
+  getArticleById(String id) {
+    print("List des articles:${articles.length} ");
+    for (var item in articles) {
+      if (item.id == id) {
+        return item;
+      }
+    }
+    return null;
   }
 
   Future<dynamic> choiceArticleContainer(
@@ -669,24 +674,27 @@ class _ImageSectionState extends State<ItemPublication> {
                                         MainAxisAlignment.spaceBetween,
                                     children: [
                                       Expanded(
-                                        child: Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
-                                          children: [
-                                            ItemListArticle(
-                                                label: "Nom",
-                                                value: articles[index].name!),
-                                            ItemListArticle(
-                                                label: "Prix",
-                                                value: articles[index]
-                                                    .price
-                                                    .toString()),
-                                            ItemListArticle(
-                                                label: "Disponible",
-                                                value: articles[index]
-                                                    .qte
-                                                    .toString()),
-                                          ],
+                                        child: Container(
+                                          padding: EdgeInsets.all(6),
+                                          child: Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.spaceBetween,
+                                            children: [
+                                              ItemListArticle(
+                                                  label: "Nom",
+                                                  value: articles[index].name!),
+                                              ItemListArticle(
+                                                  label: "Prix",
+                                                  value: articles[index]
+                                                      .price
+                                                      .toString()),
+                                              ItemListArticle(
+                                                  label: "Disponible",
+                                                  value: articles[index]
+                                                      .qte
+                                                      .toString()),
+                                            ],
+                                          ),
                                         ),
                                       ),
                                       Container(
@@ -700,7 +708,7 @@ class _ImageSectionState extends State<ItemPublication> {
                                               height: 26,
                                             ),
                                             Container(
-                                              height: 24,
+                                              height: 32,
                                               decoration: BoxDecoration(
                                                 color: articleChoiceId["id"] !=
                                                         articles[index].id!
@@ -727,6 +735,10 @@ class _ImageSectionState extends State<ItemPublication> {
                                                                   "id"]!;
                                                         });
                                                       });
+                                                      articleSelected =
+                                                          getArticleById(
+                                                              articleChoiceId[
+                                                                  "id"]!);
                                                     });
                                                     Navigator.pop(context);
                                                   },
@@ -769,35 +781,39 @@ class _ImageSectionState extends State<ItemPublication> {
     );
   }
 
+  // Modification de la fonction pour accepter des couleurs optionnelles
   Container ItemListArticle({
     required String label,
     required String value,
+    Color? labelColor, // Nouveau paramètre
+    Color? valueColor, // Nouveau paramètre
   }) {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 4),
-      decoration: const BoxDecoration(
-          // color: Colors.red,
-          ),
+      margin: const EdgeInsets.symmetric(
+          horizontal: 0), // Enlevez le margin pour le contrôle dans la Row
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 6),
-            child: Text(
-              label,
-              style: GoogleFonts.roboto(
-                  fontSize: 10,
-                  fontWeight: FontWeight.w700,
-                  color: couleurPrincipale),
+          Text(
+            label,
+            style: GoogleFonts.roboto(
+              fontSize: 10,
+              fontWeight: FontWeight.w700,
+              color: labelColor ??
+                  couleurPrincipale, // Utilisation de la couleur passée
             ),
           ),
-          Container(
-            constraints: const BoxConstraints(maxWidth: 100),
+          const SizedBox(height: 2), // Petit espacement vertical
+          SizedBox(
+            width:
+                70, // Contrainte de largeur ajustée (peut être enlevée si vous préférez)
             child: Text(
               value,
               style: GoogleFonts.roboto(
-                fontSize: 11,
-                color: couleurPrincipale.withAlpha(180),
+                fontSize: 12, // Taille légèrement plus grande
+                fontWeight: FontWeight.w300, // Mettre la valeur en gras
+                color: valueColor ??
+                    Colors.black, // Utilisation de la couleur passée
               ),
               overflow: TextOverflow.clip,
             ),

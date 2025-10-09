@@ -30,9 +30,9 @@ class _PublicationPageState extends ConsumerState<PublicationPageRiverPod> {
   void initState() {
     super.initState();
 
-    // Charger les publications après le build
-    Future.microtask(() =>
-        ref.read(publicationProvider22.notifier).loadArticles(refresh: true));
+    // // Charger les publications après le build
+    // Future.microtask(() =>
+    //     ref.read(publicationProvider22.notifier).loadArticles(refresh: false));
 
     // Pagination
     _scrollController.addListener(() {

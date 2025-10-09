@@ -30,7 +30,7 @@ class _PublicationListState extends ConsumerState<PublicationList> {
     return Scaffold(
       body: Container(
         child: asyncPublications.loading == true
-            ? WaitWidget()
+            ? const WaitWidget()
             : (asyncPublications.loading == false &&
                     asyncPublications.error != '' &&
                     asyncPublications.error != null)

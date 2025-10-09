@@ -1,6 +1,5 @@
 import 'package:application_amonak/colors/colors.dart';
 import 'package:application_amonak/interface/accueils/video_player_widget.dart';
-import 'package:application_amonak/notifier/NotificationNotifier.dart';
 import 'package:application_amonak/notifier/PublicationNotifierFianl.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -63,18 +62,24 @@ class _VideoScrollWidgetState extends ConsumerState<VideoScrollWidget> {
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(publicationProvider22);
+    // final publications =
+    //     state.publication.where((p) => p.type != 'share').toList();
 
     return PageView.builder(
       controller: pageController,
       scrollDirection: Axis.vertical,
-      itemCount: widget.publications!.length,
+      allowImplicitScrolling: true,
+      physics: const CustomScrollPhysics(sensitivity: 0.4),
+      itemCount: state.publication.length,
       onPageChanged: (index) {
         setState(() {
           currentPage = index;
         });
       },
       itemBuilder: (context, index) {
-        final pub = widget.publications![index];
+        // if (state.publication[index].type == 'share') return const SizedBox();
+        final pub = state.publication[index];
+        print("Publication type: ${pub.typePub} \n\n\n\n ");
         return Scaffold(
           body: VideoPlayerWidget(
             videoItem: pub,
@@ -146,5 +151,24 @@ class _VideoScrollWidgetState extends ConsumerState<VideoScrollWidget> {
         ],
       ),
     );
+  }
+}
+
+class CustomScrollPhysics extends ScrollPhysics {
+  final double sensitivity;
+
+  const CustomScrollPhysics({ScrollPhysics? parent, this.sensitivity = 1.0})
+      : super(parent: parent);
+
+  @override
+  CustomScrollPhysics applyTo(ScrollPhysics? ancestor) {
+    return CustomScrollPhysics(
+        parent: buildParent(ancestor), sensitivity: sensitivity);
+  }
+
+  @override
+  double applyPhysicsToUserOffset(ScrollMetrics position, double offset) {
+    // Divise l'offset par la sensibilité
+    return super.applyPhysicsToUserOffset(position, offset / sensitivity);
   }
 }

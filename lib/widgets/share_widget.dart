@@ -63,10 +63,15 @@ class _ShareWidgetState extends State<ShareWidget> {
                         border: Border.all(width: 2, color: couleurPrincipale)),
                     child: ClipOval(
                       child: DataController.user!.avatar!.isEmpty
-                          ? Image.asset("assets/medias/profile.jpg")
+                          ? Image.asset(
+                              "assets/medias/profile.jpg",
+                              fit: BoxFit.cover,
+                              width: 48,
+                              height: 48,
+                            )
                           : Image.network(
                               DataController.user!.avatar!.first.url!,
-                              fit: BoxFit.contain,
+                              fit: BoxFit.cover,
                               width: 48,
                               height: 48,
                               errorBuilder: (context, error, stackTrace) {
