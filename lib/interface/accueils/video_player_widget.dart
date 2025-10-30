@@ -101,6 +101,8 @@ class _VideoPlayerWidgetState extends ConsumerState<VideoPlayerWidget> {
 
   List likes = [];
   String? type;
+  bool _isForwarding = false;
+  bool _isRewinding = false;
 
   @override
   void didUpdateWidget(covariant VideoPlayerWidget oldWidget) {
@@ -179,6 +181,59 @@ class _VideoPlayerWidgetState extends ConsumerState<VideoPlayerWidget> {
     }
   }
 
+  void _startFastForward() {
+    _isForwarding = true;
+    _fastForwardLoop();
+  }
+
+  void _stopFastForward() {
+    _isForwarding = false;
+  }
+
+  void _startRewind() {
+    _isRewinding = true;
+    _rewindLoop();
+  }
+
+  void _stopRewind() {
+    _isRewinding = false;
+  }
+
+  Future<void> _fastForwardLoop() async {
+    while (_isForwarding && controller!.value.isInitialized) {
+      final position = await controller!.position ?? Duration.zero;
+      final duration = controller!.value.duration;
+
+      final newPosition = position + const Duration(seconds: 1);
+      if (newPosition < duration) {
+        controller!.seekTo(newPosition);
+      } else {
+        controller!.seekTo(duration);
+        break;
+      }
+
+      await Future.delayed(const Duration(milliseconds: 100)); // vitesse
+    }
+  }
+
+  Future<void> _rewindLoop() async {
+    while (_isRewinding && controller!.value.isInitialized) {
+      final position = await controller!.position ?? Duration.zero;
+
+      final newPosition = position - const Duration(seconds: 1);
+      if (newPosition > Duration.zero) {
+        controller!.seekTo(newPosition);
+      } else {
+        if (controller != null) {
+          controller!.seekTo(Duration.zero);
+        }
+        break;
+      }
+
+      await Future.delayed(const Duration(milliseconds: 100));
+    }
+  }
+
   @override
   void dispose() {
     if (type == 'video' && controller != null) {
@@ -232,15 +287,16 @@ class _VideoPlayerWidgetState extends ConsumerState<VideoPlayerWidget> {
 
   deleteLike() async {
     if (isLike) {
+      setState(() {
+        isLike = false;
+        nbLike -= 1;
+      });
       await PublicationService.deleteLike(idLike).then((value) {
         if (kDebugMode) {
           print("SUppression like ${value.statusCode} .. \n\n");
         }
-        setState(() {
-          isLike = false;
-          nbLike -= 1;
-        });
-        if (value.statusCode.toString() != '200') {
+
+        if (value.statusCode != 200) {
           setState(() {
             isLike = true;
             nbLike += 1;
@@ -276,16 +332,38 @@ class _VideoPlayerWidgetState extends ConsumerState<VideoPlayerWidget> {
                   setState(() {
                     showFavourite = true;
                   });
+                  if (isLike == false) {
+                    setState(() {
+                      isLike = true;
+                      nbLike += 1;
+                    });
+                    PublicationService.addLike({
+                      "publication": widget.videoItem.id,
+                      "user": DataController.user!.id,
+                      "type": 'like'
+                    }).then((value) {
+                      if (value.statusCode != 200) {
+                        setState(() {
+                          isLike = false;
+                          nbLike -= 1;
+                        });
+                      }
+                    }).catchError((e) {
+                      setState(() {
+                        isLike = false;
+                        nbLike -= 1;
+                      });
+                      if (kDebugMode) {
+                        print("Erreur lors du like: $e");
+                      }
+                    });
+                  }
+
                   Future.delayed(const Duration(milliseconds: 1200), () {
                     setState(() {
                       showFavourite = false;
                     });
                   });
-                  if (isLike == false) {
-                    likePublication();
-                  } else {
-                    deleteLike();
-                  }
                 },
                 onTapUp: (details) {
                   if (kDebugMode) {
@@ -395,7 +473,28 @@ class _VideoPlayerWidgetState extends ConsumerState<VideoPlayerWidget> {
                     size: 90,
                   ))),
             containerButton(),
-            containerDescription()
+            containerDescription(),
+            // Zone gauche (retour rapide)
+            Align(
+              alignment: Alignment.centerLeft,
+              child: GestureDetector(
+                behavior: HitTestBehavior.translucent,
+                onLongPressStart: (_) => _startRewind(),
+                onLongPressEnd: (_) => _stopRewind(),
+                child: Container(width: MediaQuery.of(context).size.width / 2),
+              ),
+            ),
+
+            // Zone droite (avance rapide)
+            Align(
+              alignment: Alignment.centerRight,
+              child: GestureDetector(
+                behavior: HitTestBehavior.translucent,
+                onLongPressStart: (_) => _startFastForward(),
+                onLongPressEnd: (_) => _stopFastForward(),
+                child: Container(width: MediaQuery.of(context).size.width / 2),
+              ),
+            ),
           ],
         ),
       ),
@@ -507,9 +606,36 @@ class _VideoPlayerWidgetState extends ConsumerState<VideoPlayerWidget> {
                     borderRadius: BorderRadius.circular(22)),
                 child: Column(
                   children: [
-                    ButtonLike(
-                      pub: widget.videoItem,
-                      color: Colors.white,
+                    // ButtonLike(
+                    //   pub: widget.videoItem,
+                    //   color: Colors.white,
+                    // ),
+                    Container(
+                      margin: EdgeInsets.symmetric(vertical: 8),
+                      child: Column(
+                        children: [
+                          IconButton(
+                            onPressed: () {
+                              setState(() {
+                                if (isLike) {
+                                  deleteLike();
+                                } else {
+                                  likePublication();
+                                }
+                              });
+                            },
+                            icon: Icon(isLike
+                                ? Icons.favorite
+                                : Icons.favorite_outline),
+                            color: isLike ? Colors.red : Colors.white,
+                            iconSize: 28,
+                          ),
+                          if (nbLike > 0)
+                            Text(nbLike.toString(),
+                                style: GoogleFonts.roboto(
+                                    fontSize: sizeLike, color: Colors.white))
+                        ],
+                      ),
                     ),
                     CommentaireButton(
                       pubId: widget.videoItem.id!,

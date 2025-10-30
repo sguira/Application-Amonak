@@ -69,7 +69,7 @@ class _VideoScrollWidgetState extends ConsumerState<VideoScrollWidget> {
       controller: pageController,
       scrollDirection: Axis.vertical,
       allowImplicitScrolling: true,
-      physics: const CustomScrollPhysics(sensitivity: 0.4),
+      physics: const CustomScrollPhysics(sensitivity: 0.5),
       itemCount: state.publication.length,
       onPageChanged: (index) {
         setState(() {

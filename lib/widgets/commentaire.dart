@@ -208,6 +208,9 @@ class _CommentaireWidgetState extends State<CommentaireWidget> {
                       Expanded(
                           child: Container(
                         // height: 48,
+                        decoration: BoxDecoration(
+                            color: Colors.black12.withAlpha(20),
+                            borderRadius: BorderRadius.circular(26)),
                         child: TextFormField(
                           maxLines: null,
                           controller: content,
@@ -229,10 +232,10 @@ class _CommentaireWidgetState extends State<CommentaireWidget> {
                                 // borderRadius: BorderRadius.circular(26),
                                 borderSide: BorderSide(
                                     color: couleurPrincipale, width: 2)),
-                            focusedBorder: const UnderlineInputBorder(
-                                // borderRadius: BorderRadius.circular(26),
+                            focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(26),
                                 borderSide: BorderSide(
-                                    color: couleurPrincipale, width: 2)),
+                                    color: couleurPrincipale, width: .5)),
                             enabledBorder: const UnderlineInputBorder(
                                 // borderRadius: BorderRadius.circular(26),
                                 borderSide: BorderSide(

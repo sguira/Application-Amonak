@@ -136,6 +136,11 @@ class PublicationNotifier extends StateNotifier<PublicationState> {
   void hideNewPubBannier() {
     state = state.copyWith(newPubEvent: false);
   }
+
+  void deletePublication(String id) {
+    state =
+        state.copyWith(alerte: state.alerte.where((p) => p.id != id).toList());
+  }
 }
 
 final alerteNotifier =

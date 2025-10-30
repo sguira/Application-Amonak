@@ -55,7 +55,7 @@ class _ContactState extends ConsumerState<ContactWithNotifier> {
   @override
   Widget build(BuildContext context) {
     Future.microtask(() {
-      ref.read(messageProvider.notifier).loadMessage(refresh: false);
+      // ref.read(messageProvider.notifier).loadMessage(refresh: false);
     });
     final state = ref.watch(messageProvider);
 
@@ -146,13 +146,13 @@ class _ContactState extends ConsumerState<ContactWithNotifier> {
                                               child: ClipRRect(
                                                 borderRadius:
                                                     BorderRadius.circular(36),
-                                                child: item.to.avatar!.isEmpty
+                                                child: item.from.avatar!.isEmpty
                                                     ? Image.asset(
                                                         "assets/medias/profile.jpg",
                                                         fit: BoxFit.cover,
                                                       )
                                                     : Image.network(
-                                                        item.to.avatar!.first
+                                                        item.from.avatar!.first
                                                             .url!,
                                                         fit: BoxFit.fitHeight,
                                                         errorBuilder: (context,

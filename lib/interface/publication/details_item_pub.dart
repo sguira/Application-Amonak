@@ -10,6 +10,7 @@ import 'package:application_amonak/services/publication.dart';
 import 'package:application_amonak/services/socket/notificationSocket.dart';
 import 'package:application_amonak/services/socket/publication.dart';
 import 'package:application_amonak/settings/weights.dart';
+import 'package:application_amonak/widgets/ImageView.dart';
 import 'package:application_amonak/widgets/buildModalSheet.dart';
 import 'package:application_amonak/widgets/commentaire.dart';
 import 'package:application_amonak/widgets/header_publication.dart';
@@ -162,19 +163,30 @@ class _ImageSectionState extends State<DetailsItemPubliction> {
       //   borderRadius: BorderRadius.circular(11),
 
       // ),
-      child: ClipRRect(
-          borderRadius: BorderRadius.circular(11),
-          child: image != ''
-              ? LoadImage(
-                  imageUrl: image,
-                  width: ScreenSize.width * 0.9,
-                  height: 300,
-                  fit: BoxFit.cover,
-                )
-              : Image.asset(
-                  "assets/medias/user.jpg",
-                  fit: BoxFit.cover,
-                )),
+      child: GestureDetector(
+        onTap: () {
+          Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => ViewImage(
+                        imageUrl: image!,
+                        heroTag: widget.pub.id.toString(),
+                      )));
+        },
+        child: ClipRRect(
+            borderRadius: BorderRadius.circular(11),
+            child: image != ''
+                ? LoadImage(
+                    imageUrl: image,
+                    width: ScreenSize.width * 0.9,
+                    height: 300,
+                    fit: BoxFit.cover,
+                  )
+                : Image.asset(
+                    "assets/medias/user.jpg",
+                    fit: BoxFit.cover,
+                  )),
+      ),
     );
   }
 
@@ -340,8 +352,7 @@ class _ImageSectionState extends State<DetailsItemPubliction> {
           Map data = jsonDecode(value.body);
           print("publication $data");
 
-          notificationsocket.socket!
-              .emit("refreshNotificationBox", notification);
+          notificationsocket.socket!.emit("refreshNotificationBox");
         }
       }).catchError((e) {
         print("Error like ${e.toString()}");

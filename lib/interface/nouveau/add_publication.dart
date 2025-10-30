@@ -289,6 +289,7 @@ class _CreatePublicationState extends ConsumerState<CreatePublication> {
 
         if (code == 'OK') {
           print(value);
+         
 
           publicationSocket.socket!.emit(
               "newPublicationEvent", {"type": "mobile", "data": value['data']});

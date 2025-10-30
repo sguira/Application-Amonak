@@ -89,6 +89,7 @@ itemDescription(String value, String label) {
 headerBoutiquecustom(
     {required User user,
     required int style,
+    dynamic? onDelete,
     required DateTime dateCreation,
     required BuildContext context,
     String? typeLateralBtn}) {
@@ -147,7 +148,7 @@ headerBoutiquecustom(
           Container(
             child: IconButton(
                 onPressed: () {
-                  Navigator.pop(context);
+                  if (onDelete != null) onDelete();
                 },
                 icon: const Icon(
                   Icons.close,

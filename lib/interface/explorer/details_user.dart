@@ -32,9 +32,6 @@ class _DetailsUserState extends State<DetailsUser> {
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        elevation: 0,
-        shadowColor: Colors.white,
-        surfaceTintColor: Colors.white,
         backgroundColor: Colors.white,
         leading: IconButton(
             onPressed: () {
@@ -46,10 +43,13 @@ class _DetailsUserState extends State<DetailsUser> {
             )),
       ),
       body: Container(
+        color: Colors.white,
         child: NestedScrollView(
           headerSliverBuilder: (context, innerBoxIsScrolled) {
             return [
               SliverAppBar(
+                  backgroundColor: Colors.white,
+                  // floating: false,
                   automaticallyImplyLeading: false,
                   expandedHeight: 250,
                   elevation: 0,
@@ -72,6 +72,7 @@ class _DetailsUserState extends State<DetailsUser> {
       child: DefaultTabController(
         length: 4,
         child: Scaffold(
+          backgroundColor: Colors.white,
           appBar: AppBar(
             automaticallyImplyLeading: false,
             toolbarHeight: 0,
@@ -134,10 +135,15 @@ class _DetailsUserState extends State<DetailsUser> {
               height: 100,
               margin: const EdgeInsets.symmetric(vertical: 2),
               child: ClipOval(
-                child: Image.asset(
-                  "assets/medias/profile.jpg",
-                  fit: BoxFit.cover,
-                ),
+                child: widget.user.avatar!.isEmpty
+                    ? Image.asset(
+                        "assets/medias/profile.jpg",
+                        fit: BoxFit.cover,
+                      )
+                    : Image.network(
+                        widget.user.avatar!.last.url!,
+                        fit: BoxFit.cover,
+                      ),
               ),
             ),
           ],

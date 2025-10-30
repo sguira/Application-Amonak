@@ -54,6 +54,7 @@ class MessageModel {
     // print("nom ${data['from']['userName']}\n\n\n");
     try {
       messageModel.to = User.fromJson(data['to']);
+      messageModel.from = User.fromJson(data['from']);
     } catch (e) {
       messageModel.to = data['to'];
       print("Error contenu $e");

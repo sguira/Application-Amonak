@@ -7,6 +7,8 @@ import 'package:application_amonak/interface/publication/videoPlayerWidget.dart'
 import 'package:application_amonak/models/article.dart';
 import 'package:application_amonak/models/message.dart';
 import 'package:application_amonak/models/publication.dart';
+import 'package:application_amonak/notifier/AlertNotifier.dart';
+import 'package:application_amonak/notifier/PublicationNotifierFianl.dart';
 import 'package:application_amonak/services/commentaire.dart';
 import 'package:application_amonak/services/message.dart';
 import 'package:application_amonak/services/notification.dart';
@@ -25,11 +27,12 @@ import 'package:application_amonak/widgets/share_widget.dart';
 import 'package:application_amonak/widgets/text_expanded.dart';
 import 'package:application_amonak/widgets/zone_commentaire.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:socket_io_client/socket_io_client.dart';
 
-class ItemPublication extends StatefulWidget {
+class ItemPublication extends ConsumerStatefulWidget {
   final Publication pub;
   final String? type;
   final PublicationSocket? publicationSocket;
@@ -38,10 +41,10 @@ class ItemPublication extends StatefulWidget {
       {super.key, required this.pub, this.publicationSocket, this.type});
 
   @override
-  State<ItemPublication> createState() => _ImageSectionState();
+  ConsumerState<ItemPublication> createState() => _ImageSectionState();
 }
 
-class _ImageSectionState extends State<ItemPublication> {
+class _ImageSectionState extends ConsumerState<ItemPublication> {
   bool isLike = false;
   int nbLike = 0;
   int nbComment = 0;
@@ -172,6 +175,74 @@ class _ImageSectionState extends State<ItemPublication> {
     );
   }
 
+  onDelete() async {
+    PublicationService.deletePublication(widget.pub.id!).then((value) {
+      print("Resultat de la suppression ${value.statusCode} \n\n\n\n");
+      if (value.statusCode == 200) {
+        // Navigator.pop(context);
+        if (widget.type == "alerte") {
+          ref.read(alerteNotifier.notifier).deletePublication(widget.pub.id!);
+        } else {
+          ref
+              .read(publicationProvider22.notifier)
+              .deletePublication(widget.pub.id!);
+        }
+        successSnackBar(message: "Publication supprimée", context: context);
+      } else {
+        errorSnackBar(message: "Une erreur s'est produite", context: context);
+      }
+      return value.statusCode == 200;
+    }).catchError((e) {
+      errorSnackBar(message: "Une erreur s'est produite", context: context);
+    });
+  }
+
+  confirmDialog() {
+    showDialog(
+        context: context,
+        builder: (context) => StatefulBuilder(builder: (context, S) {
+              bool wait = false;
+              return AlertDialog(
+                shape: const RoundedRectangleBorder(
+                    borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(2),
+                        topRight: Radius.circular(26),
+                        bottomLeft: Radius.circular(26),
+                        bottomRight: Radius.circular(2))),
+                title: Text(
+                  "Confirmer la suppression",
+                  style: GoogleFonts.roboto(color: Colors.black, fontSize: 16),
+                ),
+                content: const Text("Voulez-vous vraiment supprimer ?"),
+                actions: [
+                  TextButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
+                      child: Text(
+                        "Annuler",
+                        style: GoogleFonts.roboto(
+                            color: Colors.black, fontSize: 12),
+                      )),
+                  TextButton(
+                      onPressed: () async {
+                        await onDelete();
+                        Navigator.pop(context);
+                      },
+                      style: TextButton.styleFrom(
+                          backgroundColor: Colors.redAccent),
+                      child: wait == false
+                          ? Text(
+                              "Supprimer",
+                              style: GoogleFonts.roboto(
+                                  color: Colors.white, fontSize: 12),
+                            )
+                          : circularProgression(color: Colors.white))
+                ],
+              );
+            }));
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -181,7 +252,7 @@ class _ImageSectionState extends State<ItemPublication> {
           margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
           padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 12),
           decoration: BoxDecoration(
-              color: Colors.blue.withAlpha(5),
+              color: Colors.blue.withAlpha(12),
               borderRadius: BorderRadius.circular(16),
               border: Border.all(width: .5, color: Colors.black.withAlpha(10))),
           child: Column(
@@ -192,7 +263,10 @@ class _ImageSectionState extends State<ItemPublication> {
                   user: widget.pub.user!,
                   dateCreation: widget.pub.dateCreation!,
                   style: 1,
-                  typeLateralBtn: "",
+                  onDelete: confirmDialog,
+                  typeLateralBtn: widget.pub.user!.id == DataController.user!.id
+                      ? "close"
+                      : "",
                   context: context),
               InkWell(
                 onTap: () {

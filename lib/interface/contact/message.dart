@@ -17,6 +17,7 @@ import 'package:application_amonak/services/publication.dart';
 import 'package:application_amonak/services/socket/chatProvider.dart';
 import 'package:application_amonak/services/user.dart';
 import 'package:application_amonak/settings/weights.dart';
+import 'package:application_amonak/widgets/ImageView.dart';
 import 'package:application_amonak/widgets/buildModalSheet.dart';
 import 'package:application_amonak/widgets/circular_progressor.dart';
 import 'package:application_amonak/widgets/wait_widget.dart';
@@ -101,6 +102,7 @@ class _MessagePageState extends State<MessagePage> {
         setState(() {
           newMessage = false;
           countNewMessage = 0;
+          isBottom();
         });
       } else {
         setState(() {
@@ -214,9 +216,9 @@ class _MessagePageState extends State<MessagePage> {
                               ListView.builder(
                                 controller: scrollController,
                                 itemCount: listMessage.length,
-                                shrinkWrap: true,
+                                // shrinkWrap: true,
                                 itemBuilder: (contxt, index) {
-                                  isBottom();
+                                  // isBottom();
                                   return listMessage[index].type != 'alerte'
                                       ? GestureDetector(
                                           onTap: () {
@@ -428,27 +430,41 @@ class _MessagePageState extends State<MessagePage> {
                                                                     BorderRadius
                                                                         .circular(
                                                                             11),
-                                                                child: Image
-                                                                    .network(
-                                                                  listMessage[
-                                                                          index]
-                                                                      .files
-                                                                      .first
-                                                                      .url!,
-                                                                  errorBuilder:
-                                                                      (context,
-                                                                          error,
-                                                                          stackTrace) {
-                                                                    return Image
-                                                                        .asset(
-                                                                      "assets/medias/profile.jpg",
-                                                                      fit: BoxFit
-                                                                          .cover,
-                                                                      width: 48,
-                                                                      height:
-                                                                          48,
-                                                                    );
+                                                                child:
+                                                                    GestureDetector(
+                                                                  onTap: () {
+                                                                    showDialog(
+                                                                        context:
+                                                                            context,
+                                                                        builder: (context) =>
+                                                                            ViewImage(
+                                                                              imageUrl: listMessage[index].files.first.url!,
+                                                                              heroTag: listMessage[index].id.toString(),
+                                                                            ));
                                                                   },
+                                                                  child: Image
+                                                                      .network(
+                                                                    listMessage[
+                                                                            index]
+                                                                        .files
+                                                                        .first
+                                                                        .url!,
+                                                                    errorBuilder:
+                                                                        (context,
+                                                                            error,
+                                                                            stackTrace) {
+                                                                      return Image
+                                                                          .asset(
+                                                                        "assets/medias/profile.jpg",
+                                                                        fit: BoxFit
+                                                                            .cover,
+                                                                        width:
+                                                                            48,
+                                                                        height:
+                                                                            48,
+                                                                      );
+                                                                    },
+                                                                  ),
                                                                 )),
                                                           ),
                                                       ],
@@ -503,30 +519,25 @@ class _MessagePageState extends State<MessagePage> {
                                 },
                               ),
                               newMessage
-                                  ? Positioned(
-                                      bottom: 1,
-                                      right: 10,
-                                      child: newMessage == true
-                                          ? Positioned(
-                                              bottom: 10,
-                                              right: 16,
-                                              child: FloatingActionButton(
-                                                onPressed: () {
-                                                  scrollJump();
-                                                },
-                                                elevation: 0,
-                                                backgroundColor:
-                                                    Colors.transparent,
-                                                child: Container(
-                                                  child: Icon(
-                                                    Icons.keyboard_arrow_down,
-                                                    color: couleurPrincipale,
-                                                  ),
-                                                ),
+                                  ? newMessage == true
+                                      ? Positioned(
+                                          bottom: 10,
+                                          right: 16,
+                                          child: FloatingActionButton(
+                                            onPressed: () {
+                                              scrollJump();
+                                            },
+                                            elevation: 0,
+                                            backgroundColor: Colors.transparent,
+                                            child: Container(
+                                              child: Icon(
+                                                Icons.keyboard_arrow_down,
+                                                color: couleurPrincipale,
                                               ),
-                                            )
-                                          : const SizedBox(),
-                                    )
+                                            ),
+                                          ),
+                                        )
+                                      : const SizedBox()
                                   : const SizedBox(),
                             ],
                           )

@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:nativewrappers/_internal/vm/lib/ffi_allocation_patch.dart';
 
 import 'package:application_amonak/data/data_controller.dart';
 import 'package:application_amonak/models/message.dart';
@@ -56,30 +55,55 @@ class MessageNotifier extends StateNotifier<MessageState> {
       return;
     }
     state = state.copyWith(isLoad: true);
+    List<MessageModel> message = [];
+    List<String> userId = [];
+    // await MessageService.getMessage(
+    //   params: {
+    //     'to': DataController.user!.id,
+    //     'notRead': 'false',
+    //     'distinct': 'true'
+    //   },
+    // ).then((value) {
+    // print(value.statusCode);
+    // if (value.statusCode == 200) {
+    //   for (var item in jsonDecode(value.body)) {
+    //     if (item['to'] != null && item['from'] != null) {
+    //       message.add(MessageModel.fromJson(item));
+
+    //       // userId.add(item['from']['_id']);
+    //     }
+    //   }
+    // }
+    // }).catchError((e) {
+    //   print("er");
+    //   state = state.copyWith(hasError: e.toString());
+    // });
     await MessageService.getMessage(
-      params: {
-        'to': DataController.user!.id,
-        'notRead': false,
-        'distinct': true
-      },
-    ).then((value) {
-      print("Cgargement des message");
+            params: {'from': DataController.user!.id, 'distinct': 'true'})
+        .then((value) {
       if (value.statusCode == 200) {
-        state = state.copyWith(isLoad: false);
-        state = state.copyWith(hasError: null);
-        final List<MessageModel> message = [];
         for (var item in jsonDecode(value.body)) {
           if (item['to'] != null && item['from'] != null) {
-            // message.add(MessageModel.fromJson(item));
+            try {
+              message.add(MessageModel.fromJson(item));
+              userId.add(item['to']['_id']);
+              print("USER ID ADD: $item");
+              if (userId.contains(item['to']['_id']) == false) {}
+            } catch (e) {
+              print("ERROR $e \t name:${item['to']['userName']}");
+            }
           }
         }
-        state = state.copyWith(firstLoading: false, messages: message);
       }
     }).catchError((e) {
-      print("Error $e");
-      e.call();
-      state = state.copyWith(hasError: e.toString(), isLoad: false);
+      state = state.copyWith(hasError: e.toString());
     });
+
+    state = state.copyWith(
+        messages: message,
+        user: userId.toSet().toList(),
+        firstLoading: false,
+        isLoad: false);
   }
 }
 

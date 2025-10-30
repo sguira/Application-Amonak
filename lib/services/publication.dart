@@ -266,4 +266,15 @@ class PublicationService {
       return e;
     });
   }
+
+  static Future<http.Response> deletePublication(String id) async {
+    return await http
+        .delete(Uri.parse("$apiLink/publications/$id"), headers: authHeader)
+        .then((value) {
+      return value;
+    }).catchError((e) {
+      print("ERROR $e");
+      return e;
+    });
+  }
 }

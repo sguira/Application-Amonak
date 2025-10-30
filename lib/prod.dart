@@ -10,4 +10,4 @@ Map<String, String> authHeader = {
   'Authorization': "Bearer $tokenValue"
 };
 
-const newElementNoticeLimit = 5;
+const newElementNoticeLimit = 1;

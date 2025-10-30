@@ -151,19 +151,26 @@ class PublicationNotifier extends StateNotifier<PublicationState> {
     var condition =
         pub.map((toElement) => toElement.id == newPublication.id).isEmpty;
     if (condition) {
+      state = state.copyWith(newPub: [newPublication, ...state.newPub]);
+      print("Taille de newPub: ${state.newPub.length} \n\n\n\n");
       state = state.copyWith(
-          newPub: [newPublication, ...state.newPub],
           newPubEvent:
-              state.newPub.length > newElementNoticeLimit ? true : false);
+              state.newPub.length >= newElementNoticeLimit ? true : false);
+      print("Nouvelle publication ajoutée dans le state local: \n\n\n\n");
     }
   }
 
   fusionPub() {
-    if (state.newPub.isEmpty) return;
+    // if (state.newPub.isEmpty) return;
     state = state.copyWith(
         publication: [...state.newPub, ...state.publication],
         newPub: [],
         newPubEvent: false);
+  }
+
+  void deletePublication(String id) {
+    state = state.copyWith(
+        publication: state.publication.where((p) => p.id != id).toList());
   }
 
   Future<void> searchPublication({

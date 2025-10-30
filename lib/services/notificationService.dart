@@ -1,6 +1,10 @@
 import 'dart:convert';
 
 import 'package:application_amonak/interface/contact/contact.dart';
+import 'package:application_amonak/interface/contact/message.dart';
+import 'package:application_amonak/interface/publication/details_publication.dart';
+import 'package:application_amonak/models/user.dart';
+import 'package:application_amonak/services/user.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -89,7 +93,7 @@ class NotificationLocalService {
             importance: Importance.max,
             priority: Priority.high,
             playSound: true,
-            icon: "@drawable/amonak");
+            icon: "amonak");
 
     const DarwinNotificationDetails iosDetails =
         DarwinNotificationDetails(presentAlert: true, presentSound: true);
@@ -124,8 +128,30 @@ class NotificationLocalService {
     if (response.payload != null &&
         response.payload!.isNotEmpty &&
         jsonDecode(response.payload!)['route'] == "message") {
+      final userData = await UserService.getUser(
+              userId: response.payload != null
+                  ? jsonDecode(response.payload!)['id']
+                  : "")
+          .then((value) {
+        if (value.statusCode == 200) {
+          User u = User.fromJson(jsonDecode(value.body));
+          navigatorKey.currentState?.push(
+            MaterialPageRoute(builder: (context) => MessagePage(user: u)),
+          );
+        }
+      });
+    }
+
+    if (response.payload != null &&
+        response.payload!.isNotEmpty &&
+        jsonDecode(response.payload!)['route'] == "publication") {
       navigatorKey.currentState?.push(
-        MaterialPageRoute(builder: (context) => const Contact()),
+        MaterialPageRoute(
+            builder: (context) => DetailsPublication(
+                  pubId: response.payload != null
+                      ? jsonDecode(response.payload!)['id']
+                      : "",
+                )),
       );
     }
 

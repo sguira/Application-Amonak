@@ -12,6 +12,7 @@ import 'package:application_amonak/interface/profile/profile.dart';
 import 'package:application_amonak/models/article.dart';
 import 'package:application_amonak/models/notifications.dart';
 import 'package:application_amonak/models/publication.dart';
+import 'package:application_amonak/models/user.dart';
 import 'package:application_amonak/notifier/AlertNotifier.dart';
 import 'package:application_amonak/notifier/ArticleNotifier.dart';
 import 'package:application_amonak/notifier/NotificationNotifier.dart';
@@ -21,6 +22,7 @@ import 'package:application_amonak/services/socket/chatProvider.dart';
 import 'package:application_amonak/services/socket/commentSocket.dart';
 import 'package:application_amonak/services/socket/notificationSocket.dart';
 import 'package:application_amonak/services/socket/publication.dart';
+import 'package:application_amonak/services/user.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -46,7 +48,8 @@ class _HomeState extends ConsumerState<HomePageTab> {
     const PublicationList(),
     const ExplorerPage(),
     const NewPage(),
-    const Contact(),
+    // const Contact(),
+    ContactWithNotifier(),
     const ProfilePage()
   ];
 
@@ -106,21 +109,50 @@ class _HomeState extends ConsumerState<HomePageTab> {
     // Socket des commentaires
     commentSocket.socket!.on("newCommentEventListener", (data) {
       print("Nouveau Commentaire détecté !!! $data");
-      if (data['user']['_id'] == DataController.user!.id) {
+      String user = data['user']['userName'];
+      if (data['user']['_id'] != DataController.user!.id) {
         NotificationLocalService.showNotification(
-            title: "Commentaire",
-            body: "Votre publication vient de recevoir un nouveau commentaire");
+          title: "Commentaire",
+          body: " ${user} vient de commenter votre publication",
+          payload: jsonEncode(
+            {"route": "publication", "id": data['publication']},
+          ),
+        );
+      }
+    });
+
+    // Like publication
+    publicationSocket.socket!.on("likePublicationListener", (data) {
+      print("Nouveau Like détecté !!! $data");
+      String user = data['user'];
+      if (data['user']['_id'] != DataController.user!.id) {
+        NotificationLocalService.showNotification(
+          title: "Like",
+          body: " ${user} aime votre publication",
+          payload: jsonEncode(
+            {"route": "publication", "id": data['publication']},
+          ),
+        );
       }
     });
 
     // MessageSocket
     messageSocket.socket!.on("refreshMessageBoxHandler", (handler) {
-      if (handler['to'] == DataController.user!.id) {
-        NotificationLocalService.showNotification(
-            title: "Message",
-            body: "Vous avez réçu un message",
-            payload: jsonEncode({"route": "message", "id": handler['from']}));
-      }
+      String id = handler['from'];
+      UserService.getUser(userId: id).then((value) {
+        if (value.statusCode == 200) {
+          User u = User.fromJson(jsonDecode(value.body));
+          if (handler['to'] == DataController.user!.id) {
+            NotificationLocalService.showNotification(
+                title: "Message",
+                body: "${u.userName}  Vous a envoyé un message",
+                payload:
+                    jsonEncode({"route": "message", "id": handler['from']}));
+          }
+          // ref.read(chatProvider.notifier).addOrUpdateContact(u);
+        }
+      });
+      print("Socket Message déclenché avec \$\$\$\$ : $handler \n\n\n");
     });
 
     Future.microtask(

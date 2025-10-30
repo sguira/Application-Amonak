@@ -82,197 +82,202 @@ class _DetailsPublicationState extends State<DetailsPublication>
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    return FutureBuilder(
-        future: loadData,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Column(
-              children: [
-                Skeletonizer.zone(
-                  child: Card(
-                    child: ListTile(
-                      leading: Bone.circle(size: 48),
-                      title: Bone.text(words: 2),
-                      subtitle: Bone.text(),
-                      trailing: Bone.icon(),
+    return Scaffold(
+      body: FutureBuilder(
+          future: loadData,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Column(
+                children: [
+                  Skeletonizer.zone(
+                    child: Card(
+                      child: ListTile(
+                        leading: Bone.circle(size: 48),
+                        title: Bone.text(words: 2),
+                        subtitle: Bone.text(),
+                        trailing: Bone.icon(),
+                      ),
                     ),
                   ),
+                ],
+              );
+            }
+            if (snapshot.hasError) {
+              const Column(
+                children: [Text("Une erreur est survenue")],
+              );
+            }
+            return Padding(
+              padding: EdgeInsets.only(
+                  bottom: MediaQuery.of(context).viewInsets.bottom),
+              child: Container(
+                // margin: EdgeInsets.symmetric(horizontal: 12,vertical: 8),
+                height: MediaQuery.of(context).size.height * 0.90,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(11),
                 ),
-              ],
-            );
-          }
-          if (snapshot.hasError) {
-            const Column(
-              children: [Text("Une erreur est survenue")],
-            );
-          }
-          return Padding(
-            padding: EdgeInsets.only(
-                bottom: MediaQuery.of(context).viewInsets.bottom),
-            child: Container(
-              // margin: EdgeInsets.symmetric(horizontal: 12,vertical: 8),
-              height: MediaQuery.of(context).size.height * 0.90,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(11),
-              ),
-              child: ListView(
-                children: [
-                  Container(
-                    child: DetailsItemPubliction(
-                        pub: pub, publicationSocket: publicationSocket),
-                  ),
-                  SingleChildScrollView(
-                    child: Container(
-                      margin: const EdgeInsets.symmetric(horizontal: 4),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Expanded(
-                            child: Container(
-                              margin: const EdgeInsets.only(right: 4),
-                              // height: 42,
-                              child: TextFormField(
-                                controller: commentText,
-                                minLines: 1,
-                                maxLines: 5,
-                                onChanged: (value) {
-                                  setState(() {
-                                    commentText.text = value;
-                                  });
-                                },
-                                style: GoogleFonts.roboto(fontSize: 14),
-                                decoration: InputDecoration(
-                                  hintText: 'Votre Commentaire',
-                                  hintStyle: GoogleFonts.roboto(fontSize: 13),
-                                  filled: true,
-                                  fillColor: Colors.white,
-                                  enabledBorder: const OutlineInputBorder(
-                                      borderSide:
-                                          BorderSide(color: Colors.black12)),
-                                  focusedBorder: const OutlineInputBorder(
-                                      borderSide:
-                                          BorderSide(color: Colors.black12)),
+                child: ListView(
+                  children: [
+                    Container(
+                      child: DetailsItemPubliction(
+                          pub: pub, publicationSocket: publicationSocket),
+                    ),
+                    SingleChildScrollView(
+                      child: Container(
+                        margin: const EdgeInsets.symmetric(horizontal: 4),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Expanded(
+                              child: Container(
+                                margin: const EdgeInsets.only(right: 4),
+                                // height: 42,
+                                child: TextFormField(
+                                  controller: commentText,
+                                  minLines: 1,
+                                  maxLines: 5,
+                                  onChanged: (value) {
+                                    setState(() {
+                                      commentText.text = value;
+                                    });
+                                  },
+                                  style: GoogleFonts.roboto(fontSize: 14),
+                                  decoration: InputDecoration(
+                                    hintText: 'Votre Commentaire',
+                                    hintStyle: GoogleFonts.roboto(fontSize: 13),
+                                    filled: true,
+                                    fillColor: Colors.white,
+                                    enabledBorder: const OutlineInputBorder(
+                                        borderSide:
+                                            BorderSide(color: Colors.black12)),
+                                    focusedBorder: const OutlineInputBorder(
+                                        borderSide:
+                                            BorderSide(color: Colors.black12)),
+                                  ),
                                 ),
                               ),
                             ),
-                          ),
-                          AnimatedSwitcher(
-                            duration: const Duration(milliseconds: 600),
-                            // transitionBuilder: (child, animation) => ,
-                            child: Container(
-                                decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(36),
-                                    border: Border.all(
-                                        color:
-                                            couleurPrincipale.withAlpha(60))),
-                                child: commentText.text.isNotEmpty &&
-                                        commentText.text.isEmpty == false
-                                    ? IconButton(
-                                        onPressed: () {
-                                          Commentaire com = Commentaire();
-                                          com.content = commentText.text;
-                                          com.userId = DataController.user!.id;
-                                          com.publicationId = widget.pubId;
-                                          com.isLike = false;
-                                          Map<String, dynamic>
-                                              notificationData = {
-                                            'publication': widget.pubId,
-                                            'from': DataController.user!.id,
-                                            'to': pub.user!.id,
-                                            'type': 'comment'
-                                          };
+                            AnimatedSwitcher(
+                              duration: const Duration(milliseconds: 600),
+                              // transitionBuilder: (child, animation) => ,
+                              child: Container(
+                                  decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(36),
+                                      border: Border.all(
+                                          color:
+                                              couleurPrincipale.withAlpha(60))),
+                                  child: commentText.text.isNotEmpty &&
+                                          commentText.text.isEmpty == false
+                                      ? IconButton(
+                                          onPressed: () {
+                                            Commentaire com = Commentaire();
+                                            com.content = commentText.text;
+                                            com.userId =
+                                                DataController.user!.id;
+                                            com.publicationId = widget.pubId;
+                                            com.isLike = false;
+                                            Map<String, dynamic>
+                                                notificationData = {
+                                              'publication': widget.pubId,
+                                              'from': DataController.user!.id,
+                                              'to': pub.user!.id,
+                                              'type': 'comment'
+                                            };
 
-                                          CommentaireService.saveComent(com)
-                                              .then((value) {
-                                            if (value.statusCode == 200) {
-                                              setState(() {
+                                            CommentaireService.saveComent(com)
+                                                .then((value) {
+                                              if (value.statusCode == 200) {
                                                 setState(() {
-                                                  commentaires.insert(
-                                                      0,
-                                                      Commentaire.fromJson(
-                                                          jsonDecode(
-                                                              value.body)));
-                                                  commentaires[0].isLike =
-                                                      false;
+                                                  setState(() {
+                                                    commentaires.insert(
+                                                        0,
+                                                        Commentaire.fromJson(
+                                                            jsonDecode(
+                                                                value.body)));
+                                                    commentaires[0].isLike =
+                                                        false;
+                                                  });
                                                 });
-                                              });
-                                            }
-                                          });
-                                        },
-                                        icon: const Icon(
-                                          Icons.send_rounded,
-                                          color: couleurPrincipale,
-                                          size: 22,
-                                        ))
-                                    : null),
+                                              }
+                                            });
+                                          },
+                                          icon: const Icon(
+                                            Icons.send_rounded,
+                                            color: couleurPrincipale,
+                                            size: 22,
+                                          ))
+                                      : null),
+                            )
+                          ],
+                        ),
+                      ),
+                    ),
+                    Container(
+                      margin:
+                          const EdgeInsets.only(left: 12, right: 12, top: 18),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Container(
+                            child: Text(
+                              "Les commentaires",
+                              style: GoogleFonts.roboto(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w700,
+                                  color: couleurPrincipale),
+                            ),
+                          ),
+                          Container(
+                            // height: 80,
+                            // width: 120,
+                            child: DropdownButton(
+                                elevation: 0,
+                                focusColor: Colors.white10,
+                                style: GoogleFonts.roboto(
+                                    fontSize: 12, color: Colors.black),
+                                value: currentDropDownValue,
+                                items: dropDownList.map((String ele) {
+                                  return DropdownMenuItem(
+                                      value: ele, child: Text(ele));
+                                }).toList(),
+                                onChanged: (value) {
+                                  setState(() {
+                                    currentDropDownValue = value!;
+                                    if (currentDropDownValue ==
+                                        dropDownList.first) {
+                                      setState(() {
+                                        loadPub(5);
+                                      });
+                                    }
+                                    if (currentDropDownValue ==
+                                        dropDownList[1]) {
+                                      loadPub(1000);
+                                    }
+                                  });
+                                }),
                           )
                         ],
                       ),
                     ),
-                  ),
-                  Container(
-                    margin: const EdgeInsets.only(left: 12, right: 12, top: 18),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Container(
-                          child: Text(
-                            "Les commentaires",
-                            style: GoogleFonts.roboto(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w700,
-                                color: couleurPrincipale),
+                    Container(
+                        margin: const EdgeInsets.only(top: 18),
+                        child: SingleChildScrollView(
+                          child: Column(
+                            children: [
+                              for (var item in commentaires)
+                                ItemCommentaire(
+                                    com: item,
+                                    setState_: () {},
+                                    pubId: widget.pubId)
+                            ],
                           ),
-                        ),
-                        Container(
-                          // height: 80,
-                          // width: 120,
-                          child: DropdownButton(
-                              elevation: 0,
-                              focusColor: Colors.white10,
-                              style: GoogleFonts.roboto(
-                                  fontSize: 12, color: Colors.black),
-                              value: currentDropDownValue,
-                              items: dropDownList.map((String ele) {
-                                return DropdownMenuItem(
-                                    value: ele, child: Text(ele));
-                              }).toList(),
-                              onChanged: (value) {
-                                setState(() {
-                                  currentDropDownValue = value!;
-                                  if (currentDropDownValue ==
-                                      dropDownList.first) {
-                                    setState(() {
-                                      loadPub(5);
-                                    });
-                                  }
-                                  if (currentDropDownValue == dropDownList[1]) {
-                                    loadPub(1000);
-                                  }
-                                });
-                              }),
-                        )
-                      ],
-                    ),
-                  ),
-                  Container(
-                      margin: const EdgeInsets.only(top: 18),
-                      child: SingleChildScrollView(
-                        child: Column(
-                          children: [
-                            for (var item in commentaires)
-                              ItemCommentaire(
-                                  com: item,
-                                  setState_: () {},
-                                  pubId: widget.pubId)
-                          ],
-                        ),
-                      ))
-                ],
+                        ))
+                  ],
+                ),
               ),
-            ),
-          );
-        });
+            );
+          }),
+    );
   }
 }

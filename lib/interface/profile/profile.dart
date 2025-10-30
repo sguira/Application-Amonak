@@ -19,6 +19,7 @@ import 'package:application_amonak/services/profil.dart';
 import 'package:application_amonak/services/publication.dart';
 import 'package:application_amonak/services/user.dart';
 import 'package:application_amonak/settings/weights.dart';
+import 'package:application_amonak/widgets/ImageView.dart';
 import 'package:application_amonak/widgets/list_friend_widget.dart';
 import 'package:application_amonak/widgets/wait_widget.dart';
 import 'package:flutter/cupertino.dart';
@@ -404,7 +405,20 @@ class _ProfilePageState extends State<ProfilePage> {
                         children: [
                           IconButton(
                               onPressed: () {
-                                viewPicture();
+                                if (DataController.user!.avatar!.isEmpty) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                          content:
+                                              Text("Aucune image de profil")));
+                                  return;
+                                }
+                                showDialog(
+                                    context: context,
+                                    builder: (context) => ViewImage(
+                                        imageUrl: DataController
+                                            .user!.avatar!.first.url!,
+                                        heroTag:
+                                            "Erreur de chargement de phone"));
                               },
                               icon: const Icon(
                                 FontAwesomeIcons.eye,
