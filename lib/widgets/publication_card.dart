@@ -11,7 +11,8 @@ Container itemPublication(User item, int style) {
     padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 6),
     margin: const EdgeInsets.symmetric(vertical: 18, horizontal: 12),
     decoration: BoxDecoration(
-        border: Border.all(width: 1, color: Colors.black26),
+        border: Border.all(width: 1, color: const Color.fromARGB(55, 0, 0, 0)),
+        color: Colors.white,
         borderRadius: BorderRadius.circular(11)),
     child: Column(
       children: [
@@ -58,7 +59,7 @@ footerPublication(dynamic item) {
               Icons.favorite,
               color: Colors.white,
             ),
-            label: Text("S'Abonner",
+            label: Text("S'abonner",
                 style: GoogleFonts.roboto(
                   fontSize: 12,
                   color: Colors.white,

@@ -61,7 +61,7 @@ class _ListePersonnePageState extends ConsumerState<ListePersonnePage> {
     print("Taille des utilisateurs: ${state.users.length}");
     return SafeArea(
         child: Scaffold(
-            backgroundColor: Colors.white,
+            backgroundColor: Colors.transparent,
             body: Column(
               children: [
                 ExplorerSearchWidget(

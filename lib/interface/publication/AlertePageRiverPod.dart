@@ -49,7 +49,7 @@ class _PublicationPageState extends ConsumerState<AlertePageRiverPod> {
     final state = ref.watch(alerteNotifier);
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Colors.transparent,
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       floatingActionButton: state.newPubEvent == true
           ? FloatingActionButton.extended(

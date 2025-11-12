@@ -95,81 +95,89 @@ class _ExplorerPageState extends State<ExplorerPage> {
         builder: (context, snapshot) {
           return Scaffold(
             backgroundColor: Colors.white,
-            body: DefaultTabController(
-              length: 5,
-              child: Column(
-                children: [
-                  // header(),
-                  Expanded(
-                    child: Column(
-                      children: [
-                        Container(
-                          margin:
-                              const EdgeInsets.only(left: 8, right: 8, top: 6),
-                          padding: const EdgeInsets.all(0),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Image.asset(
-                                "assets/icons/amonak.png",
-                                width: 100,
-                              ),
-                              const ButtonNotificationWidget()
-                            ],
-                          ),
-                        ),
-                        Expanded(
-                          child: Scaffold(
-                            backgroundColor: Colors.white,
-                            appBar: AppBar(
-                              // leading: Container(
-                              //   child:const Column(
-                              //     children: [
-                              //       Text("Nous dévenons ce que nous pensons")
-                              //     ],
-                              //   ),
-                              // ),
-                              toolbarHeight: 0,
-                              backgroundColor: Colors.white,
-                              automaticallyImplyLeading: false,
-                              // excludeHeaderSemantics: true,
-                              // leading: header(),
-                              // flexibleSpace: header(),
-                              bottom: TabBar(
-                                tabs: [
-                                  itemTabBar("Personnes"),
-                                  itemTabBar("Articles"),
-                                  itemTabBar("Boutiques"),
-                                  itemTabBar("Publications"),
-                                  itemTabBar("Alertes"),
-                                ],
-                                labelStyle: const TextStyle(
-                                  fontSize: 18,
-                                  color: Color(0xFF6151D4),
-                                  fontWeight: FontWeight.bold,
+            body: Container(
+              decoration: const BoxDecoration(
+                image: DecorationImage(
+                  image: AssetImage('assets/medias/backblur.png'),
+                  fit: BoxFit.cover,
+                ),
+              ),
+              child: DefaultTabController(
+                length: 5,
+                child: Column(
+                  children: [
+                    // header(),
+                    Expanded(
+                      child: Column(
+                        children: [
+                          Container(
+                            margin: const EdgeInsets.only(
+                                left: 8, right: 8, top: 6),
+                            padding: const EdgeInsets.all(0),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Image.asset(
+                                  "assets/icons/amonak.png",
+                                  width: 100,
                                 ),
-                                unselectedLabelStyle: const TextStyle(
-                                  fontSize: 16,
-                                ),
-                              ),
+                                const ButtonNotificationWidget()
+                              ],
                             ),
-                            body: const TabBarView(children: [
-                              ListePersonnePage(),
-                              ArticlePage2(),
-                              BoutiquePage2(),
-                              PublicationPageRiverPod(),
-                              AlertePageRiverPod(
-                                type: 'alerte',
-                                // publications: publications,
-                              )
-                            ]),
                           ),
-                        ),
-                      ],
+                          Expanded(
+                            child: Scaffold(
+                              backgroundColor: Colors.transparent,
+                              appBar: AppBar(
+                                // leading: Container(
+                                //   child:const Column(
+                                //     children: [
+                                //       Text("Nous dévenons ce que nous pensons")
+                                //     ],
+                                //   ),
+                                // ),
+                                toolbarHeight: 0,
+                                backgroundColor: Colors.transparent,
+                                automaticallyImplyLeading: false,
+                                // excludeHeaderSemantics: true,
+                                // leading: header(),
+                                // flexibleSpace: header(),
+                                bottom: TabBar(
+                                  tabs: [
+                                    itemTabBar("Personnes"),
+                                    itemTabBar("Articles"),
+                                    itemTabBar("Boutiques"),
+                                    itemTabBar("Publications"),
+                                    itemTabBar("Alertes"),
+                                  ],
+                                  labelStyle: const TextStyle(
+                                    fontSize: 18,
+                                    color: Color(0xFF6151D4),
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                  unselectedLabelStyle: const TextStyle(
+                                    fontSize: 16,
+                                  ),
+                                ),
+                              ),
+                              body: const TabBarView(children: [
+                                ListePersonnePage(),
+                                ArticlePage2(),
+                                BoutiquePage2(),
+                                PublicationPageRiverPod(),
+                                AlertePageRiverPod(
+                                  type: 'alerte',
+                                  // publications: publications,
+                                )
+                              ]),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           );

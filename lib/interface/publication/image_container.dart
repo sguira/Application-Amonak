@@ -252,7 +252,7 @@ class _ImageSectionState extends ConsumerState<ItemPublication> {
           margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
           padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 12),
           decoration: BoxDecoration(
-              color: const Color.fromARGB(255, 255, 255, 255).withAlpha(12),
+              color: const Color.fromARGB(193, 255, 255, 255),
               borderRadius: BorderRadius.circular(16),
               border: Border.all(width: .5, color: Colors.black.withAlpha(10))),
           child: Column(

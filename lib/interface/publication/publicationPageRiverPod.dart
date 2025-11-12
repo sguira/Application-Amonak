@@ -1,4 +1,3 @@
-import 'package:application_amonak/colors/colors.dart';
 import 'package:application_amonak/interface/explorer/ExplorerSearchWidget.dart';
 import 'package:application_amonak/interface/publication/image_container.dart';
 import 'package:application_amonak/models/publication.dart';
@@ -50,7 +49,7 @@ class _PublicationPageState extends ConsumerState<PublicationPageRiverPod> {
     final state = ref.watch(publicationProvider22);
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Colors.transparent,
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       floatingActionButton: state.newPubEvent == true
           ? FloatingActionButton.extended(
@@ -60,7 +59,8 @@ class _PublicationPageState extends ConsumerState<PublicationPageRiverPod> {
               label: Container(
                 padding: EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                    color: couleurPrincipale.withAlpha(160),
+                    color:
+                        const Color.fromARGB(255, 255, 255, 255).withAlpha(160),
                     borderRadius: BorderRadius.circular(26)),
                 child: Row(
                   children: [

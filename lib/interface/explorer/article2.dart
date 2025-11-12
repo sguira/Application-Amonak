@@ -47,7 +47,7 @@ class _ArticlePageState extends ConsumerState<ArticlePage2> {
 
     return Scaffold(
       // appBar: AppBar(title: const Text("Articles")),
-      backgroundColor: Colors.white,
+      backgroundColor: Colors.transparent,
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       floatingActionButton: ref.read(articleProvider).isNewArticleEvent
           ? FloatingActionButton.extended(
