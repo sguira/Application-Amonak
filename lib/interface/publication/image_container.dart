@@ -25,7 +25,6 @@ import 'package:application_amonak/widgets/imageSkeleton.dart';
 import 'package:application_amonak/widgets/publication_card.dart';
 import 'package:application_amonak/widgets/share_widget.dart';
 import 'package:application_amonak/widgets/text_expanded.dart';
-import 'package:application_amonak/widgets/zone_commentaire.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -249,10 +248,11 @@ class _ImageSectionState extends ConsumerState<ItemPublication> {
       children: [
         Container(
           // width: ScreenSize.width*0.9,
+
           margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
           padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 12),
           decoration: BoxDecoration(
-              color: Colors.blue.withAlpha(12),
+              color: const Color.fromARGB(255, 255, 255, 255).withAlpha(12),
               borderRadius: BorderRadius.circular(16),
               border: Border.all(width: .5, color: Colors.black.withAlpha(10))),
           child: Column(
@@ -343,8 +343,8 @@ class _ImageSectionState extends ConsumerState<ItemPublication> {
     return Container(
       // margin: ,
       margin: const EdgeInsets.symmetric(horizontal: 0, vertical: 4),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      child: Column(
+        //mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Row(
             children: [
@@ -369,9 +369,14 @@ class _ImageSectionState extends ConsumerState<ItemPublication> {
             ],
           ),
           Row(
+            mainAxisAlignment: MainAxisAlignment.end,
             children: [
               Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 3),
+                  decoration: const BoxDecoration(
+                    color: Color(0xFFE8E9FF),
+                    shape: BoxShape.circle,
+                  ),
+                  margin: const EdgeInsets.all(0),
                   child: IconButton(
                       onPressed: () {
                         if (isLike) {
@@ -388,6 +393,11 @@ class _ImageSectionState extends ConsumerState<ItemPublication> {
                         color: isLike ? Colors.red : Colors.black,
                       ))),
               Container(
+                decoration: const BoxDecoration(
+                  color: Color(0xFFE8E9FF),
+                  shape: BoxShape.circle,
+                ),
+                margin: const EdgeInsets.symmetric(horizontal: 6),
                 child: IconButton(
                     onPressed: () {
                       // zoneCommentaire(context, pub, pubId)
@@ -395,26 +405,30 @@ class _ImageSectionState extends ConsumerState<ItemPublication> {
                           context: context,
                           child: DetailsPublication(pubId: widget.pub.id!));
                     },
+                    constraints: const BoxConstraints(),
                     icon: const Icon(Icons.comment)),
               ),
               if (widget.type != 'alerte') shareIcon(Icons.repeat),
               if (widget.type == 'alerte')
                 Container(
-                  child: TextButton(
+                  child: TextButton.icon(
                       onPressed: () {
                         articleSelected = null;
                         widgetResponseAlerte(widget.pub);
                       },
                       style: TextButton.styleFrom(
                           backgroundColor: couleurPrincipale,
-                          padding:
-                              EdgeInsets.symmetric(vertical: 1, horizontal: 1)),
-                      child: Text(
+                          padding: const EdgeInsets.symmetric(horizontal: 12)),
+                      icon: const Icon(
+                        Icons.quickreply_outlined,
+                        color: Colors.white,
+                      ),
+                      label: Text(
                         'Répondre',
                         style: GoogleFonts.roboto(
-                            fontSize: 11,
+                            fontSize: 12,
                             color: Colors.white,
-                            fontWeight: FontWeight.w300),
+                            fontWeight: FontWeight.w500),
                       )),
                 )
             ],
@@ -840,7 +854,7 @@ class _ImageSectionState extends ConsumerState<ItemPublication> {
                               ),
                             ))
                     : Container(
-                        child: Column(
+                        child: const Column(
                           children: [
                             Text(
                                 "Vous avez publier aucun article en vente jusqu'a present")
@@ -1002,7 +1016,8 @@ class _ImageSectionState extends ConsumerState<ItemPublication> {
               width: 32,
               child: Text(
                 label,
-                style: GoogleFonts.roboto(fontSize: 11),
+                style: GoogleFonts.roboto(
+                    fontSize: 12, fontWeight: FontWeight.w400),
                 overflow: TextOverflow.ellipsis,
               ))
         ],

@@ -1,11 +1,9 @@
 import 'package:application_amonak/colors/colors.dart';
-import 'package:application_amonak/data/data_controller.dart';
 import 'package:application_amonak/interface/explorer/details_user.dart';
 import 'package:application_amonak/models/user.dart';
 import 'package:application_amonak/notifier/personneNotifier.dart';
 import 'package:application_amonak/services/user.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -77,7 +75,7 @@ class FollowUserWidget extends ConsumerWidget {
                 overflow: TextOverflow.ellipsis,
               )),
           !isFriend(user)
-              ? TextButton(
+              ? TextButton.icon(
                   onPressed: () {
                     UserService.sendFriend(user.id!).then((value) {
                       print('Friend request sent $value');
@@ -95,27 +93,37 @@ class FollowUserWidget extends ConsumerWidget {
                   style: TextButton.styleFrom(
                       backgroundColor: couleurPrincipale.withAlpha(40),
                       padding: const EdgeInsets.symmetric(horizontal: 18)),
-                  child: Text("S'abonner",
-                      style: GoogleFonts.roboto(fontSize: 11)))
+                  icon: const Icon(
+                    Icons.person_add_alt_1,
+                    color: Color(0xff6151D4),
+                  ),
+                  label: Text("S'abonner",
+                      style: GoogleFonts.roboto(
+                        fontSize: 12,
+                        color: Color(0xff6151D4),
+                        fontWeight: FontWeight.w500,
+                      )))
               : Container(
                   padding:
                       const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
                   decoration: BoxDecoration(
                       // color: Colors.black12,
                       borderRadius: BorderRadius.circular(22)),
-                  child: Wrap(
-                    children: [
-                      const Icon(
+                  child: TextButton.icon(
+                      onPressed: () {},
+                      style: TextButton.styleFrom(
+                          backgroundColor: const Color(0xFFF5F5F5)),
+                      icon: const Icon(
                         Icons.check,
                         size: 18,
                       ),
-                      Text(
+                      label: Text(
                         "Abonné",
-                        style: GoogleFonts.roboto(fontSize: 13),
-                      )
-                    ],
-                  ),
-                )
+                        style: GoogleFonts.roboto(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      )))
         ],
       ),
     );

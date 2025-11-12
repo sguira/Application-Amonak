@@ -1,10 +1,8 @@
 import 'package:application_amonak/data/data_controller.dart';
-import 'package:application_amonak/models/publication.dart';
 import 'package:application_amonak/models/user.dart';
 import 'package:application_amonak/settings/weights.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
 
 Container itemPublication(User item, int style) {
@@ -20,16 +18,16 @@ Container itemPublication(User item, int style) {
         // style==1?
         headerBoutique2(item, style),
         // textContainer(item)
-        Container(
-          width: ScreenSize.width * 0.75,
-          margin: const EdgeInsets.symmetric(vertical: 18, horizontal: 6),
-          decoration: BoxDecoration(
-              color: Colors.blue, borderRadius: BorderRadius.circular(18)),
+        ClipRRect(
+          borderRadius: BorderRadius.circular(10),
           child: Image.asset(
             'assets/medias/profile.jpg',
+            width: 300, // 👈 fixe une largeur
+            height: 200, // 👈 fixe une hauteur
             fit: BoxFit.cover,
           ),
         ),
+
         Container(
           margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
           child: footerPublication(item),
@@ -51,13 +49,21 @@ footerPublication(dynamic item) {
             // itemDescription(item['nbAchats'], 'Achats'),
           ],
         ),
-        TextButton(
+        TextButton.icon(
             onPressed: () {},
             style: TextButton.styleFrom(
                 backgroundColor: const Color.fromRGBO(97, 81, 212, 1),
-                padding: const EdgeInsets.symmetric(horizontal: 6)),
-            child: Text("S'Abonner",
-                style: GoogleFonts.roboto(fontSize: 10, color: Colors.white)))
+                padding: const EdgeInsets.symmetric(horizontal: 18)),
+            icon: const Icon(
+              Icons.favorite,
+              color: Colors.white,
+            ),
+            label: Text("S'Abonner",
+                style: GoogleFonts.roboto(
+                  fontSize: 12,
+                  color: Colors.white,
+                  fontWeight: FontWeight.w500,
+                )))
       ],
     ),
   );

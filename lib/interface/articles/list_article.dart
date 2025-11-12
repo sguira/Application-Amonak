@@ -19,6 +19,7 @@ class _ListArticleState extends State<Article> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       body: FutureBuilder(
           future: ProductService.getSingleArticle().then((value) {
             print("stauscode ${value.statusCode}");

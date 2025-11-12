@@ -1,7 +1,6 @@
 import 'dart:convert';
 
 import 'package:application_amonak/data/data_controller.dart';
-import 'package:application_amonak/interface/publication/image_container.dart';
 import 'package:application_amonak/interface/publication/videoPlayerWidget.dart';
 import 'package:application_amonak/models/publication.dart';
 import 'package:application_amonak/services/commentaire.dart';
@@ -15,10 +14,8 @@ import 'package:application_amonak/widgets/buildModalSheet.dart';
 import 'package:application_amonak/widgets/commentaire.dart';
 import 'package:application_amonak/widgets/header_publication.dart';
 import 'package:application_amonak/widgets/imageSkeleton.dart';
-import 'package:application_amonak/widgets/publication_card.dart';
 import 'package:application_amonak/widgets/share_widget.dart';
 import 'package:application_amonak/widgets/text_expanded.dart';
-import 'package:application_amonak/widgets/zone_commentaire.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
@@ -106,6 +103,7 @@ class _ImageSectionState extends State<DetailsItemPubliction> {
   Widget build(BuildContext context) {
     return Container(
       // width: ScreenSize.width*0.9,
+      color: Colors.white,
       margin: const EdgeInsets.symmetric(horizontal: 0, vertical: 0),
       padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 4),
       decoration: BoxDecoration(

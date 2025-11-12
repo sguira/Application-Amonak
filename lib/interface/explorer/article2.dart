@@ -1,13 +1,11 @@
 import 'package:application_amonak/colors/colors.dart';
 import 'package:application_amonak/interface/boutique/details_boutique..dart';
+import 'package:application_amonak/models/article.dart';
 import 'package:application_amonak/notifier/ArticleNotifier.dart';
 import 'package:application_amonak/services/socket/publication.dart';
+import 'package:application_amonak/widgets/wait_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:application_amonak/models/article.dart';
-import 'package:application_amonak/widgets/wait_widget.dart';
-
-import 'package:application_amonak/widgets/publication_card.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class ArticlePage2 extends ConsumerStatefulWidget {
@@ -49,6 +47,7 @@ class _ArticlePageState extends ConsumerState<ArticlePage2> {
 
     return Scaffold(
       // appBar: AppBar(title: const Text("Articles")),
+      backgroundColor: Colors.white,
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       floatingActionButton: ref.read(articleProvider).isNewArticleEvent
           ? FloatingActionButton.extended(

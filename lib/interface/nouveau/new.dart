@@ -7,11 +7,8 @@ import 'package:application_amonak/interface/nouveau/vendre_article.dart';
 import 'package:application_amonak/settings/weights.dart';
 import 'package:application_amonak/widgets/buildModalSheet.dart';
 import 'package:application_amonak/widgets/notification_button.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class NewPage extends StatefulWidget {
   const NewPage({super.key});
@@ -45,17 +42,17 @@ class _NewPageState extends State<NewPage> {
                           Text(
                             "Voir nouveau",
                             style: GoogleFonts.roboto(
-                                fontSize: 28,
-                                color: Colors.white,
-                                fontWeight: FontWeight.w400),
+                                fontSize: 30,
+                                color: const Color(0xffE8E9FF),
+                                fontWeight: FontWeight.w500),
                             textAlign: TextAlign.start,
                           ),
                           Text(
                             "Voir loin",
                             style: GoogleFonts.roboto(
-                                fontSize: 25,
-                                color: Colors.white,
-                                fontWeight: FontWeight.w400),
+                                fontSize: 30,
+                                color: const Color(0xffE8E9FF),
+                                fontWeight: FontWeight.w500),
                             textAlign: TextAlign.start,
                           ),
                         ],
@@ -71,7 +68,7 @@ class _NewPageState extends State<NewPage> {
                       child: Row(
                     children: [
                       itemButtonWithIcon(
-                          label: 'Dévenez Vendeur',
+                          label: 'DEVENIR VENDEUR',
                           function: () {
                             Navigator.push(
                                 context,
@@ -95,7 +92,7 @@ class _NewPageState extends State<NewPage> {
                   children: [
                     itemButtonWithIcon(
                         label: 'Faire une alerte',
-                        icon: Icons.add_alert,
+                        icon: Icons.campaign_rounded,
                         function: bottomSheetAlerte),
                     itemButtonWithIcon(
                         label: 'Vendre en live',
@@ -137,13 +134,20 @@ class _NewPageState extends State<NewPage> {
                   const EdgeInsets.symmetric(horizontal: 18, vertical: 12)),
           child: Row(
             children: [
-              if (icon != null) Icon(icon),
+              if (icon != null)
+                Icon(
+                  icon,
+                  color: const Color(0xff6151D4),
+                ),
               const SizedBox(
                 width: 4,
               ),
               Text(
                 label,
-                style: GoogleFonts.roboto(fontSize: 14),
+                style: GoogleFonts.roboto(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w400,
+                    color: const Color(0xff6151D4)),
               ),
             ],
           )),

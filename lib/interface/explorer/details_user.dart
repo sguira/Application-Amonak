@@ -1,20 +1,15 @@
-import 'package:application_amonak/colors/colors.dart';
 import 'package:application_amonak/data/data_controller.dart';
 import 'package:application_amonak/interface/contact/message.dart';
-import 'package:application_amonak/interface/publication/publication.dart';
-import 'package:application_amonak/interface/profile/edit_profile.dart';
-import 'package:application_amonak/interface/profile/gestion_profile.dart';
 import 'package:application_amonak/interface/profile/list_abonne.dart';
 import 'package:application_amonak/interface/profile/profile.dart';
-import 'package:application_amonak/interface/profile/publication_widget.dart';
+import 'package:application_amonak/interface/publication/publication.dart';
 import 'package:application_amonak/models/user.dart';
 import 'package:application_amonak/services/user.dart';
 import 'package:application_amonak/widgets/gradient_button.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class DetailsUser extends StatefulWidget {
   final User user;
@@ -218,19 +213,18 @@ class _DetailsUserState extends State<DetailsUser> {
                     : Container(
                         margin: const EdgeInsets.symmetric(horizontal: 22),
                         decoration: const BoxDecoration(),
-                        child: Wrap(
-                          children: [
-                            const Icon(
+                        child: TextButton.icon(
+                            onPressed: () {},
+                            style: TextButton.styleFrom(
+                                backgroundColor: const Color(0xFFF5F5F5)),
+                            icon: const Icon(
                               Icons.check,
                               size: 18,
                             ),
-                            Text(
+                            label: Text(
                               "Abonné",
                               style: GoogleFonts.roboto(fontSize: 12),
-                            )
-                          ],
-                        ),
-                      ),
+                            ))),
                 const SizedBox(
                   width: 32,
                 ),

@@ -102,7 +102,7 @@ class _CreateAccountState extends State<CreateAccount> {
               ),
             ),
             const SizedBox(
-              height: 18,
+              height: 10,
             ),
             Container(
               margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
@@ -247,12 +247,12 @@ class _CreateAccountState extends State<CreateAccount> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Container(
-                  width: ScreenSize.width * 0.80,
+                  width: ScreenSize.width * 0.90,
                   constraints: const BoxConstraints(
                       // maxWidth: 300
                       ),
                   margin:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      const EdgeInsets.symmetric(horizontal: 0, vertical: 8),
                   decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(36),
                       gradient: const LinearGradient(colors: [
@@ -261,13 +261,17 @@ class _CreateAccountState extends State<CreateAccount> {
                         Color.fromRGBO(132, 62, 201, 1)
                       ])),
                   child: Center(
-                    child: TextButton(
+                    child: TextButton.icon(
                         onPressed: () {
                           if (keyCreate.currentState!.validate()) {
                             onCreateUser();
                           }
                         },
-                        child: Center(
+                        icon: const Icon(
+                          Icons.login,
+                          color: Colors.white,
+                        ),
+                        label: Center(
                           child: waitRegister == false
                               ? Center(
                                   child: Text("S'inscrire",

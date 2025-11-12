@@ -1,10 +1,8 @@
 import 'dart:convert';
-import 'dart:ui';
 
 import 'package:application_amonak/colors/colors.dart';
 import 'package:application_amonak/data/data_controller.dart';
 import 'package:application_amonak/data/video_controller_cache.dart'; // Import the new cache
-import 'package:application_amonak/interface/accueils/notifications.dart';
 import 'package:application_amonak/interface/explorer/details_user.dart';
 import 'package:application_amonak/interface/vendre/vendre.dart';
 import 'package:application_amonak/models/article.dart';
@@ -15,7 +13,6 @@ import 'package:application_amonak/services/product.dart';
 import 'package:application_amonak/services/publication.dart';
 import 'package:application_amonak/settings/weights.dart';
 import 'package:application_amonak/widgets/ResponseAlerteWidget.dart';
-import 'package:application_amonak/widgets/btnLike.dart';
 import 'package:application_amonak/widgets/buildModalSheet.dart';
 import 'package:application_amonak/widgets/buttonComment.dart';
 import 'package:application_amonak/widgets/commentaire.dart';
@@ -23,17 +20,14 @@ import 'package:application_amonak/widgets/imageSkeleton.dart';
 import 'package:application_amonak/widgets/notification_button.dart';
 import 'package:application_amonak/widgets/share_widget.dart';
 import 'package:application_amonak/widgets/wait_widget.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart'; // Import for kDebugMode
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:video_player/video_player.dart';
 import 'package:intl/intl.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:flutter_animate/flutter_animate.dart';
-import 'package:flutter/foundation.dart'; // Import for kDebugMode
+import 'package:video_player/video_player.dart';
 
 class VideoPlayerWidget extends ConsumerStatefulWidget {
   final Publication videoItem;
@@ -624,9 +618,8 @@ class _VideoPlayerWidgetState extends ConsumerState<VideoPlayerWidget> {
                                 }
                               });
                             },
-                            icon: Icon(isLike
-                                ? Icons.favorite
-                                : Icons.favorite_outline),
+                            icon:
+                                Icon(isLike ? Icons.favorite : Icons.favorite),
                             color: isLike ? Colors.red : Colors.white,
                             iconSize: 28,
                           ),

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 
 class ExplorerSearchWidget extends StatefulWidget {
   final Function(String) onSearchChanged;
@@ -24,9 +23,9 @@ class _ExplorerSearchWidgetState extends State<ExplorerSearchWidget> {
         decoration: InputDecoration(
           hintText: "Chercher...",
           filled: true,
-          fillColor: Colors.black12,
+          fillColor: const Color(0xFFF5F5F5),
           border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(22),
+            borderRadius: BorderRadius.circular(30),
             borderSide: BorderSide.none,
           ),
         ),

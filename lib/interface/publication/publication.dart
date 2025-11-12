@@ -1,34 +1,21 @@
 import 'dart:convert';
 
 import 'package:application_amonak/colors/colors.dart';
-import 'package:application_amonak/data/data_controller.dart';
-import 'package:application_amonak/interface/accueils/video_player_widget.dart';
-import 'package:application_amonak/interface/boutique/details_boutique..dart';
 import 'package:application_amonak/interface/publication/image_container.dart';
 import 'package:application_amonak/interface/publication/videoPlayerWidget.dart';
 import 'package:application_amonak/models/publication.dart';
 import 'package:application_amonak/models/user.dart';
-import 'package:application_amonak/prod.dart';
 import 'package:application_amonak/services/publication.dart';
 import 'package:application_amonak/services/socket/notificationSocket.dart';
 import 'package:application_amonak/services/socket/publication.dart';
 import 'package:application_amonak/settings/weights.dart';
-import 'package:application_amonak/widgets/bottom_sheet_header.dart';
 import 'package:application_amonak/widgets/commentaire.dart';
 import 'package:application_amonak/widgets/header_publication.dart';
-import 'package:application_amonak/widgets/publication_card.dart';
 import 'package:application_amonak/widgets/text_expanded.dart';
 import 'package:application_amonak/widgets/wait_widget.dart';
-import 'package:application_amonak/widgets/zone_commentaire.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:video_player/video_player.dart';
-import 'package:socket_io_client/socket_io_client.dart' as IO;
+import 'package:intl/intl.dart';
 
 class PublicationPage extends StatefulWidget {
   final String? type;
@@ -264,6 +251,7 @@ class _PublicationPageState extends State<PublicationPage> {
                                         publicationSocket: publicationSocket,
                                       )
                                     : Container(
+                                        color: Colors.white,
                                         margin: const EdgeInsets.symmetric(
                                             horizontal: 8),
                                         decoration: BoxDecoration(

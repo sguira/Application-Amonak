@@ -295,7 +295,7 @@ class _ResponseAlerteWidgetState extends State<ResponseAlerteWidget> {
                               },
                         child: loading == false
                             ? Text(
-                                'Répondre',
+                                'Réponndre',
                                 style: GoogleFonts.roboto(
                                     color: Colors.white, fontSize: 12),
                               )

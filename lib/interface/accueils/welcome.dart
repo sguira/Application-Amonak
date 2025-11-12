@@ -1,41 +1,12 @@
-import 'dart:convert';
-import 'dart:io';
-
-import 'package:application_amonak/colors/colors.dart';
-import 'package:application_amonak/data/data_controller.dart';
 import 'package:application_amonak/interface/auths/LoginContainer.dart';
-import 'package:application_amonak/interface/connection/activation.dart';
 import 'package:application_amonak/interface/connection/change_password.dart';
 import 'package:application_amonak/interface/connection/create_user.dart';
-import 'package:application_amonak/interface/connection/reset_password.dart';
-import 'package:application_amonak/interface/accueils/home_tab_menu.dart';
-import 'package:application_amonak/local_storage.dart';
-import 'package:application_amonak/models/adresse.dart';
-import 'package:application_amonak/models/auth.dart';
-import 'package:application_amonak/models/notifications.dart';
-import 'package:application_amonak/models/user.dart';
-import 'package:application_amonak/prod.dart';
-import 'package:application_amonak/services/auths.dart';
-import 'package:application_amonak/services/notification.dart';
-import 'package:application_amonak/services/register.dart';
-import 'package:application_amonak/services/socket/notificationSocket.dart';
-import 'package:application_amonak/services/user.dart';
-import 'package:application_amonak/settings/weights.dart';
-import 'package:application_amonak/widgets/bottom_sheet_header.dart';
 import 'package:application_amonak/widgets/buildModalSheet.dart';
 import 'package:application_amonak/widgets/circular_progressor.dart';
-import 'package:application_amonak/widgets/gradient_button.dart';
-import 'package:application_amonak/widgets/item_form.dart';
-import 'package:image_picker/image_picker.dart';
-// import 'package:chewie/chewie.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
+import 'package:google_fonts/google_fonts.dart';
 // import 'package:tiktoklikescroller/tiktoklikescroller.dart';
 import 'package:video_player/video_player.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:select_form_field/select_form_field.dart';
 
 // import 'package:application_amonak/services/login.dart';
 class WelcomePage extends StatefulWidget {
@@ -152,10 +123,20 @@ class _WelcomePageState extends State<WelcomePage> {
                     ),
                     Container(
                         margin: const EdgeInsets.symmetric(horizontal: 22),
-                        child: Text(
-                          'Amonak est un réseau social e-commerce gratuit chaque compte crée est l\'équivalent d\'un site e-commerce. Achetez en toute simplicité avec garanti de 24h pour tous vos achats',
-                          style: GoogleFonts.roboto(color: Colors.white),
-                          textAlign: TextAlign.center,
+                        child: Column(
+                          children: [
+                            Text(
+                              'Soyez votre propre patron !',
+                              style: GoogleFonts.roboto(
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.white),
+                            ),
+                            Text(
+                              'Amonak est un réseau social e-commerce gratuit. Désormais un compte créé est l\'équivalent d\'un site e-commerce. Achetez et vendez en ligne simplement avec livraison garantie.',
+                              style: GoogleFonts.roboto(color: Colors.white),
+                              textAlign: TextAlign.center,
+                            )
+                          ],
                         )),
                     Container(
                       margin: const EdgeInsets.only(top: 36),
@@ -179,7 +160,7 @@ class _WelcomePageState extends State<WelcomePage> {
                               // );
                             },
                             child: Text(
-                              'Commencez maintenant',
+                              'Commencer maintenant',
                               style: GoogleFonts.roboto(fontSize: 16),
                             )),
                       ),
@@ -196,7 +177,11 @@ class _WelcomePageState extends State<WelcomePage> {
                               ? Text(
                                   'Se connecter',
                                   style: GoogleFonts.roboto(
-                                      color: Colors.white, fontSize: 18),
+                                      color: Colors.white,
+                                      fontSize: 18,
+                                      decoration: TextDecoration.underline,
+                                      decorationColor:
+                                          Color.fromARGB(255, 255, 255, 255)),
                                 )
                               : circularProgression()),
                     ),

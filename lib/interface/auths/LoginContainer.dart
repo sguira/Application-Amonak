@@ -9,7 +9,6 @@ import 'package:application_amonak/local_storage.dart';
 import 'package:application_amonak/models/auth.dart';
 import 'package:application_amonak/models/notifications.dart';
 import 'package:application_amonak/models/user.dart';
-import 'package:application_amonak/prod.dart';
 import 'package:application_amonak/services/auths.dart';
 import 'package:application_amonak/services/notification.dart';
 import 'package:application_amonak/services/socket/notificationSocket.dart';
@@ -146,7 +145,7 @@ class _LoginContainerState extends State<LoginContainer> {
                                       // Color.fromARGB(255, 9, 51, 189),
                                       Color.fromRGBO(132, 62, 201, 1)
                                     ])),
-                                child: TextButton(
+                                child: TextButton.icon(
                                     style: TextButton.styleFrom(),
                                     onPressed: () {
                                       if (logingForm.currentState!.validate()) {
@@ -214,7 +213,11 @@ class _LoginContainerState extends State<LoginContainer> {
                                         });
                                       }
                                     },
-                                    child: Center(
+                                    icon: const Icon(
+                                      Icons.login,
+                                      color: Colors.white,
+                                    ),
+                                    label: Center(
                                         child: wailLoging == false
                                             ? Text(
                                                 'Connexion',

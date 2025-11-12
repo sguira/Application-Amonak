@@ -1,14 +1,12 @@
 import 'package:application_amonak/colors/colors.dart';
 import 'package:application_amonak/interface/explorer/ExplorerSearchWidget.dart';
 import 'package:application_amonak/interface/publication/image_container.dart';
+import 'package:application_amonak/models/publication.dart';
 import 'package:application_amonak/notifier/AlertNotifier.dart';
 import 'package:application_amonak/notifier/PublicationNotifierFianl.dart';
-import 'package:application_amonak/services/socket/publication.dart';
+import 'package:application_amonak/widgets/wait_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:application_amonak/models/publication.dart';
-import 'package:application_amonak/widgets/publication_card.dart';
-import 'package:application_amonak/widgets/wait_widget.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class AlertePageRiverPod extends ConsumerStatefulWidget {
@@ -51,6 +49,7 @@ class _PublicationPageState extends ConsumerState<AlertePageRiverPod> {
     final state = ref.watch(alerteNotifier);
 
     return Scaffold(
+      backgroundColor: Colors.white,
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       floatingActionButton: state.newPubEvent == true
           ? FloatingActionButton.extended(

@@ -1,25 +1,18 @@
 import 'dart:convert';
 
 import 'package:application_amonak/data/data_controller.dart';
-import 'package:application_amonak/interface/articles/list_article.dart';
 import 'package:application_amonak/interface/explorer/article2.dart';
-import 'package:application_amonak/interface/explorer/boutique.dart';
 import 'package:application_amonak/interface/explorer/boutique2.dart';
 import 'package:application_amonak/interface/explorer/personne.dart';
 import 'package:application_amonak/interface/publication/AlertePageRiverPod.dart';
-import 'package:application_amonak/interface/publication/publication.dart';
-import 'package:application_amonak/interface/profile/publication_widget.dart';
 import 'package:application_amonak/interface/publication/publicationPageRiverPod.dart';
 import 'package:application_amonak/models/publication.dart';
 import 'package:application_amonak/models/user.dart';
 import 'package:application_amonak/services/publication.dart';
 import 'package:application_amonak/services/user.dart';
-import 'package:application_amonak/settings/weights.dart';
 import 'package:application_amonak/widgets/notification_button.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class ExplorerPage extends StatefulWidget {
   const ExplorerPage({super.key});
@@ -101,6 +94,7 @@ class _ExplorerPageState extends State<ExplorerPage> {
         future: fetchAllData(),
         builder: (context, snapshot) {
           return Scaffold(
+            backgroundColor: Colors.white,
             body: DefaultTabController(
               length: 5,
               child: Column(
@@ -127,6 +121,7 @@ class _ExplorerPageState extends State<ExplorerPage> {
                         ),
                         Expanded(
                           child: Scaffold(
+                            backgroundColor: Colors.white,
                             appBar: AppBar(
                               // leading: Container(
                               //   child:const Column(
@@ -136,17 +131,28 @@ class _ExplorerPageState extends State<ExplorerPage> {
                               //   ),
                               // ),
                               toolbarHeight: 0,
+                              backgroundColor: Colors.white,
                               automaticallyImplyLeading: false,
                               // excludeHeaderSemantics: true,
                               // leading: header(),
                               // flexibleSpace: header(),
-                              bottom: TabBar(tabs: [
-                                itemTabBar("Personne"),
-                                itemTabBar("Article"),
-                                itemTabBar("Boutique"),
-                                itemTabBar("Publication"),
-                                itemTabBar("Alerte"),
-                              ]),
+                              bottom: TabBar(
+                                tabs: [
+                                  itemTabBar("Personnes"),
+                                  itemTabBar("Articles"),
+                                  itemTabBar("Boutiques"),
+                                  itemTabBar("Publications"),
+                                  itemTabBar("Alertes"),
+                                ],
+                                labelStyle: const TextStyle(
+                                  fontSize: 18,
+                                  color: Color(0xFF6151D4),
+                                  fontWeight: FontWeight.bold,
+                                ),
+                                unselectedLabelStyle: const TextStyle(
+                                  fontSize: 16,
+                                ),
+                              ),
                             ),
                             body: const TabBarView(children: [
                               ListePersonnePage(),

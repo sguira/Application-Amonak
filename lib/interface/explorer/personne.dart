@@ -2,16 +2,15 @@ import 'dart:convert';
 
 import 'package:application_amonak/data/data_controller.dart';
 import 'package:application_amonak/interface/explorer/ExplorerSearchWidget.dart';
+import 'package:application_amonak/models/user.dart';
 import 'package:application_amonak/notifier/personneNotifier.dart';
 import 'package:application_amonak/services/user.dart';
 import 'package:application_amonak/widgets/error_widget.dart';
-import 'package:application_amonak/widgets/follow_user_widget.dart';
 import 'package:application_amonak/widgets/list_friend_widget.dart';
 import 'package:application_amonak/widgets/wait_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:application_amonak/models/user.dart';
 
 class ListePersonnePage extends ConsumerStatefulWidget {
   // TextEditingController?  controller;
@@ -62,34 +61,37 @@ class _ListePersonnePageState extends ConsumerState<ListePersonnePage> {
     print("Taille des utilisateurs: ${state.users.length}");
     return SafeArea(
         child: Scaffold(
+            backgroundColor: Colors.white,
             body: Column(
-      children: [
-        ExplorerSearchWidget(
-            onSearchChanged: searchUser, searchController: _searchController),
-        Expanded(
-          child: Container(
-              child: state.loading
-                  ? const WaitWidget(
-                      label: 'chargement...',
-                    )
-                  : (state.loading == false &&
-                          state.error != '' &&
-                          state.error != null)
-                      ? CustomErrorWidget(
-                          error: state.error,
-                        )
-                      : state.users.isNotEmpty && state.loading == false
-                          ? Container(
-                              child:
-                                  ContainerFollowerWidget(users: state.users),
+              children: [
+                ExplorerSearchWidget(
+                    onSearchChanged: searchUser,
+                    searchController: _searchController),
+                Expanded(
+                  child: Container(
+                      child: state.loading
+                          ? const WaitWidget(
+                              label: 'chargement...',
                             )
-                          : Container(
-                              alignment: Alignment.center,
-                              child: const Text("Aucun utilisateur chargée .."),
-                            )),
-        ),
-      ],
-    )));
+                          : (state.loading == false &&
+                                  state.error != '' &&
+                                  state.error != null)
+                              ? CustomErrorWidget(
+                                  error: state.error,
+                                )
+                              : state.users.isNotEmpty && state.loading == false
+                                  ? Container(
+                                      child: ContainerFollowerWidget(
+                                          users: state.users),
+                                    )
+                                  : Container(
+                                      alignment: Alignment.center,
+                                      child: const Text(
+                                          "Aucun utilisateur chargée .."),
+                                    )),
+                ),
+              ],
+            )));
 
     //   if (snashot.hasData) {
     //     return StatefulBuilder(builder: (context, setState_) {
